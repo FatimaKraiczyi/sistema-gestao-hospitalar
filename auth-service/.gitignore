@@ -1,0 +1,26 @@
+# Ignore build outputs
+target/
+*.jar
+*.war
+*.ear
+
+# Ignore IDE files
+.idea/
+.vscode/
+*.iml
+
+# Ignore log files and database
+*.log
+*.sql
+*.sqlite
+
+# Ignore Docker files
+*.db
+docker-compose.override.yml
+
+# Ignore temporary files
+*.tmp
+*.bak
+
+# Ignore local environment files
+.env
