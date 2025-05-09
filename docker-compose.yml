@@ -1,19 +1,30 @@
 services:
   api-gateway:
     build: ./api-gateway
+    container_name: api-gateway
     ports:
       - "3000:3000"
     depends_on:
       - auth-service
+    networks:
+      - hospital-network
+    env_file:
+      - ./api-gateway/.env
 
   auth-service:
     build:
       context: ./auth-service
     container_name: auth-service
     ports:
-      - "8081:8080" 
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/authdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: faty0910
     env_file:
       - ./auth-service/.env
+    networks:
+      - hospital-network
     depends_on:
       - auth-db
 
@@ -23,13 +34,15 @@ services:
     restart: always
     environment:
       POSTGRES_DB: authdb
-      POSTGRES_USER: authuser
-      POSTGRES_PASSWORD: authpass
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: faty0910
     ports:
-      - "5433:5432"
+      - "5433:5432" 
     volumes:
-      - ./auth-service/init/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - auth-data:/var/lib/postgresql/data
+      - ./auth-service/init/init.sql:/docker-entrypoint-initdb.d/init.sql 
+      - auth-data:/var/lib/postgresql/data 
+    networks:
+      - hospital-network
 
   pgadmin:
     image: dpage/pgadmin4
@@ -41,6 +54,12 @@ services:
       - "5050:80"
     volumes:
       - ./pgadmin-data:/var/lib/pgadmin
+    networks:
+      - hospital-network
 
 volumes:
-  auth-data:
+  auth-data:  # Volume para persistência dos dados do PostgreSQL
+
+networks:
+  hospital-network:
+    driver: bridge  # Rede isolada para comunicação entre os containers

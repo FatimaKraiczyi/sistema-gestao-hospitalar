@@ -1,10 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import swaggerUi from 'swagger-ui-express';
 import authRoutes from './routes/auth.routes';
-import pacienteRoutes from './routes/paciente.routes';
-import consultaRoutes from './routes/consulta.routes';
+import pacienteRoutes from './routes/pacientes.routes';
+import consultaRoutes from './routes/consultas.routes';
 import { setupSwagger } from './swagger';
 
 dotenv.config();
