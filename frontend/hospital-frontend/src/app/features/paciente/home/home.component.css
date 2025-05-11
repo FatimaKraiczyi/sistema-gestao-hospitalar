@@ -1,0 +1,46 @@
+.card {
+  transition: transform 0.3s ease;
+  margin-bottom: 1.5rem;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card-header {
+  font-weight: 500;
+}
+
+.btn {
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.table-responsive {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.badge {
+  padding: 0.5em 0.75em;
+  font-weight: 500;
+}
+
+.alert {
+  border-radius: 0.25rem;
+}
+
+.text-center h2 {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: #0d6efd;
+}
+
+.spinner-border {
+  width: 2rem;
+  height: 2rem;
+}

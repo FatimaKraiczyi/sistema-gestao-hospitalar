@@ -1,0 +1,76 @@
+<div class="container mt-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/paciente/home">Início</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Comprar Pontos</li>
+    </ol>
+  </nav>
+  
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">Comprar Pontos</h4>
+        </div>
+        <div class="card-body">
+          <!-- Mensagens de erro e sucesso -->
+          <div *ngIf="sucesso" class="alert alert-success">{{sucesso}}</div>
+          <div *ngIf="erro" class="alert alert-danger">{{erro}}</div>
+          
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            Cada ponto custa R$ 5,00 e pode ser usado para obter descontos em consultas.
+          </div>
+          
+          <form [formGroup]="pontoForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="quantidade" class="form-label">Quantidade de pontos</label>
+              <input 
+                type="number" 
+                class="form-control" 
+                id="quantidade" 
+                formControlName="quantidade"
+                min="1"
+                max="1000">
+              <div *ngIf="pontoForm.get('quantidade')?.invalid && pontoForm.get('quantidade')?.touched" class="text-danger mt-1">
+                <small *ngIf="pontoForm.get('quantidade')?.errors?.['required']">A quantidade é obrigatória.</small>
+                <small *ngIf="pontoForm.get('quantidade')?.errors?.['min']">A quantidade mínima é 1 ponto.</small>
+                <small *ngIf="pontoForm.get('quantidade')?.errors?.['max']">A quantidade máxima é 1000 pontos.</small>
+              </div>
+            </div>
+            
+            <div class="card mb-3">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-6">
+                    <p class="mb-0">Valor por ponto:</p>
+                  </div>
+                  <div class="col-6 text-end">
+                    <p class="mb-0">{{formatarMoeda(valorUnitario)}}</p>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-6">
+                    <h5 class="mb-0">Valor total:</h5>
+                  </div>
+                  <div class="col-6 text-end">
+                    <h5 class="mb-0">{{formatarMoeda(valorTotal)}}</h5>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary" [disabled]="pontoForm.invalid || enviando">
+                <span *ngIf="enviando" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Comprar Pontos
+              </button>
+              <button type="button" class="btn btn-outline-secondary" (click)="voltar()">Voltar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
