@@ -1,6 +1,6 @@
 package br.com.gestao_hospitalar.auth_service.service;
 
-import br.com.gestao_hospitalar.auth_service.model.Usuario;
+import br.com.gestao_hospitalar.auth_service.entity.Usuario;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;

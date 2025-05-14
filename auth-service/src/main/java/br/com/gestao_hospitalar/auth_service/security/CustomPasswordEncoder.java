@@ -24,20 +24,21 @@ public class CustomPasswordEncoder {
     }
 
     public boolean matches(String rawPassword, String encodedPassword) {
-        // Divide o salt e o hash SHA-256 armazenado
-        String[] parts = encodedPassword.split(":");
-        if (parts.length != 2) {
-            return false;
-        }
-        String salt = parts[0];
-        String storedHash = parts[1];
-
-        // Recalcula o hash SHA-256 com o salt
-        String computedHash = hashWithSHA256(rawPassword, salt);
-
-        // Compara o hash armazenado com o recalculado
-        return storedHash.equals(computedHash);
+    // Divide o salt e o hash SHA-256 armazenado
+    String[] parts = encodedPassword.split(":");
+    if (parts.length != 2) {
+        return false;  // Se o formato não for correto, retorna falso
     }
+    
+    String salt = parts[0];  // O salt está antes dos ":"
+    String storedHash = parts[1];  // O hash SHA-256 está depois dos ":"
+
+    // Recalcula o hash SHA-256 com o salt
+    String computedHash = hashWithSHA256(rawPassword, salt);
+
+    // Compara o hash armazenado com o recalculado
+    return storedHash.equals(computedHash);
+}
 
     private String hashWithSHA256(String password, String salt) {
         try {

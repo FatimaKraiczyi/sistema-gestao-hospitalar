@@ -1,11 +1,9 @@
 package br.com.gestao_hospitalar.auth_service.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@DiscriminatorValue("PACIENTE") 
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,6 +20,12 @@ public class Paciente extends Usuario {
     private String logradouro;
 
     @Column(nullable = false)
+    private String numero;
+
+    @Column
+    private String complemento;
+
+    @Column(nullable = false)
     private String bairro;
 
     @Column(nullable = false)
@@ -29,11 +33,4 @@ public class Paciente extends Usuario {
 
     @Column(nullable = false)
     private String estado;
-
-    @Column(nullable = false)
-    private String numero;
-
-    @Column
-    private String complemento;
-
 }

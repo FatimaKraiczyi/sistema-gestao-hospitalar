@@ -1,4 +1,4 @@
-package br.com.gestao_hospitalar.auth_service.utils;
+package br.com.gestao_hospitalar.auth_service.util;
 
 import br.com.gestao_hospitalar.auth_service.dto.ViaCepResponse;
 import org.springframework.stereotype.Component;

@@ -5,32 +5,6 @@ const requireFuncionario = require('../middlewares/requireFuncionario');
 
 const router = express.Router();
 
-/**
- * @swagger
- * /auth/login:
- *   post:
- *     summary: Realiza login e retorna um token JWT
- *     tags: [Autenticação]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *               senha:
- *                 type: string
- *     responses:
- *       200:
- *         description: Login realizado com sucesso
- *       401:
- *         description: Credenciais inválidas
- */
-
-router.post('/auth/login', loginHandler);
-
 router.use('/auth', async (req, res, next) => {
   try {
     const response = await requestAuthService(req.method, req.url, req.body);

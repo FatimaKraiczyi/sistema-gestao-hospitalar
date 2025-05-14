@@ -1,15 +1,12 @@
 package br.com.gestao_hospitalar.auth_service.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@DiscriminatorValue("FUNCIONARIO")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Funcionario extends Usuario {
-
+    // Campos específicos para o Funcionario, se houver
 }

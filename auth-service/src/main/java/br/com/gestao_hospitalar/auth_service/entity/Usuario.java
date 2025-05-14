@@ -4,18 +4,19 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE) 
-@DiscriminatorColumn(name = "tipo", discriminatorType = DiscriminatorType.STRING) 
-@Table(name = "usuarios")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class Usuario {
+public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+		@Column(nullable = false)
+    private String tipo;
 
     @Column(nullable = false)
     private String nome;
@@ -27,12 +28,10 @@ public abstract class Usuario {
     private String email;
 
     @Column(nullable = false)
-    private String senha;
-
-    @Column(nullable = false)
-    private String tipo;
-
-    @Column(nullable = false)
     private String telefone;
 
+    @Column(nullable = false)
+    private String senha;
+
+  
 }
