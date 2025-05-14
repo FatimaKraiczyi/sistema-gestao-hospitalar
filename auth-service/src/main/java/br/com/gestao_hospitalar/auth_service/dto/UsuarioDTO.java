@@ -1,16 +1,18 @@
 package br.com.gestao_hospitalar.auth_service.dto;
 
-import br.com.gestao_hospitalar.auth_service.enums.TipoUsuario;
-import lombok.*;
+public record PacienteDTO(
+    @NotBlank String nome,
+    @NotBlank String cpf,
+		@NotBlank String telefone,
+    @NotBlank String email,
+    @NotBlank String cep,
+    @NotBlank String numero,
+    String complemento
+) {}
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class UsuarioDTO {
-    private String cpf;
-    private String email;
-    private String nome;
-    private String senha;
-    private String cep;
-    private String endereco;
-    private TipoUsuario tipo; 
-    private Integer pontos;
-}
+public record FuncionarioDTO(
+		@NotBlank String nome,
+    @NotBlank String cpf,
+		@NotBlank String telefone,
+    @NotBlank String email	
+) {}

@@ -1,27 +1,27 @@
 package br.com.gestao_hospitalar.auth_service.config;
 
-import org.springframework.context.annotation.*;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import br.com.gestao_hospitalar.auth_service.security.CustomPasswordEncoder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-@EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        return new PasswordEncoder() {
+            private final CustomPasswordEncoder customPasswordEncoder = new CustomPasswordEncoder();
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-            .authorizeHttpRequests()
-            .requestMatchers("/auth/**").permitAll()
-            .anyRequest().authenticated();
-        return http.build();
+            @Override
+            public String encode(CharSequence rawPassword) {
+                return customPasswordEncoder.encodeWithSHA256(rawPassword.toString());
+            }
+
+            @Override
+            public boolean matches(CharSequence rawPassword, String encodedPassword) {
+                return customPasswordEncoder.matches(rawPassword.toString(), encodedPassword);
+            }
+        };
     }
 }
