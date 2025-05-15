@@ -6,9 +6,6 @@ services:
       - "3000:3000"
     depends_on:
       - auth-service
-    volumes:
-      - ./api-gateway:/app
-      - /app/node_modules
     networks:
       - hospital-network
     env_file:
@@ -24,9 +21,6 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/authdb
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: faty0910
-    volumes:
-      - ./auth-service:/app
-      - ~/.m2:/root/.m2
     env_file:
       - ./auth-service/.env
     networks:
@@ -43,10 +37,10 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: faty0910
     ports:
-      - "5433:5432"
+      - "5433:5432" 
     volumes:
-      - ./auth-service/init-db/init.sql:/docker-entrypoint-initdb.d/init.sql 
-      - auth-data:/var/lib/postgresql/data
+      - ./auth-service/init/init.sql:/docker-entrypoint-initdb.d/init.sql 
+      - auth-data:/var/lib/postgresql/data 
     networks:
       - hospital-network
 

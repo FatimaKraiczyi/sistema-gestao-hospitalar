@@ -2,6 +2,7 @@ package br.com.gestao_hospitalar.auth_service.service;
 
 import br.com.gestao_hospitalar.auth_service.dto.*;
 import br.com.gestao_hospitalar.auth_service.entity.*;
+import br.com.gestao_hospitalar.auth_service.enums.TipoUsuario;
 import br.com.gestao_hospitalar.auth_service.repository.UsuarioRepository;
 import br.com.gestao_hospitalar.auth_service.security.CustomPasswordEncoder;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final CustomPasswordEncoder customPasswordEncoder; 
     private final JwtService jwtService;
+		private final EmailService emailService;
 
     public void cadastrarUsuario(CadastroDTO dto) {
     if (usuarioRepository.findByCpf(dto.getCpf()).isPresent()) {
@@ -25,12 +27,12 @@ public class UsuarioService {
     String senhaGerada = gerarSenha();
     String senhaCriptografada = customPasswordEncoder.encodeWithSHA256(senhaGerada);
 
-    CadastroDTO usuario = new Usuario();
+    Usuario  usuario = new Usuario();
     usuario.setNome(dto.getNome());
     usuario.setCpf(dto.getCpf());
     usuario.setEmail(dto.getEmail());
     usuario.setSenha(senhaCriptografada); 
-    usuario.setTipo(dto.getTipo());
+    usuario.setTipo(TipoUsuario.valueOf(dto.getTipo()));
 
     usuarioRepository.save(usuario);
 
@@ -38,11 +40,11 @@ public class UsuarioService {
 }
 
     public String login(LoginDTO dto) {
-        Usuario usuario = usuarioRepository.findByEmail(dto.email())
+        Usuario usuario = usuarioRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         // Verifica se a senha fornecida corresponde ao hash armazenado
-        if (!customPasswordEncoder.matches(dto.senha(), usuario.getSenha())) { 
+        if (!customPasswordEncoder.matches(dto.getSenha(), usuario.getSenha())) { 
             throw new RuntimeException("Senha inválida");
         }
 

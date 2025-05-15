@@ -1,11 +1,15 @@
 package br.com.gestao_hospitalar.auth_service.dto;
 
 import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.Setter;
 
-public record CadastroDTO(
-    @NotBlank @Email String email,
-		@NotBlank String nome,
-		@NotBlank String cpf,
-		@NotBlank String senha,
-		@NotBlank String tipo
-) {}
+@Getter
+@Setter
+public class CadastroDTO {
+    @NotBlank @Email private String email;
+    @NotBlank private String nome;
+    @NotBlank private String cpf;
+    @NotBlank private String senha;
+    @NotBlank private String tipo;
+}

@@ -2,6 +2,7 @@ package br.com.gestao_hospitalar.auth_service.entity;
 
 import br.com.gestao_hospitalar.auth_service.enums.TipoUsuario;
 import jakarta.persistence.*;
+import jakarta.persistence.EnumType;
 import lombok.*;
 
 @Entity
@@ -10,6 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "usuario") 
 public class Usuario {
 
     @Id
@@ -28,7 +30,7 @@ public class Usuario {
     @Column(nullable = false)
     private String senha;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private TipoUsuario tipo;
 }

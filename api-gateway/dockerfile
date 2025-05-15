@@ -1,18 +1,17 @@
 FROM node:18
 
-# Define o diretório de trabalho
+# Define a pasta de trabalho no container
 WORKDIR /app
 
-# Copia apenas os arquivos de dependência
+# Copia os arquivos de dependência e instala
 COPY package*.json ./
-
-# Instala dependências
 RUN npm install
 
-# (Não copie o restante do código — o bind mount vai cuidar disso!)
+# Copia o restante dos arquivos para dentro do container
+COPY . .
 
-# Expor a porta
+# Expõe a porta configurada (assumindo que config.port é 3000)
 EXPOSE 3000
 
 # Iniciar com nodemon (instale localmente ou globalmente)
-CMD ["npx", "nodemon", "src/server.js"]
+CMD ["node", "src/server.js"]

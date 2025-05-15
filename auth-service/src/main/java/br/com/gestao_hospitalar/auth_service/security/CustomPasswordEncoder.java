@@ -1,10 +1,11 @@
 package br.com.gestao_hospitalar.auth_service.security;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
+import org.springframework.stereotype.Component;
 import java.security.MessageDigest;
 import java.util.Base64;
 
+@Component
 public class CustomPasswordEncoder {
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
