@@ -7,7 +7,7 @@ services:
     depends_on:
       - auth-service
     volumes:
-      - ./api-gateway:/app  # Bind mount do código local
+      - ./api-gateway:/app
       - /app/node_modules
     networks:
       - hospital-network
@@ -25,8 +25,8 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: faty0910
     volumes:
-      - ./auth-service:/app  # Bind mount do código local
-      - ~/.m2:/root/.m2  # Cache Maven dependencies
+      - ./auth-service:/app
+      - ~/.m2:/root/.m2
     env_file:
       - ./auth-service/.env
     networks:

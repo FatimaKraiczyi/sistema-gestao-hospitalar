@@ -7,5 +7,5 @@ public record CadastroDTO(
 		@NotBlank String nome,
 		@NotBlank String cpf,
 		@NotBlank String senha,
-		@NotBlank String tipo,
+		@NotBlank String tipo
 ) {}
