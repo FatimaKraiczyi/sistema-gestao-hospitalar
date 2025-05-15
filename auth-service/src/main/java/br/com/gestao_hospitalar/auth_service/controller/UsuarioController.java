@@ -20,14 +20,20 @@ public class UsuarioController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginDTO dto) {
-        String token = usuarioService.login(dto);
-        return ResponseEntity.ok(token);
-    }
+    public ResponseEntity<TokenDTO> login(@RequestBody LoginDTO dto) {
+    String token = usuarioService.login(dto);
+    return ResponseEntity.ok(new TokenDTO(token));
+}
 
     @PostMapping("/cadastro")
 		public ResponseEntity<Void> cadastrar(@RequestBody @Valid CadastroDTO dto) {
    			 usuarioService.cadastrarUsuario(dto);
    			 return ResponseEntity.ok().build();
 		}
+
+		@GetMapping("/teste")
+    public ResponseEntity<String> teste() {
+    return ResponseEntity.ok("Auth-service está respondendo!");
+}
+
 }

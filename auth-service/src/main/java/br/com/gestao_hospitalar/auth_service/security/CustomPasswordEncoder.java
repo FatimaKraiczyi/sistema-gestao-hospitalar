@@ -1,52 +1,47 @@
 package br.com.gestao_hospitalar.auth_service.security;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+
 import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.util.Base64;
 
 @Component
 public class CustomPasswordEncoder {
 
-    private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+    private static final int SALT_LENGTH = 16; // 128 bits
 
     public String encodeWithSHA256(String rawPassword) {
-        // Gera o hash com BCrypt (inclui o salt)
-        String bcryptHash = bCryptPasswordEncoder.encode(rawPassword);
+        // Gera salt aleatório em bytes
+        byte[] saltBytes = new byte[SALT_LENGTH];
+        new SecureRandom().nextBytes(saltBytes);
+        String saltBase64 = Base64.getEncoder().encodeToString(saltBytes);
 
-        // Extrai o salt do hash do BCrypt (os primeiros 29 caracteres)
-        String salt = bcryptHash.substring(0, 29);
+        // Aplica SHA-256 com o salt
+        String hash = hashWithSHA256(rawPassword, saltBase64);
 
-        // Aplica SHA-256 usando o salt extraído
-        String sha256Hash = hashWithSHA256(rawPassword, salt);
-
-        // Retorna o salt + hash SHA-256
-        return salt + ":" + sha256Hash;
+        // Armazena como "salt:hash"
+        return saltBase64 + ":" + hash;
     }
 
     public boolean matches(String rawPassword, String encodedPassword) {
-    // Divide o salt e o hash SHA-256 armazenado
-    String[] parts = encodedPassword.split(":");
-    if (parts.length != 2) {
-        return false;  // Se o formato não for correto, retorna falso
+        String[] parts = encodedPassword.split(":");
+        if (parts.length != 2) return false;
+
+        String saltBase64 = parts[0];
+        String storedHash = parts[1];
+
+        String computedHash = hashWithSHA256(rawPassword, saltBase64);
+
+        return storedHash.equals(computedHash);
     }
-    
-    String salt = parts[0];  // O salt está antes dos ":"
-    String storedHash = parts[1];  // O hash SHA-256 está depois dos ":"
 
-    // Recalcula o hash SHA-256 com o salt
-    String computedHash = hashWithSHA256(rawPassword, salt);
-
-    // Compara o hash armazenado com o recalculado
-    return storedHash.equals(computedHash);
-}
-
-    private String hashWithSHA256(String password, String salt) {
+    private String hashWithSHA256(String password, String saltBase64) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            String saltedPassword = salt + password;
-            byte[] hash = digest.digest(saltedPassword.getBytes("UTF-8"));
-            return Base64.getEncoder().encodeToString(hash);
+            String saltedPassword = saltBase64 + password;
+            byte[] hashBytes = digest.digest(saltedPassword.getBytes("UTF-8"));
+            return Base64.getEncoder().encodeToString(hashBytes);
         } catch (Exception e) {
             throw new RuntimeException("Erro ao gerar hash SHA-256", e);
         }

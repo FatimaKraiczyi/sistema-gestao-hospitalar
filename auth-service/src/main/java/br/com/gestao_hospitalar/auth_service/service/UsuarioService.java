@@ -44,9 +44,9 @@ public class UsuarioService {
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         // Verifica se a senha fornecida corresponde ao hash armazenado
-        if (!customPasswordEncoder.matches(dto.getSenha(), usuario.getSenha())) { 
-            throw new RuntimeException("Senha inválida");
-        }
+        if (!customPasswordEncoder.matches(dto.getSenha(), usuario.getSenha())) {
+        throw new RuntimeException("Senha inválida");
+}
 
         return jwtService.generateToken(usuario);  // Gera o token JWT se a senha for válida
     }
