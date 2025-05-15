@@ -11,29 +11,25 @@ import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
-    public UsuarioController(UsuarioService usuarioService) {
-        this.usuarioService = usuarioService;
-    }
-
     @PostMapping("/login")
     public ResponseEntity<TokenDTO> login(@RequestBody LoginDTO dto) {
-    String token = usuarioService.login(dto);
-    return ResponseEntity.ok(new TokenDTO(token));
-}
+        String token = usuarioService.login(dto);
+        return ResponseEntity.ok(new TokenDTO(token));
+    }
 
     @PostMapping("/cadastro")
-		public ResponseEntity<Void> cadastrar(@RequestBody @Valid CadastroDTO dto) {
-   			 usuarioService.cadastrarUsuario(dto);
-   			 return ResponseEntity.ok().build();
-		}
+    public ResponseEntity<Void> cadastrar(@RequestBody @Valid CadastroDTO dto) {
+        usuarioService.cadastrarUsuario(dto);
+        return ResponseEntity.ok().build();
+    }
 
-		@GetMapping("/teste")
+    @GetMapping("/teste")
     public ResponseEntity<String> teste() {
-    return ResponseEntity.ok("Auth-service está respondendo!");
-}
-
+        return ResponseEntity.ok("Auth-service está respondendo!");
+    }
 }

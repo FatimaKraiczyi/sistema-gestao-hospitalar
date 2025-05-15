@@ -10,6 +10,5 @@ public class CadastroDTO {
     @NotBlank @Email private String email;
     @NotBlank private String nome;
     @NotBlank private String cpf;
-    @NotBlank private String senha;
     @NotBlank private String tipo;
 }
