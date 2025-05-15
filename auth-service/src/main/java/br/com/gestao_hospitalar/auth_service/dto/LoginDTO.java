@@ -6,5 +6,3 @@ public record LoginDTO(
     @NotBlank @Email String email,
     @NotBlank String senha
 ) {}
-
-

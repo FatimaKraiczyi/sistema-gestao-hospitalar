@@ -9,24 +9,23 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
-@RequiredArgsConstructor
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
-    @PostMapping("/cadastro/paciente")
-    public void cadastroPaciente(@Valid @RequestBody PacienteDTO dto) {
-        usuarioService.cadastrarPaciente(dto);
-    }
-
-    @PostMapping("/cadastro/funcionario")
-    public void cadastroFuncionario(@Valid @RequestBody FuncionarioDTO dto) {
-        usuarioService.cadastrarFuncionario(dto);
+    public UsuarioController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginDTO dto) {
-        return usuarioService.login(dto);
+    public ResponseEntity<String> login(@RequestBody LoginDTO dto) {
+        String token = usuarioService.login(dto);
+        return ResponseEntity.ok(token);
+    }
+
+    @PostMapping("/cadastrar")
+    public ResponseEntity<Void> registrarUsuario(@RequestBody CadastroDTO dto) {
+        usuarioService.cadastrarUsuario(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
-
