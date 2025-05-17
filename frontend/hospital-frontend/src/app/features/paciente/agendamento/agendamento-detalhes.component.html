@@ -1,0 +1,90 @@
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="/paciente/home">Início</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Detalhes do Agendamento</li>
+    </ol>
+    </nav>
+    
+    <div class="card">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Detalhes do Agendamento</h4>
+    </div>
+    <div class="card-body">
+        <div *ngIf="erro" class="alert alert-danger">{{erro}}</div>
+        
+        <div *ngIf="carregando" class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-2">Carregando informações do agendamento...</p>
+        </div>
+        
+        <div *ngIf="!carregando && !agendamento" class="text-center py-4">
+        <p class="mb-3">Agendamento não encontrado.</p>
+        <a routerLink="/paciente/home" class="btn btn-primary">Voltar ao Início</a>
+        </div>
+        
+        <div *ngIf="!carregando && agendamento" class="py-4">
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+            <h6 class="mb-0">Informações do Agendamento</h6>
+            </div>
+            <div class="card-body">
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Código:</strong></div>
+                <div class="col-md-8">{{agendamento.id}}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Data/Hora:</strong></div>
+                <div class="col-md-8">{{formatarData(agendamento.data)}}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Especialidade:</strong></div>
+                <div class="col-md-8">{{agendamento.especialidade}}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Médico:</strong></div>
+                <div class="col-md-8">{{agendamento.medico}}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Valor:</strong></div>
+                <div class="col-md-8">{{formatarMoeda(agendamento.valor)}}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Pontos utilizados:</strong></div>
+                <div class="col-md-8">{{agendamento.pontosUsados}} pontos</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Valor pago:</strong></div>
+                <div class="col-md-8">{{formatarMoeda(agendamento.valorPago)}}</div>
+            </div>
+            <div class="row">
+                <div class="col-md-4"><strong>Status:</strong></div>
+                <div class="col-md-8">
+                <span class="badge" [ngClass]="getStatusClass(agendamento.status)">
+                    {{agendamento.status}}
+                </span>
+                </div>
+            </div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+            <a routerLink="/paciente/home" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Voltar
+            </a>
+            
+            <div *ngIf="agendamento.status === 'CRIADO'" class="d-flex gap-2">
+            <a [routerLink]="['/paciente/check-in', agendamento.id]" class="btn btn-info">
+                Fazer Check-in
+            </a>
+            <a [routerLink]="['/paciente/cancelar', agendamento.id]" class="btn btn-warning">
+                Cancelar
+            </a>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+</div>

@@ -1,0 +1,27 @@
+.card { 
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: none;
+    border-radius: 0.5rem;
+}
+.card-header {
+    border-top-left-radius: 0.5rem !important;
+    border-top-right-radius: 0.5rem !important;
+}
+.btn { 
+    transition: all 0.3s ease;
+}
+.btn:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+}
+.table-hover tbody tr:hover { 
+    background-color: rgba(13, 202, 240, 0.1); 
+}
+.badge {
+    padding: 0.5em 0.75em;
+    font-weight: 500;
+}
+.alert {
+    border-radius: 0.25rem;
+}

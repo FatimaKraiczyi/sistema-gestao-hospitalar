@@ -1,0 +1,45 @@
+<header class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/paciente/home">Sistema Hospitalar</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/paciente/home" routerLinkActive="active">Início</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/paciente/agendar" routerLinkActive="active">Agendar Consulta</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="pontosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Pontos
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="pontosDropdown">
+            <li><a class="dropdown-item" routerLink="/paciente/pontos/comprar">Comprar Pontos</a></li>
+            <li><a class="dropdown-item" routerLink="/paciente/pontos/extrato">Extrato de Pontos</a></li>
+          </ul>
+        </li>
+      </ul>
+      <div class="d-flex align-items-center">
+        <span class="text-light me-3" *ngIf="currentUser">
+          <i class="bi bi-person-circle me-1"></i> {{currentUser.name}}
+        </span>
+        <button class="btn btn-outline-light" (click)="logout()">
+          <i class="bi bi-box-arrow-right me-1"></i> Sair
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <router-outlet></router-outlet>
+</main>
+
+<footer class="bg-light py-3 mt-5">
+  <div class="container text-center">
+    <p class="text-muted mb-0">Sistema de Gestão Hospitalar &copy; 2025</p>
+  </div>
+</footer>

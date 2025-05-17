@@ -1,0 +1,109 @@
+<div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="card mt-5">
+          <div class="card-header bg-primary text-white text-center">
+            <h4>Cadastro de Paciente</h4>
+          </div>
+          <div class="card-body">
+            <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+              <!-- Alertas de sucesso e erro -->
+              <div *ngIf="success" class="alert alert-success">{{success}}</div>
+              <div *ngIf="error" class="alert alert-danger">{{error}}</div>
+              
+              <!-- CPF -->
+              <div class="mb-3">
+                <label for="cpf" class="form-label">CPF</label>
+                <input
+                  type="text"
+                  formControlName="cpf"
+                  class="form-control"
+                  [ngClass]="{ 'is-invalid': submitted && f['cpf'].errors }"
+                  placeholder="Digite apenas números"
+                  mask="000.000.000-00"
+                  [showMaskTyped]="true"
+                />
+                <div *ngIf="submitted && f['cpf'].errors" class="invalid-feedback">
+                  <div *ngIf="f['cpf'].errors['required']">CPF é obrigatório</div>
+                  <div *ngIf="f['cpf'].errors['pattern']">CPF deve conter 11 dígitos</div>
+                </div>
+              </div>
+              
+              <!-- Nome -->
+              <div class="mb-3">
+                <label for="name" class="form-label">Nome Completo</label>
+                <input
+                  type="text"
+                  formControlName="name"
+                  class="form-control"
+                  [ngClass]="{ 'is-invalid': submitted && f['name'].errors }"
+                  placeholder="Digite seu nome completo"
+                />
+                <div *ngIf="submitted && f['name'].errors" class="invalid-feedback">
+                  <div *ngIf="f['name'].errors['required']">Nome é obrigatório</div>
+                </div>
+              </div>
+              
+              <!-- Email -->
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input
+                  type="email"
+                  formControlName="email"
+                  class="form-control"
+                  [ngClass]="{ 'is-invalid': submitted && f['email'].errors }"
+                  placeholder="Digite seu email"
+                />
+                <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
+                  <div *ngIf="f['email'].errors['required']">Email é obrigatório</div>
+                  <div *ngIf="f['email'].errors['email']">Email inválido</div>
+                </div>
+              </div>
+              
+              <!-- CEP -->
+              <div class="mb-3">
+                <label for="cep" class="form-label">CEP</label>
+                <div class="input-group">
+                  <input
+                    type="text"
+                    formControlName="cep"
+                    class="form-control"
+                    [ngClass]="{ 'is-invalid': submitted && f['cep'].errors }"
+                    placeholder="Digite apenas números"
+                    mask="00000-000"
+                    [showMaskTyped]="true"
+                  />
+                  <button 
+                    type="button" 
+                    class="btn btn-outline-secondary"
+                    (click)="buscarEnderecoPorCep()"
+                    [disabled]="!f['cep'].value || f['cep'].errors"
+                  >
+                    Buscar
+                  </button>
+                  <div *ngIf="submitted && f['cep'].errors" class="invalid-feedback">
+                    <div *ngIf="f['cep'].errors['required']">CEP é obrigatório</div>
+                    <div *ngIf="f['cep'].errors['pattern']">CEP deve conter 8 dígitos</div>
+                  </div>
+                </div>
+                <small class="form-text text-muted">O endereço será preenchido automaticamente</small>
+              </div>
+              
+              <!-- Botão de Cadastro -->
+              <div class="d-grid gap-2">
+                <button [disabled]="loading" class="btn btn-primary">
+                  <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
+                  Cadastrar
+                </button>
+              </div>
+              
+              <!-- Link para login -->
+              <div class="text-center mt-3">
+                <p>Já possui conta? <a routerLink="/login">Faça login</a></p>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

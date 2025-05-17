@@ -1,0 +1,292 @@
+<div class="container mt-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/paciente/home">Início</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Agendar Consulta</li>
+    </ol>
+  </nav>
+  
+  <div class="card">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">Agendar Consulta</h4>
+    </div>
+    <div class="card-body">
+      <!-- Mensagens -->
+      <div *ngIf="erro" class="alert alert-danger">{{erro}}</div>
+      <div *ngIf="sucesso" class="alert alert-success">{{sucesso}}</div>
+      
+      <!-- Etapa 1: Busca -->
+      <div *ngIf="etapaAtual === 'busca'">
+        <div class="row mb-4">
+          <div class="col-md-12">
+            <h5 class="border-bottom pb-2">1. Buscar Consulta Disponível</h5>
+            <form [formGroup]="filtroForm" (ngSubmit)="buscarConsultas()">
+              <div class="row">
+                <div class="col-md-5 mb-3">
+                  <label for="especialidade" class="form-label">Especialidade</label>
+                  <select 
+                    id="especialidade" 
+                    class="form-select" 
+                    formControlName="especialidade"
+                    [disabled]="carregandoEspecialidades">
+                    <option value="">Selecione uma especialidade</option>
+                    <option *ngFor="let esp of especialidades" [value]="esp.codigo">{{esp.nome}}</option>
+                  </select>
+                </div>
+                
+                <div class="col-md-5 mb-3">
+                  <label for="medico" class="form-label">Médico</label>
+                  <select 
+                    id="medico" 
+                    class="form-select" 
+                    formControlName="medico"
+                    [disabled]="carregandoMedicos || !filtroForm.get('especialidade')?.value">
+                    <option value="">Selecione um médico</option>
+                    <option *ngFor="let med of medicos" [value]="med.nome">{{med.nome}}</option>
+                  </select>
+                </div>
+                
+                <div class="col-md-2 d-flex align-items-end mb-3">
+                  <button 
+                    type="submit" 
+                    class="btn btn-primary w-100" 
+                    [disabled]="carregandoConsultas">
+                    <span *ngIf="carregandoConsultas" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Buscar
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <!-- Resultados da busca -->
+        <div *ngIf="consultas.length > 0" class="mt-4">
+          <h5 class="border-bottom pb-2">Consultas Disponíveis</h5>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Data/Hora</th>
+                  <th>Especialidade</th>
+                  <th>Médico</th>
+                  <th>Valor</th>
+                  <th>Vagas</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let consulta of consultas">
+                  <td>{{formatarData(consulta.data)}}</td>
+                  <td>{{getNomeEspecialidade(consulta.especialidade)}}</td>
+                  <td>{{consulta.medico}}</td>
+                  <td>{{formatarMoeda(consulta.valor)}}</td>
+                  <td>{{consulta.vagasDisponiveis}} / {{consulta.vagasTotal}}</td>
+                  <td>
+                    <button class="btn btn-success btn-sm" (click)="selecionarConsulta(consulta)">
+                      Selecionar
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div *ngIf="consultas.length === 0 && !carregandoConsultas && !erro" class="text-center py-4">
+          <p class="mb-3">Nenhuma consulta disponível para os critérios selecionados.</p>
+          <button class="btn btn-outline-primary" (click)="filtroForm.reset()">Limpar Filtros</button>
+        </div>
+      </div>
+      
+      <!-- Etapa 2: Seleção de Pontos -->
+      <div *ngIf="etapaAtual === 'selecao' && consultaSelecionada">
+        <div class="row mb-4">
+          <div class="col-md-12">
+            <h5 class="border-bottom pb-2">2. Escolher Descontos com Pontos</h5>
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              Você possui <strong>{{saldoPontos}} pontos</strong> disponíveis. Cada ponto vale R$ 5,00 de desconto.
+            </div>
+            
+            <div class="card mb-4">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">Detalhes da Consulta</h6>
+              </div>
+              <div class="card-body">
+                <div class="row mb-2">
+                  <div class="col-md-4"><strong>Data/Hora:</strong></div>
+                  <div class="col-md-8">{{formatarData(consultaSelecionada.data)}}</div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-md-4"><strong>Especialidade:</strong></div>
+                  <div class="col-md-8">{{getNomeEspecialidade(consultaSelecionada.especialidade)}}</div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-md-4"><strong>Médico:</strong></div>
+                  <div class="col-md-8">{{consultaSelecionada.medico}}</div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4"><strong>Valor:</strong></div>
+                  <div class="col-md-8">{{formatarMoeda(consultaSelecionada.valor)}}</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">Aplicar Pontos</h6>
+              </div>
+              <div class="card-body">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <div class="input-group">
+                      <button 
+                        class="btn btn-outline-secondary" 
+                        type="button"
+                        (click)="decrementarPontos()"
+                        [disabled]="pontosParaUsar <= 0">
+                        <i class="bi bi-dash"></i>
+                      </button>
+                      <input 
+                        type="text" 
+                        class="form-control text-center" 
+                        [value]="pontosParaUsar" 
+                        readonly>
+                      <button 
+                        class="btn btn-outline-secondary" 
+                        type="button"
+                        (click)="incrementarPontos()"
+                        [disabled]="pontosParaUsar >= saldoPontos || calcularDesconto(pontosParaUsar + 1) > consultaSelecionada.valor">
+                        <i class="bi bi-plus"></i>
+                      </button>
+                    </div>
+                    <small class="form-text text-muted">
+                      Pontos selecionados (máximo: {{saldoPontos}})
+                    </small>
+                  </div>
+                </div>
+                
+                <div class="card bg-light mb-3">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-6">
+                        <p class="mb-2">Valor da consulta:</p>
+                      </div>
+                      <div class="col-6 text-end">
+                        <p class="mb-2">{{formatarMoeda(consultaSelecionada.valor)}}</p>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-6">
+                        <p class="mb-2">Desconto ({{pontosParaUsar}} pontos):</p>
+                      </div>
+                      <div class="col-6 text-end">
+                        <p class="mb-2 text-success">-{{formatarMoeda(calcularDesconto(pontosParaUsar))}}</p>
+                      </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                      <div class="col-6">
+                        <h5 class="mb-0">Valor a pagar:</h5>
+                      </div>
+                      <div class="col-6 text-end">
+                        <h5 class="mb-0">{{formatarMoeda(calcularValorFinal())}}</h5>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                  <button class="btn btn-outline-secondary" (click)="voltarParaBusca()">
+                    <i class="bi bi-arrow-left me-2"></i>Voltar
+                  </button>
+                  <button class="btn btn-primary" (click)="prosseguirParaConfirmacao()">
+                    Prosseguir<i class="bi bi-arrow-right ms-2"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Etapa 3: Confirmação -->
+      <div *ngIf="etapaAtual === 'confirmacao' && consultaSelecionada">
+        <div class="row mb-4">
+          <div class="col-md-12">
+            <h5 class="border-bottom pb-2">3. Confirmar Agendamento</h5>
+            
+            <div class="card mb-4">
+              <div class="card-header bg-success text-white">
+                <h6 class="mb-0">Resumo do Agendamento</h6>
+              </div>
+              <div class="card-body">
+                <div class="row mb-2">
+                  <div class="col-md-4"><strong>Data/Hora:</strong></div>
+                  <div class="col-md-8">{{formatarData(consultaSelecionada.data)}}</div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-md-4"><strong>Especialidade:</strong></div>
+                  <div class="col-md-8">{{getNomeEspecialidade(consultaSelecionada.especialidade)}}</div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-md-4"><strong>Médico:</strong></div>
+                  <div class="col-md-8">{{consultaSelecionada.medico}}</div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-md-4"><strong>Valor original:</strong></div>
+                  <div class="col-md-8">{{formatarMoeda(consultaSelecionada.valor)}}</div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-md-4"><strong>Pontos utilizados:</strong></div>
+                  <div class="col-md-8">{{pontosParaUsar}} pontos (-{{formatarMoeda(calcularDesconto(pontosParaUsar))}})</div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4"><strong>Valor final:</strong></div>
+                  <div class="col-md-8">{{formatarMoeda(calcularValorFinal())}}</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="alert alert-warning">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              Ao confirmar o agendamento, os pontos serão debitados do seu saldo automaticamente.
+            </div>
+            
+            <div class="d-flex justify-content-between">
+              <button class="btn btn-outline-secondary" (click)="voltarParaSelecao()">
+                <i class="bi bi-arrow-left me-2"></i>Voltar
+              </button>
+              <button 
+                class="btn btn-success" 
+                (click)="confirmarAgendamento()"
+                [disabled]="enviandoAgendamento">
+                <span *ngIf="enviandoAgendamento" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Confirmar Agendamento
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Etapa 4: Finalizado -->
+      <div *ngIf="etapaAtual === 'finalizado'">
+        <div class="text-center py-4">
+          <div class="display-1 text-success mb-3">
+            <i class="bi bi-check-circle"></i>
+          </div>
+          <h4 class="mb-3">Agendamento Realizado com Sucesso!</h4>
+          <p class="mb-4">Seu agendamento foi confirmado. Você pode acompanhar o status na sua área de paciente.</p>
+          <div class="d-grid gap-2 col-md-6 mx-auto">
+            <button class="btn btn-primary" (click)="voltarParaInicio()">
+              Voltar para o Início
+            </button>
+            <a routerLink="/paciente/agendar" class="btn btn-outline-primary">
+              Agendar Nova Consulta
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

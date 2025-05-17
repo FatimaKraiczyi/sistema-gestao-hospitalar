@@ -1,0 +1,40 @@
+.form-control[type="number"] {
+  font-weight: bold;
+  text-align: center;
+}
+
+.card {
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card-body .row {
+  padding: 0.5rem 0;
+}
+
+.alert-info {
+  background-color: #e8f4fd;
+  border-color: #b8daff;
+  color: #0c5460;
+}
+
+.btn-primary {
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover:not([disabled]) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.currency {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 500;
+}
+
+h5 {
+  font-weight: 600;
+}

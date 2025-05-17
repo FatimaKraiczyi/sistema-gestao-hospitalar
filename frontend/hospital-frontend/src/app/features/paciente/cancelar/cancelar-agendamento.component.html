@@ -1,0 +1,88 @@
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="/paciente/home">Início</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Cancelar Agendamento</li>
+    </ol>
+    </nav>
+    
+    <div class="card">
+    <div class="card-header bg-warning text-dark">
+        <h4 class="mb-0">Cancelar Agendamento</h4>
+    </div>
+    <div class="card-body">
+        <div *ngIf="erro" class="alert alert-danger">{{erro}}</div>
+        <div *ngIf="sucesso" class="alert alert-success">{{sucesso}}</div>
+        
+        <div *ngIf="carregando" class="text-center py-4">
+        <div class="spinner-border text-warning" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-2">Carregando informações do agendamento...</p>
+        </div>
+        
+        <div *ngIf="!carregando && !agendamento && !sucesso" class="text-center py-4">
+        <p class="mb-3">Agendamento não encontrado ou indisponível para cancelamento.</p>
+        <a routerLink="/paciente/home" class="btn btn-primary">Voltar ao Início</a>
+        </div>
+        
+        <div *ngIf="!carregando && agendamento && !sucesso" class="py-4">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>Atenção!</strong> Ao cancelar um agendamento, os pontos utilizados serão devolvidos ao seu saldo.
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+            <h6 class="mb-0">Detalhes do Agendamento</h6>
+            </div>
+            <div class="card-body">
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Código:</strong></div>
+                <div class="col-md-8">{{agendamento.id}}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Data/Hora:</strong></div>
+                <div class="col-md-8">{{formatarData(agendamento.data)}}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Especialidade:</strong></div>
+                <div class="col-md-8">{{agendamento.especialidade}}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Médico:</strong></div>
+                <div class="col-md-8">{{agendamento.medico}}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Valor:</strong></div>
+                <div class="col-md-8">{{formatarMoeda(agendamento.valor)}}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Pontos utilizados:</strong></div>
+                <div class="col-md-8">{{agendamento.pontosUsados}} pontos</div>
+            </div>
+            <div class="row">
+                <div class="col-md-4"><strong>Status:</strong></div>
+                <div class="col-md-8">
+                <span class="badge bg-primary">{{agendamento.status}}</span>
+                </div>
+            </div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+            <a routerLink="/paciente/home" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Voltar
+            </a>
+            <button 
+            class="btn btn-danger" 
+            (click)="confirmarCancelamento()"
+            [disabled]="confirmando">
+            <span *ngIf="confirmando" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            Confirmar Cancelamento
+            </button>
+        </div>
+        </div>
+    </div>
+    </div>
+</div>
