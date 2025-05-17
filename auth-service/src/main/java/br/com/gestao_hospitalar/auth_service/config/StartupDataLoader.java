@@ -22,12 +22,11 @@ public class StartupDataLoader implements CommandLineRunner {
             String password = "TADS";
             String hashedPassword = customPasswordEncoder.encodeWithSHA256(password);
 
-            User user = User.builder()
-                    .cpf(cpf)
-                    .email("func_pre@hospital.com")
-                    .password(hashedPassword)
-                    .type(UserType.FUNCIONARIO)
-                    .build();
+            User user = new User();
+						user.setCpf(cpf);
+						user.setEmail("func_pre@hospital.com");
+						user.setPassword(hashedPassword);
+						user.setType(UserType.FUNCIONARIO);
 
             userRepository.save(user);
             System.out.println("✅ Usuário padrão inserido com sucesso.");

@@ -1,30 +1,21 @@
-package br.com.gestao_hospitalar.auth_service.entity;
+package br.com.gestao_hospitalar.auth_service.dto;
 
 import br.com.gestao_hospitalar.auth_service.enums.UserType;
-import jakarta.persistence.*;
 
-@Entity
-@Table(name = "account")
-public class User {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+public class UserRegisterDTO {
     private String email;
-
     private String cpf;
-
-    @Enumerated(EnumType.STRING)
     private UserType type;
 
-    private String password;
+    public UserRegisterDTO() {}
 
-    public User() {}
+    public UserRegisterDTO(String email, String cpf, UserType type) {
+        this.email = email;
+        this.cpf = cpf;
+        this.type = type;
+    }
 
     // Getters e Setters
-    public Long getId() { return id; }
-
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
@@ -33,7 +24,4 @@ public class User {
 
     public UserType getType() { return type; }
     public void setType(UserType type) { this.type = type; }
-
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
 }
