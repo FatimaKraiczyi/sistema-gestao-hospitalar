@@ -1,4 +1,4 @@
-package br.com.gestao_hospitalar.auth_service.config;
+package br.com.hospital_management.auth_service.config;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,21 +18,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    @Bean
+    public SecurityFilterChain SecurityConfig(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/auth/**").permitAll()
+                .anyRequest().denyAll()
+            )
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((req, res, e) ->
+                    res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
+            );
 
-   @Bean
-public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(csrf -> csrf.disable())
-        .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/auth/**").permitAll() // Permite cadastro e login
-            .anyRequest().denyAll() // Nenhuma outra rota deve ser usada
-        )
-        .exceptionHandling(ex -> ex
-            .authenticationEntryPoint((req, res, e) -> 
-                res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
-        );
-    return http.build();
-}
-
+        return http.build();
+    }
 }

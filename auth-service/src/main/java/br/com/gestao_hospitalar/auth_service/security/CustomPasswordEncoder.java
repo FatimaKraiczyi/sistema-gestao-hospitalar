@@ -39,9 +39,22 @@ public class CustomPasswordEncoder {
     private String hashWithSHA256(String password, String saltBase64) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            String saltedPassword = saltBase64 + password;
-            byte[] hashBytes = digest.digest(saltedPassword.getBytes("UTF-8"));
+
+            // Decodifica salt de Base64 para bytes
+            byte[] saltBytes = Base64.getDecoder().decode(saltBase64);
+            byte[] passwordBytes = password.getBytes("UTF-8");
+
+            // Concatena salt + password em bytes
+            byte[] saltedPasswordBytes = new byte[saltBytes.length + passwordBytes.length];
+            System.arraycopy(saltBytes, 0, saltedPasswordBytes, 0, saltBytes.length);
+            System.arraycopy(passwordBytes, 0, saltedPasswordBytes, saltBytes.length, passwordBytes.length);
+
+            // Calcula hash SHA-256
+            byte[] hashBytes = digest.digest(saltedPasswordBytes);
+
+            // Retorna hash codificado em Base64
             return Base64.getEncoder().encodeToString(hashBytes);
+
         } catch (Exception e) {
             throw new RuntimeException("Erro ao gerar hash SHA-256", e);
         }

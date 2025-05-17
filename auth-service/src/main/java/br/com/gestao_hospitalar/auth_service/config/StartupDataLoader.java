@@ -11,11 +11,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class StartupDataLoader implements CommandLineRunner {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-
-    @Autowired
-    private CustomPasswordEncoder customPasswordEncoder;
+    @Autowired private UsuarioRepository usuarioRepository;
+    @Autowired private CustomPasswordEncoder customPasswordEncoder;
 
     @Override
     public void run(String... args) {
@@ -26,7 +23,6 @@ public class StartupDataLoader implements CommandLineRunner {
             String senhaCriptografada = customPasswordEncoder.encodeWithSHA256(senha);
 
             Usuario usuario = Usuario.builder()
-                    .nome("Funcionário Padrão")
                     .cpf(cpf)
                     .email("func_pre@hospital.com")
                     .senha(senhaCriptografada)

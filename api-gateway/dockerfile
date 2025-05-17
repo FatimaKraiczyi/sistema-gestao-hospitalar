@@ -1,17 +1,20 @@
+# Imagem base do Node.js
 FROM node:18
 
-# Define a pasta de trabalho no container
+# Diretório de trabalho no container
 WORKDIR /app
 
-# Copia os arquivos de dependência e instala
+# Copia os arquivos package.json e package-lock.json
 COPY package*.json ./
+
+# Instala as dependências
 RUN npm install
 
-# Copia o restante dos arquivos para dentro do container
+# Copia o restante dos arquivos da aplicação
 COPY . .
 
-# Expõe a porta configurada (assumindo que config.port é 3000)
+# Expõe a porta configurada no .env
 EXPOSE 3000
 
-# Iniciar com nodemon (instale localmente ou globalmente)
-CMD ["node", "src/server.js"]
+# Comando para iniciar a aplicação
+CMD ["node", "src/index.js"]
