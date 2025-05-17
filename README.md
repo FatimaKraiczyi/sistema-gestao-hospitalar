@@ -40,15 +40,7 @@ git clone https://github.com/FatimaKraiczyi/sistema-gestao-hospitalar.git
 cd sistema-gestao-hospitalar
 ```
 
-2. **Gere o `.jar` do `auth-service` (caso necessário)**
-
-```bash
-cd auth-service
-mvn clean package -DskipTests
-cd ..
-```
-
-3. **Suba os containers**
+2. **Suba os containers**
 
 ```bash
 docker-compose up --build
@@ -59,7 +51,7 @@ docker-compose up --build
 | Serviço        | Porta | Descrição                      |
 |----------------|-------|--------------------------------|
 | API Gateway    | 3000  | Entrada principal da API       |
-| auth-service   | 8080  | MS Autenticação                |
+| auth-service   | 8081  | MS Autenticação                |
 | Auth DB        | 5432  | PostgreSQL do auth-service     |
 | pgAdmin        | 5050  | Interface web para o banco     |
 
@@ -67,11 +59,10 @@ docker-compose up --build
 
 | Campo     | Valor                      |
 |-----------|----------------------------|
-| Nome      | Funcionário Padrão         |
 | CPF       | 90769281001                |
 | E-mail    | func_pre@hospital.com      |
 | Senha     | TADS                       |
-| Tipo      | FUNCIONÁRIO                |
+| Tipo      | FUNCIONARIO                |
 
 > Este usuário serve para fazer os primeiros testes de autenticação e administração no sistema.
 
