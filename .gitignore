@@ -1,6 +1,5 @@
 # Arquivos e pastas específicos do PGAdmin
 pgadmin-data/
-!pgadmin-data/.gitkeep
 
 # Database
 *.db
