@@ -12,7 +12,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Random;
 
@@ -27,47 +26,51 @@ public class UserService {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    public RegisterResponse register(RegisterRequest request) {
-        if (repository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("E-mail já registrado");
-        }
-        if (repository.existsByCpf(request.getCpf())) {
-            throw new RuntimeException("CPF já registrado");
-        }
-
-        String password = generateRandomPassword();
-        String hashedPassword = customPasswordEncoder.encodeWithSHA256(password);
-
-        User user = User.builder()
-                .cpf(request.getCpf())
-                .email(request.getEmail())
-                .type(request.getType())
-                .password(hashedPassword)
-                .build();
-
-        User savedUser = repository.save(user);
-
-        sendPasswordByEmail(savedUser.getEmail(), password);
-
-        return new RegisterResponse(
-                savedUser.getEmail(),
-                "Usuário registrado com sucesso. Verifique o e-mail para acessar.",
-                LocalDateTime.now()
-        );
+    public ApiResponse registerUser(RegisterRequest request) {
+    // Verificações de unicidade
+    if (repository.existsByEmail(request.getEmail())) {
+        throw new RuntimeException("E-mail já registrado");
     }
+    if (repository.existsByCpf(request.getCpf())) {
+        throw new RuntimeException("CPF já registrado");
+    }
+
+    // Gera senha aleatória de 4 dígitos
+    String generatedPassword = generateRandomPassword(); // ex: "8371"
+
+    // Criptografa com SHA-256 + salt
+    String hashedPassword = customPasswordEncoder.encodeWithSHA256(generatedPassword);
+
+    // Cria novo usuário
+    User user = new User(
+        request.getCpf(),
+        request.getEmail(),
+        hashedPassword,
+        request.getType()
+    );
+
+    // Salva no banco
+    repository.save(user);
+
+    // Envia senha por e-mail
+    sendPasswordByEmail(user.getEmail(), generatedPassword);
+
+    // Retorna resposta padronizada
+    return new ApiResponse("Usuário registrado com sucesso. Senha enviada para o e-mail: " + user.getEmail());
+}
 
     public AuthResponse authenticate(AuthRequest request) {
         User user = repository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         if (!customPasswordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Senha inválida");
-        }
+  						throw new RuntimeException("Senha inválida");
+}
 
         return new AuthResponse(generateToken(user));
     }
 
-    public ForgotPasswordResponse handleForgotPassword(ForgotPasswordRequest request) {
+    public ApiResponse handleForgotPassword(ForgotPasswordRequest request) {
         User user = repository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("E-mail não encontrado"));
 
@@ -79,18 +82,14 @@ public class UserService {
 
         sendPasswordByEmail(user.getEmail(), newPassword);
 
-        return new ForgotPasswordResponse(
-                user.getEmail(),
-                "Nova senha enviada para o e-mail cadastrado.",
-                LocalDateTime.now()
-        );
+        return new ApiResponse("Nova senha enviada para o e-mail: " + user.getEmail());
     }
 
-    public String handleForgotEmail(ForgotEmailRequest request) {
+    public ApiResponse handleForgotEmail(ForgotEmailRequest request) {
         User user = repository.findByCpf(request.getCpf())
                 .orElseThrow(() -> new RuntimeException("CPF não encontrado"));
 
-        return user.getEmail();
+        return new ApiResponse("Seu email cadastrado é: " + user.getEmail());
     }
 
     private String generateRandomPassword() {

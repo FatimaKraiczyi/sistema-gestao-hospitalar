@@ -3,6 +3,7 @@ package br.com.gestao_hospitalar.auth_service.controller;
 import br.com.gestao_hospitalar.auth_service.dto.*;
 import br.com.gestao_hospitalar.auth_service.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +17,9 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@RequestBody @Valid RegisterRequest request) {
-        return ResponseEntity.ok(userService.register(request));
+		public ResponseEntity<ApiResponse> register(@RequestBody @Valid RegisterRequest request) {
+        ApiResponse response = userService.registerUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/login")
@@ -26,26 +28,18 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<ForgotPasswordResponse> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
+    public ResponseEntity<ApiResponse> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
         return ResponseEntity.ok(userService.handleForgotPassword(request));
     }
 
     @PostMapping("/forgot-email")
-    public ResponseEntity<ForgotEmailResponse> forgotEmail(@RequestBody @Valid ForgotEmailRequest request) {
-        String email = userService.handleForgotEmail(request);
-        return ResponseEntity.ok(
-            new ForgotEmailResponse(email, "E-mail recuperado com sucesso.", java.time.LocalDateTime.now())
-        );
-    }
-
+    public ResponseEntity<ApiResponse> forgotEmail(@RequestBody @Valid ForgotEmailRequest request) {
+        return ResponseEntity.ok(userService.handleForgotEmail(request));
+		}
+  
     @GetMapping("/teste")
     public ResponseEntity<ApiResponse> healthCheck(HttpServletRequest request) {
-        return ResponseEntity.ok(
-            ApiResponse.builder()
-                .timestamp(java.time.Instant.now())
-                .status(200)
-                .message("Auth-service está respondendo!")
-                .build()
-        );
+        return ResponseEntity.ok(new ApiResponse("Auth service is up and running!"));
+           
     }
 }

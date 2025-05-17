@@ -15,14 +15,12 @@ app.use((err, req, res, next) => {
 
     // Verifica se erro veio de uma chamada axios (microserviço)
     if (err.response && err.response.data) {
-        const { timestamp, status, message } = err.response.data;
-        return res.status(status || 500).json({ timestamp, status, message });
+        res.status(err.response.status).json(err.response.data);
+        return;
     }
 
     // Caso erro genérico no API Gateway
     res.status(500).json({
-        timestamp: new Date().toISOString(),
-        status: 500,
         message: 'Erro interno no servidor'
     });
 });
