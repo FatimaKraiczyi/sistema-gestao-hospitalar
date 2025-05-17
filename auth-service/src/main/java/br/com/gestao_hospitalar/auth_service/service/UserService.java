@@ -1,6 +1,11 @@
 package br.com.gestao_hospitalar.auth_service.service;
 
-import br.com.gestao_hospitalar.auth_service.dto.*;
+import br.com.gestao_hospitalar.auth_service.dto.RegisterRequest;
+import br.com.gestao_hospitalar.auth_service.dto.AuthRequest;
+import br.com.gestao_hospitalar.auth_service.dto.AuthResponse;
+import br.com.gestao_hospitalar.auth_service.dto.ForgotEmailRequest;
+import br.com.gestao_hospitalar.auth_service.dto.ForgotPasswordRequest;
+import br.com.gestao_hospitalar.auth_service.dto.ApiResponse;
 import br.com.gestao_hospitalar.auth_service.entity.User;
 import br.com.gestao_hospitalar.auth_service.repository.UserRepository;
 import br.com.gestao_hospitalar.auth_service.security.CustomPasswordEncoder;
@@ -16,7 +21,6 @@ import java.util.Date;
 import java.util.Random;
 
 @Service
-@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository repository;
@@ -26,37 +30,37 @@ public class UserService {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    public ApiResponse registerUser(RegisterRequest request) {
+    public UserService(UserRepository repository, CustomPasswordEncoder customPasswordEncoder, JavaMailSender mailSender) {
+        this.repository = repository;
+        this.customPasswordEncoder = customPasswordEncoder;
+        this.mailSender = mailSender;
+    }
+
+    public User registerUser(RegisterRequest dto) {
         // Verificações de unicidade
-        if (repository.existsByEmail(request.getEmail())) {
+        if (repository.existsByEmail(dto.getEmail())) {
             throw new RuntimeException("E-mail já registrado");
         }
-        if (repository.existsByCpf(request.getCpf())) {
+        if (repository.existsByCpf(dto.getCpf())) {
             throw new RuntimeException("CPF já registrado");
         }
 
-        // Gera senha aleatória de 4 dígitos
-        String generatedPassword = generateRandomPassword(); // ex: "8371"
+        User newUser = new User();
+        newUser.setCpf(dto.getCpf());
+        newUser.setEmail(dto.getEmail());
+        newUser.setType(dto.getType());
 
-        // Criptografa com SHA-256 + salt
+        String generatedPassword = generateRandomPassword();
         String hashedPassword = customPasswordEncoder.encodeWithSHA256(generatedPassword);
-
-        // Cria novo usuário
-        User user = User.builder()
-            .cpf(request.getCpf())
-            .email(request.getEmail())
-            .password(hashedPassword)
-            .type(request.getType())
-            .build();
+        newUser.setPassword(hashedPassword);
 
         // Salva no banco
-        repository.save(user);
+        repository.save(newUser);
 
         // Envia senha por e-mail
-        sendPasswordByEmail(user.getEmail(), generatedPassword);
+        sendPasswordByEmail(newUser.getEmail(), generatedPassword);
 
-        // Retorna resposta padronizada
-        return new ApiResponse("Usuário registrado com sucesso. Senha enviada para o e-mail: " + user.getEmail());
+        return newUser;
     }
 
     public AuthResponse authenticate(AuthRequest request) {

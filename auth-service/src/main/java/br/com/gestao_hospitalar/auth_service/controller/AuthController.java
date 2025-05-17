@@ -1,6 +1,12 @@
 package br.com.gestao_hospitalar.auth_service.controller;
 
-import br.com.gestao_hospitalar.auth_service.dto.*;
+import br.com.gestao_hospitalar.auth_service.dto.AuthRequest;
+import br.com.gestao_hospitalar.auth_service.dto.AuthResponse;
+import br.com.gestao_hospitalar.auth_service.dto.ForgotEmailRequest;
+import br.com.gestao_hospitalar.auth_service.dto.ForgotPasswordRequest;
+import br.com.gestao_hospitalar.auth_service.dto.RegisterRequest;
+import br.com.gestao_hospitalar.auth_service.dto.ApiResponse;
+import br.com.gestao_hospitalar.auth_service.entity.User;
 import br.com.gestao_hospitalar.auth_service.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -11,15 +17,18 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
-@RequiredArgsConstructor
 public class AuthController {
 
     private final UserService userService;
 
+		public AuthController(UserService userService) {
+            this.userService = userService;
+        }
+
     @PostMapping("/register")
-		public ResponseEntity<ApiResponse> register(@RequestBody @Valid RegisterRequest request) {
-        ApiResponse response = userService.registerUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		public ResponseEntity<User> register(@RequestBody RegisterRequest dto) {
+        User registeredUser = userService.registerUser(dto);
+       return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
