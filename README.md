@@ -69,14 +69,14 @@ docker-compose up --build
 ## 🐘 Acesso ao Banco via pgAdmin
 
 - **URL**: http://localhost:5050
-- **Login**: `admin@hospital.com`
-- **Senha**: `admin`
+- **Login**: conforme variável `PGADMIN_DEFAULT_EMAIL` no arquivo `.env`
+- **Senha**: conforme variável `PGADMIN_DEFAULT_PASSWORD` no arquivo `.env`
 - **Servidor do auth-service**:
   - Host: `auth-db`
   - Porta: `5432`
-  - Banco: `authdb`
-  - Usuário: `postgres`
-  - Senha: `<sua-senha>`
+  - Banco: conforme variável `POSTGRES_DB` no arquivo `.env`
+  - Usuário: conforme variável `POSTGRES_USER` no arquivo `.env`
+  - Senha: conforme variável `POSTGRES_PASSWORD` no arquivo `.env`
 
 ## 📬 Postman
 

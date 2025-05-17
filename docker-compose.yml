@@ -8,9 +8,9 @@ services:
       - "3000:3000"
     environment:
       AUTH_MS_URL: http://auth-service:8081
-      JWT_SECRET: 83ac07a8a17e9c9e931297a519741de80714485b40ccd806438d15aebdfff037f424955ca5917011a236c8786448a1acca91c2dc7a602de52823d824f62e5d6d54ed645a929d3a83c3797cfa0f4e80db104171642f196fc0822dccaa3409389020ba3ef6ea53851d673ea8d773dda1e2165cd5c659c0d509d4e70da17071d83bca49177b4276bf30df6354b12fb16139cae3d2602cdb10e8c1a1050877a1c18c4f6cfdc91484865406d577c0bd4eb230821824a7f6ba8f5c96990bb21cdb4da7f6bc2073d27680f616211ba263259dcd5314956de670bdb9c152f51d87d4f89abb4b9392c140ee9409f8e6e3cbd8b4a445d82f79fabd2a34ad1f4843323693a6
+      JWT_SECRET: ${JWT_SECRET}
     env_file:
-      - ./api-gateway/.env
+      - .env
     depends_on:
       - auth-service
     networks:
@@ -24,11 +24,13 @@ services:
       - "8081:8081"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://auth-db:5432/authdb
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=faty0910
-      - JWT_SECRET=83ac07a8a17e9c9e931297a519741de80714485b40ccd806438d15aebdfff037f424955ca5917011a236c8786448a1acca91c2dc7a602de52823d824f62e5d6d54ed645a929d3a83c3797cfa0f4e80db104171642f196fc0822dccaa3409389020ba3ef6ea53851d673ea8d773dda1e2165cd5c659c0d509d4e70da17071d83bca49177b4276bf30df6354b12fb16139cae3d2602cdb10e8c1a1050877a1c18c4f6cfdc91484865406d577c0bd4eb230821824a7f6ba8f5c96990bb21cdb4da7f6bc2073d27680f616211ba263259dcd5314956de670bdb9c152f51d87d4f89abb4b9392c140ee9409f8e6e3cbd8b4a445d82f79fabd2a34ad1f4843323693a6
-      - EMAIL_USERNAME=no.reply.gestao.hospitalar@gmail.com
-      - EMAIL_PASSWORD=hzgo embd iiej zirc
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - EMAIL_USERNAME=${EMAIL_USERNAME}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+    env_file:
+      - .env
     depends_on:
       - auth-db
     networks:
@@ -39,14 +41,16 @@ services:
     container_name: auth-db
     restart: always
     environment:
-      POSTGRES_DB: authdb
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: faty0910
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5433:5432"
     volumes:
       - ./auth-service/init/init.sql:/docker-entrypoint-initdb.d/init.sql 
       - auth-data:/var/lib/postgresql/data 
+    env_file:
+      - .env
     networks:
       - hospital-network
 
@@ -54,12 +58,14 @@ services:
     image: dpage/pgadmin4
     container_name: pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@hospital.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     ports:
       - "5050:80"
     volumes:
       - ./pgadmin-data:/var/lib/pgadmin
+    env_file:
+      - .env
     networks:
       - hospital-network
 

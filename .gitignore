@@ -1,6 +1,9 @@
 # Arquivos e pastas específicos do PGAdmin
 pgadmin-data/
 
+# Ignore environment variables
+.env
+
 # Database
 *.db
 *.sqlite
