@@ -10,6 +10,5 @@ import java.time.Instant;
 public class ApiResponse {
     private Instant timestamp;
     private int status;
-    private String mensagem;
-    private String path;
+    private String message;
 }

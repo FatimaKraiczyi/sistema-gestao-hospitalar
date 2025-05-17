@@ -1,8 +1,7 @@
 package br.com.gestao_hospitalar.auth_service.entity;
 
-import br.com.gestao_hospitalar.auth_service.enums.TipoUsuario;
+import br.com.gestao_hospitalar.auth_service.enums.UserType;
 import jakarta.persistence.*;
-import jakarta.persistence.EnumType;
 import lombok.*;
 
 @Entity
@@ -11,20 +10,23 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "usuario") 
-public class Usuario {
+@Table(name = "account")
+public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false, length = 11)
     private String cpf;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
-    private String senha;
+    @Column(nullable = false)
+    private String password;
 
     @Enumerated(EnumType.STRING)
-    private TipoUsuario tipo;
+    @Column(nullable = false)
+    private UserType type;
 }

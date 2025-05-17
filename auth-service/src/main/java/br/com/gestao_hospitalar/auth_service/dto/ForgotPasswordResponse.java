@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-public class RegisterResponse {
+public class ForgotPasswordResponse {
     private String email;
     private String message;
     private LocalDateTime timestamp;

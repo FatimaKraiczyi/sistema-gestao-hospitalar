@@ -1,14 +1,12 @@
 package br.com.gestao_hospitalar.auth_service.dto;
 
-import br.com.gestao_hospitalar.auth_service.enums.TipoUsuario;
+import br.com.gestao_hospitalar.auth_service.enums.UserType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 @Data
 public class RegisterRequest {
 
@@ -21,6 +19,5 @@ public class RegisterRequest {
     private String email;
 
     @NotNull
-    private TipoUsuario tipo;
+    private UserType type;
 }
-
