@@ -78,3 +78,8 @@ docker-compose up --build
   - Usuário: `postgres`
   - Senha: `<sua-senha>`
 
+## 📬 Postman
+
+Para testar as rotas de autenticação (auth-service) passando pelo API Gateway, utilize a collection Postman disponível no link abaixo:
+
+- [Collection Postman - Gestão Hospitalar (auth via API Gateway)](https://www.postman.com/fatimakraiczyi/gesto-hospitalar/collection/i2nizd8/auth)
