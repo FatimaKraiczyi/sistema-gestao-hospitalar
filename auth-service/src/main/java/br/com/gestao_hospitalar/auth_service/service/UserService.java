@@ -27,52 +27,52 @@ public class UserService {
     private String jwtSecret;
 
     public ApiResponse registerUser(RegisterRequest request) {
-    // Verificações de unicidade
-    if (repository.existsByEmail(request.getEmail())) {
-        throw new RuntimeException("E-mail já registrado");
+        // Verificações de unicidade
+        if (repository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("E-mail já registrado");
+        }
+        if (repository.existsByCpf(request.getCpf())) {
+            throw new RuntimeException("CPF já registrado");
+        }
+
+        // Gera senha aleatória de 4 dígitos
+        String generatedPassword = generateRandomPassword(); // ex: "8371"
+
+        // Criptografa com SHA-256 + salt
+        String hashedPassword = customPasswordEncoder.encodeWithSHA256(generatedPassword);
+
+        // Cria novo usuário
+        User user = User.builder()
+            .cpf(request.getCpf())
+            .email(request.getEmail())
+            .password(hashedPassword)
+            .type(request.getType())
+            .build();
+
+        // Salva no banco
+        repository.save(user);
+
+        // Envia senha por e-mail
+        sendPasswordByEmail(user.getEmail(), generatedPassword);
+
+        // Retorna resposta padronizada
+        return new ApiResponse("Usuário registrado com sucesso. Senha enviada para o e-mail: " + user.getEmail());
     }
-    if (repository.existsByCpf(request.getCpf())) {
-        throw new RuntimeException("CPF já registrado");
-    }
-
-    // Gera senha aleatória de 4 dígitos
-    String generatedPassword = generateRandomPassword(); // ex: "8371"
-
-    // Criptografa com SHA-256 + salt
-    String hashedPassword = customPasswordEncoder.encodeWithSHA256(generatedPassword);
-
-    // Cria novo usuário
-    User user = new User(
-        request.getCpf(),
-        request.getEmail(),
-        hashedPassword,
-        request.getType()
-    );
-
-    // Salva no banco
-    repository.save(user);
-
-    // Envia senha por e-mail
-    sendPasswordByEmail(user.getEmail(), generatedPassword);
-
-    // Retorna resposta padronizada
-    return new ApiResponse("Usuário registrado com sucesso. Senha enviada para o e-mail: " + user.getEmail());
-}
 
     public AuthResponse authenticate(AuthRequest request) {
         User user = repository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+            .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         if (!customPasswordEncoder.matches(request.getPassword(), user.getPassword())) {
-  						throw new RuntimeException("Senha inválida");
-}
+            throw new RuntimeException("Senha inválida");
+        }
 
         return new AuthResponse(generateToken(user));
     }
 
     public ApiResponse handleForgotPassword(ForgotPasswordRequest request) {
         User user = repository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("E-mail não encontrado"));
+            .orElseThrow(() -> new RuntimeException("E-mail não encontrado"));
 
         String newPassword = generateRandomPassword();
         String hashedPassword = customPasswordEncoder.encodeWithSHA256(newPassword);
@@ -87,7 +87,7 @@ public class UserService {
 
     public ApiResponse handleForgotEmail(ForgotEmailRequest request) {
         User user = repository.findByCpf(request.getCpf())
-                .orElseThrow(() -> new RuntimeException("CPF não encontrado"));
+            .orElseThrow(() -> new RuntimeException("CPF não encontrado"));
 
         return new ApiResponse("Seu email cadastrado é: " + user.getEmail());
     }
@@ -101,24 +101,24 @@ public class UserService {
         message.setTo(to);
         message.setSubject("Senha de acesso");
         message.setText(String.format("""
-                Bem-vindo ao Sistema de Gestão Hospitalar!
+            Bem-vindo ao Sistema de Gestão Hospitalar!
 
-                Sua senha de acesso é: %s
+            Sua senha de acesso é: %s
 
-                Equipe TI Hospitalar
-                """, password)
+            Equipe TI Hospitalar
+            """, password)
         );
         mailSender.send(message);
     }
 
     private String generateToken(User user) {
         return Jwts.builder()
-                .setSubject(user.getEmail())
-                .claim("cpf", user.getCpf())
-                .claim("type", user.getType().name())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 24h
-                .signWith(SignatureAlgorithm.HS256, jwtSecret)
-                .compact();
+            .setSubject(user.getEmail())
+            .claim("cpf", user.getCpf())
+            .claim("type", user.getType().name())
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 24h
+            .signWith(SignatureAlgorithm.HS256, jwtSecret)
+            .compact();
     }
 }
