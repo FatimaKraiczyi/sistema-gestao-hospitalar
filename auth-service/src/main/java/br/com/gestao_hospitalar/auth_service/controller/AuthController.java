@@ -4,7 +4,7 @@ import br.com.gestao_hospitalar.auth_service.dto.AuthRequest;
 import br.com.gestao_hospitalar.auth_service.dto.AuthResponse;
 import br.com.gestao_hospitalar.auth_service.dto.ForgotEmailRequest;
 import br.com.gestao_hospitalar.auth_service.dto.ForgotPasswordRequest;
-import br.com.gestao_hospitalar.auth_service.dto.UserRegisterDTO;
+import br.com.gestao_hospitalar.auth_service.dto.RegisterRequest;
 import br.com.gestao_hospitalar.auth_service.dto.ApiResponse;
 import br.com.gestao_hospitalar.auth_service.entity.User;
 import br.com.gestao_hospitalar.auth_service.service.UserService;
@@ -24,13 +24,8 @@ public class AuthController {
     private UserService userService;
     
     @PostMapping("/register")
-		public ResponseEntity<String> registerUser(@RequestBody UserRegisterDTO dto) {
-        try {
-            userService.registerUser(dto);
-            return ResponseEntity.ok("Usuário registrado. A senha foi enviada por e-mail.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Erro ao registrar: " + e.getMessage());
-        }
+		public ResponseEntity<ApiResponse> registerUser(@RequestBody @Valid RegisterRequest request) {
+        return ResponseEntity.ok(userService.registerUser(request));
     }
 
     @PostMapping("/login")

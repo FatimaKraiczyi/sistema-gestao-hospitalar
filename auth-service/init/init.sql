@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS account (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255),
+    password VARCHAR(64) NOT NULL,
     cpf VARCHAR(11) NOT NULL UNIQUE,
     type VARCHAR(50) NOT NULL
 );

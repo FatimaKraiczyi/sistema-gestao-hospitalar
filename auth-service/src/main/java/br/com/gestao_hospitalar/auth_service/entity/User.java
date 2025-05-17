@@ -2,8 +2,10 @@ package br.com.gestao_hospitalar.auth_service.entity;
 
 import br.com.gestao_hospitalar.auth_service.enums.UserType;
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
+@Data
 @Table(name = "account")
 public class User {
 
@@ -11,29 +13,16 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String email;
-
+    @Column(unique = true, nullable = false, length = 11)
     private String cpf;
 
-    @Enumerated(EnumType.STRING)
-    private UserType type;
+    @Column(unique = true, nullable = false)
+    private String email;
 
+    @Column(nullable = false)
     private String password;
 
-    public User() {}
-
-    // Getters e Setters
-    public Long getId() { return id; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    public String getCpf() { return cpf; }
-    public void setCpf(String cpf) { this.cpf = cpf; }
-
-    public UserType getType() { return type; }
-    public void setType(UserType type) { this.type = type; }
-
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserType type;
 }

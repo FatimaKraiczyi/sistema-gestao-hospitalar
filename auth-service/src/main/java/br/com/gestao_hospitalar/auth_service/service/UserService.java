@@ -1,11 +1,6 @@
 package br.com.gestao_hospitalar.auth_service.service;
 
-import br.com.gestao_hospitalar.auth_service.dto.UserRegisterDTO;
-import br.com.gestao_hospitalar.auth_service.dto.AuthRequest;
-import br.com.gestao_hospitalar.auth_service.dto.AuthResponse;
-import br.com.gestao_hospitalar.auth_service.dto.ForgotEmailRequest;
-import br.com.gestao_hospitalar.auth_service.dto.ForgotPasswordRequest;
-import br.com.gestao_hospitalar.auth_service.dto.ApiResponse;
+import br.com.gestao_hospitalar.auth_service.dto.*;
 import br.com.gestao_hospitalar.auth_service.entity.User;
 import br.com.gestao_hospitalar.auth_service.repository.UserRepository;
 import br.com.gestao_hospitalar.auth_service.security.CustomPasswordEncoder;
@@ -35,29 +30,30 @@ public class UserService {
 
     @Value("${jwt.secret}")
     private String jwtSecret;
-   
-    public void registerUser(UserRegisterDTO dto) throws Exception {
-        if (repository.existsByEmail(dto.getEmail())) {
-            throw new Exception("E-mail já registrado");
+
+    public ApiResponse registerUser(RegisterRequest request) {
+        if (repository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("E-mail já registrado");
         }
-        if (repository.existsByCpf(dto.getCpf())) {
-            throw new Exception("CPF já registrado");
+        if (repository.existsByCpf(request.getCpf())) {
+            throw new RuntimeException("CPF já registrado");
         }
 
-				String generatedPassword = generateRandomPassword();
+        String generatedPassword = generateRandomPassword(); 
         String hashedPassword = customPasswordEncoder.encodeWithSHA256(generatedPassword);
 
         User newUser = new User();
-        newUser.setCpf(dto.getCpf());
-        newUser.setEmail(dto.getEmail());
-        newUser.setType(dto.getType());
+        newUser.setCpf(request.getCpf());
+        newUser.setEmail(request.getEmail());
+        newUser.setType(request.getType());
 				newUser.setPassword(hashedPassword);
 
         // Salva no banco
         repository.save(newUser);
 
-        // Envia senha por e-mail
         sendPasswordByEmail(newUser.getEmail(), generatedPassword);
+
+        return new ApiResponse("Usuário registrado com sucesso. Senha enviada para o e-mail: " + newUser.getEmail());
     }
 
     public AuthResponse authenticate(AuthRequest request) {
