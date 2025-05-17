@@ -9,8 +9,7 @@ FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 
-# Expor a porta em que a aplicação irá rodar (padrão do Spring Boot é 8080)
-EXPOSE 8080
+EXPOSE 8081
 
 # Comando para iniciar a aplicação
 ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -11,7 +11,7 @@ O Sistema de Gestão Hospitalar é uma aplicação distribuída projetada para g
 
 ## 🚀 Tecnologias Utilizadas
 
-- Java 17 + Spring Boot
+- Java 21 + Spring Boot
 - PostgreSQL
 - Node.js + Express (API Gateway)
 - JWT (Autenticação)
@@ -26,7 +26,7 @@ O projeto está organizado nos seguintes componentes principais:
 
 ## 🧪 Pré-requisitos
 
-- JDK 17
+- JDK 21
 - Maven
 - Docker e Docker Compose 
 - (Opcional) pgAdmin para visualizar os dados no banco
@@ -40,15 +40,7 @@ git clone https://github.com/FatimaKraiczyi/sistema-gestao-hospitalar.git
 cd sistema-gestao-hospitalar
 ```
 
-2. **Gere o `.jar` do `auth-service` (caso necessário)**
-
-```bash
-cd auth-service
-mvn clean package -DskipTests
-cd ..
-```
-
-3. **Suba os containers**
+2. **Suba os containers**
 
 ```bash
 docker-compose up --build
@@ -59,18 +51,18 @@ docker-compose up --build
 | Serviço        | Porta | Descrição                      |
 |----------------|-------|--------------------------------|
 | API Gateway    | 3000  | Entrada principal da API       |
-| Auth DB        | 5433  | PostgreSQL do auth-service     |
+| auth-service   | 8081  | MS Autenticação                |
+| Auth DB        | 5432  | PostgreSQL do auth-service     |
 | pgAdmin        | 5050  | Interface web para o banco     |
 
 ## 🔐 Usuário Padrão Pré-Cadastrado (auth-service)
 
 | Campo     | Valor                      |
 |-----------|----------------------------|
-| Nome      | Funcionário Padrão         |
 | CPF       | 90769281001                |
 | E-mail    | func_pre@hospital.com      |
 | Senha     | TADS                       |
-| Tipo      | FUNCIONÁRIO                |
+| Tipo      | FUNCIONARIO                |
 
 > Este usuário serve para fazer os primeiros testes de autenticação e administração no sistema.
 
@@ -80,9 +72,9 @@ docker-compose up --build
 - **Login**: `admin@hospital.com`
 - **Senha**: `admin`
 - **Servidor do auth-service**:
-  - Host: `authdb`
-  - Porta: `5432` (interna) ou `5433` (externa)
+  - Host: `auth-db`
+  - Porta: `5432`
   - Banco: `authdb`
-  - Usuário: `authuser`
-  - Senha: `authpass`
+  - Usuário: `postgres`
+  - Senha: `<sua-senha>`
 
