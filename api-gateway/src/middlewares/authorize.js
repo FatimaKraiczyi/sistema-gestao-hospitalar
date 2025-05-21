@@ -7,5 +7,3 @@ module.exports = function authorizeRoles(...allowedTypes) {
     next();
   };
 };
-
-module.exports = authorizeRoles;
