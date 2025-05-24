@@ -17,7 +17,7 @@ public class PacienteController {
 
     private final PacienteService pacienteService;
 
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<PacienteResponseDTO> criarOuAtualizar(@RequestBody PacienteRequestDTO dto) {
         Paciente paciente = pacienteService.criarOuAtualizarPaciente(dto);
         PacienteResponseDTO responseDTO = pacienteService.toResponseDTO(paciente);

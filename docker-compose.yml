@@ -7,9 +7,9 @@ services:
     ports:
       - "3000:3000"
     environment:
-      AUTH_MS_URL: http://auth-service:8081
-      PACIENTE_MS_URL: http://paciente-service:8082
-      JWT_SECRET: ${JWT_SECRET}
+    - AUTH_MS_URL=http://auth-service:8081
+    - PACIENTE_MS_URL=http://paciente-service:8082
+    - JWT_SECRET=${JWT_SECRET}
     env_file:
       - .env
     depends_on:
