@@ -1,29 +1,23 @@
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 function authenticateToken(req, res, next) {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res
-      .status(401)
-      .json({ message: "Authorization header missing or invalid" });
+  const authHeader = req.headers["authorization"];
+  if (!authHeader) {
+    return res.status(401).json({ message: "Token not provided" });
   }
 
   const token = authHeader.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "Token malformed" });
+  }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) {
-      return res.status(403).json({ message: "Invalid or expired token" });
+      return res.status(403).json({ message: "Invalid token" });
     }
-
-    req.user = {
-      id: decoded.sub,
-      cpf: decoded.cpf,
-      email: decoded.email,
-      type: decoded.type,
-    };
-
+    req.user = user;
     next();
   });
 }

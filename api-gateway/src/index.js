@@ -1,32 +1,31 @@
-const express = require("express");
-const cors = require("cors");
 require("dotenv").config();
+const express = require("express");
 
 const app = express();
-app.use(cors());
 app.use(express.json());
 
-// Suas rotas
-app.use("/api", require("./routes/auth")); // rotas do auth-service
-app.use("/api", require("./routes/paciente")); // rotas do paciente-service
-
-// Middleware global de tratamento de erros (único e no fim, **depois** das rotas)
-app.use((err, req, res, next) => {
-  console.log(`[${req.method}] ${req.originalUrl}`);
-  console.error("Erro:", err);
-  next();
-
-  // Verifica se erro veio de uma chamada axios (microserviço)
-  if (err.response && err.response.data) {
-    res.status(err.response.status).json(err.response.data);
-    return;
-  }
-
-  // Caso erro genérico no API Gateway
-  res.status(500).json({
-    message: "Erro interno no servidor",
-  });
+// Health check
+app.get("/", (req, res) => {
+  res.send("API Gateway is running 🚀");
 });
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`API Gateway rodando na porta ${PORT}`));
+// Importação das rotas
+const authRoutes = require("./routes/auth.routes");
+const pacienteRoutes = require("./routes/paciente.routes");
+const consultaRoutes = require("./routes/consulta.routes");
+
+// Uso das rotas
+app.use("/api", authRoutes);
+app.use("/api", pacienteRoutes);
+app.use("/api", consultaRoutes);
+
+// Tratamento global de erro
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ message: "Internal Server Error" });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`API Gateway running on port ${PORT}`);
+});
