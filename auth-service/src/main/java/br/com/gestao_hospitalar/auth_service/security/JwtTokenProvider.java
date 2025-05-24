@@ -3,6 +3,8 @@ package br.com.gestao_hospitalar.auth_service.security;
 import br.com.gestao_hospitalar.auth_service.entity.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import java.security.Key;
 import java.util.Date;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,10 +14,14 @@ import org.springframework.stereotype.Component;
 public class JwtTokenProvider {
 
   @Value("${jwt.secret}")
-  private String jwtSecret;
+  String jwtSecret;
 
   @Value("${jwt.expiration}")
-  private long jwtExpirationInMs;
+  long jwtExpirationInMs;
+
+  private Key getSigningKey() {
+    return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+  }
 
   public String generateToken(User user) {
     return Jwts.builder()
@@ -25,7 +31,7 @@ public class JwtTokenProvider {
       .claim("type", user.getType().name())
       .setIssuedAt(new Date())
       .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
-      .signWith(SignatureAlgorithm.HS256, jwtSecret)
+      .signWith(getSigningKey(), SignatureAlgorithm.HS256)
       .compact();
   }
 }

@@ -1,55 +1,51 @@
 package br.com.gestao_hospitalar.paciente_service.entity;
 
 import jakarta.persistence.*;
+import java.util.UUID;
 import lombok.Data;
 
-import java.util.UUID;
-
-@Entity
 @Data
+@Entity
+@Table(name = "pacientes")
 public class Paciente {
 
-    @Id
-    @GeneratedValue
-    private UUID id; // Chave primária
+  @Id
+  @Column(name = "id", nullable = false, unique = true)
+  private UUID id;
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(unique = true, nullable = false)
-    private Integer pacienteId; // Número sequencial gerado automaticamente
+  @Column(name = "cpf", nullable = false, length = 14, unique = true)
+  private String cpf;
 
-    @Column(unique = true, nullable = false, length = 11)
-    private String cpf;
+  @Column(name = "email", nullable = false, length = 100, unique = true)
+  private String email;
 
-    @Column(unique = true, nullable = false, length = 255)
-    private String email;
+  @Column(name = "nome", nullable = false, length = 100)
+  private String nome;
 
-    @Column(length = 255)
-    private String nome;
+  @Column(name = "telefone", length = 20)
+  private String telefone;
 
-    @Column(length = 20)
-    private String telefone;
+  @Column(name = "cep", length = 9)
+  private String cep;
 
-    @Column(length = 10)
-    private String cep;
+  @Column(name = "logradouro", length = 150)
+  private String logradouro;
 
-    @Column(length = 255)
-    private String logradouro;
+  @Column(name = "numero", length = 10)
+  private String numero;
 
-    @Column(length = 50)
-    private String numero;
+  @Column(name = "complemento", length = 50)
+  private String complemento;
 
-    @Column(length = 255)
-    private String complemento;
+  @Column(name = "bairro", length = 100)
+  private String bairro;
 
-    @Column(length = 255)
-    private String bairro;
+  @Column(name = "cidade", length = 100)
+  private String cidade;
 
-    @Column(length = 255)
-    private String cidade;
+  @Column(name = "estado", length = 2)
+  private String estado;
 
-    @Column(length = 2)
-    private String estado;
-
-    @Column(columnDefinition = "INT DEFAULT 0")
-    private Integer pontos;
+  @Column(name = "pontos")
+  private Integer pontos;
 }

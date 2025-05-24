@@ -4,6 +4,7 @@ import br.com.gestao_hospitalar.auth_service.dto.*;
 import br.com.gestao_hospitalar.auth_service.entity.User;
 import br.com.gestao_hospitalar.auth_service.repository.UserRepository;
 import br.com.gestao_hospitalar.auth_service.security.CustomPasswordEncoder;
+import br.com.gestao_hospitalar.auth_service.security.JwtTokenProvider;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
@@ -28,7 +29,7 @@ public class UserService {
   private JavaMailSender mailSender;
 
   @Autowired
-  private JwtTokenProvider generateToken;
+  private JwtTokenProvider jwtTokenProvider;
 
   public ApiResponse registerUser(RegisterRequest request) {
     if (repository.existsByEmail(request.getEmail())) {
@@ -71,7 +72,7 @@ public class UserService {
       throw new RuntimeException("Senha inválida");
     }
 
-    return new AuthResponse(generateToken(user));
+    return new AuthResponse(jwtTokenProvider.generateToken(user));
   }
 
   public ApiResponse handleForgotPassword(ForgotPasswordRequest request) {
