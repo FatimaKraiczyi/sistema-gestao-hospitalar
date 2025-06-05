@@ -1,14 +1,228 @@
-<div class="container mt-4">
-    <div class="row">
-    <div class="col-md-12">
+<div class="container-fluid mt-4">
+  <!-- Header -->
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Área do Funcionário</h2>
-        <div class="alert alert-info">
-        <p>Bem-vindo à área de funcionário!</p>
-        <p class="mb-0">Este módulo será implementado em breve.</p>
+        <div>
+          <button class="btn btn-outline-primary me-2" routerLink="/funcionario/consultas/nova">
+            Nova Consulta
+          </button>
+          <button class="btn btn-outline-success me-2" routerLink="/funcionario/funcionarios">
+            Funcionários
+          </button>
+          <button class="btn btn-outline-secondary" (click)="logout()">
+            Sair
+          </button>
         </div>
-        <div class="mt-3">
-        <button class="btn btn-secondary" (click)="logout()">Sair</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensagens -->
+  <div *ngIf="mensagemSucesso" class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ mensagemSucesso }}
+    <button type="button" class="btn-close" (click)="mensagemSucesso = ''"></button>
+  </div>
+
+  <div *ngIf="mensagemErro" class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ mensagemErro }}
+    <button type="button" class="btn-close" (click)="mensagemErro = ''"></button>
+  </div>
+
+  <!-- Consultas das Próximas 48h -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <i class="fas fa-calendar-alt me-2"></i>
+            Consultas das Próximas 48 Horas
+          </h5>
         </div>
+        <div class="card-body">
+          <div *ngIf="carregandoConsultas" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2">Carregando consultas...</p>
+          </div>
+
+          <div *ngIf="!carregandoConsultas && consultas.length === 0" class="text-center py-4">
+            <i class="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Nenhuma consulta nas próximas 48 horas.</p>
+          </div>
+
+          <div *ngIf="!carregandoConsultas && consultas.length > 0">
+            <div class="row">
+              <div *ngFor="let consulta of consultas" class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 border-left-primary">
+                  <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <h6 class="mb-0 text-primary">{{ consulta.codigo }}</h6>
+                      <span class="badge bg-info">{{ formatarData(consulta.data) }}</span>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <h6 class="card-title">{{ consulta.especialidade }}</h6>
+                    <p class="card-text">
+                      <strong>Médico:</strong> {{ consulta.medico }}<br>
+                      <strong>Valor:</strong> {{ formatarValor(consulta.valor) }}<br>
+                      <strong>Vagas:</strong> {{ consulta.vagasOcupadas }}/{{ consulta.vagasTotal }}
+                      <span class="ms-2 badge bg-secondary">{{ calcularPercentualOcupacao(consulta) }}%</span>
+                    </p>
+
+                    <!-- Agendamentos -->
+                    <div *ngIf="consulta.agendamentos.length > 0" class="mt-3">
+                      <h6><strong>Agendamentos:</strong></h6>
+                      <div class="table-responsive mt-2">
+                        <table class="table table-sm">
+                          <thead>
+                            <tr>
+                              <th>Paciente</th>
+                              <th>Status</th>
+                              <th>ID</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngFor="let agendamento of consulta.agendamentos">
+                              <td>{{ agendamento.pacienteNome }}</td>
+                              <td><span [class]="getStatusClass(agendamento.status)">{{ agendamento.status }}</span></td>
+                              <td><small class="text-muted">{{ agendamento.id }}</small></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-footer bg-white">
+                    <div class="btn-group w-100" role="group">
+                      <button 
+                        class="btn btn-sm btn-success"
+                        (click)="abrirModalConfirmacao(consulta)"
+                        title="Confirmar Comparecimento">
+                        <i class="fas fa-check"></i>
+                      </button>
+                      <button 
+                        class="btn btn-sm btn-warning"
+                        [disabled]="!podeSerCancelada(consulta)"
+                        (click)="abrirModalCancelamento(consulta)"
+                        title="Cancelar Consulta">
+                        <i class="fas fa-times"></i>
+                      </button>
+                      <button 
+                        class="btn btn-sm btn-primary"
+                        (click)="abrirModalRealizacao(consulta)"
+                        title="Realizar Consulta">
+                        <i class="fas fa-play"></i>
+                      </button>
+                    </div>
+                    <small class="text-muted d-block text-center mt-1">
+                      Confirmar | 
+                      <span [class]="podeSerCancelada(consulta) ? 'text-warning' : 'text-muted'">Cancelar</span> | 
+                      Realizar
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    </div>
+  </div>
 </div>
+
+<!-- Modal Confirmar Comparecimento -->
+<div class="modal fade show" [style.display]="mostrarModalConfirmacao ? 'block' : 'none'" 
+     tabindex="-1" *ngIf="mostrarModalConfirmacao">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmar Comparecimento</h5>
+        <button type="button" class="btn-close" (click)="fecharModais()"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Consulta:</strong> {{ consultaSelecionada?.codigo }} - {{ consultaSelecionada?.medico }}</p>
+        <p><strong>Data:</strong> {{ formatarData(consultaSelecionada?.data!) }}</p>
+        
+        <div class="mb-3">
+          <label for="codigoConfirmacao" class="form-label">Código do Agendamento:</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            id="codigoConfirmacao"
+            [(ngModel)]="codigoConfirmacao"
+            placeholder="Digite o ID do agendamento">
+          <div class="form-text">O agendamento deve estar no status CHECK-IN</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModais()">Cancelar</button>
+        <button type="button" class="btn btn-success" (click)="confirmarComparecimento()">
+          Confirmar Comparecimento
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cancelar Consulta -->
+<div class="modal fade show" [style.display]="mostrarModalCancelamento ? 'block' : 'none'" 
+     tabindex="-1" *ngIf="mostrarModalCancelamento">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cancelar Consulta</h5>
+        <button type="button" class="btn-close" (click)="fecharModais()"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Consulta:</strong> {{ consultaSelecionada?.codigo }} - {{ consultaSelecionada?.medico }}</p>
+        <p><strong>Data:</strong> {{ formatarData(consultaSelecionada?.data!) }}</p>
+        <p><strong>Ocupação:</strong> {{ calcularPercentualOcupacao(consultaSelecionada!) }}%</p>
+        
+        <div class="alert alert-warning">
+          <strong>Atenção:</strong> Esta ação cancelará a consulta e todos os agendamentos vinculados. 
+          Os pontos serão devolvidos aos pacientes.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModais()">Voltar</button>
+        <button type="button" class="btn btn-warning" (click)="cancelarConsulta()">
+          Confirmar Cancelamento
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Realizar Consulta -->
+<div class="modal fade show" [style.display]="mostrarModalRealizacao ? 'block' : 'none'" 
+     tabindex="-1" *ngIf="mostrarModalRealizacao">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Realizar Consulta</h5>
+        <button type="button" class="btn-close" (click)="fecharModais()"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Consulta:</strong> {{ consultaSelecionada?.codigo }} - {{ consultaSelecionada?.medico }}</p>
+        <p><strong>Data:</strong> {{ formatarData(consultaSelecionada?.data!) }}</p>
+        
+        <div class="alert alert-info">
+          <strong>Informação:</strong> Esta ação marcará a consulta como REALIZADA. 
+          Pacientes que compareceram serão marcados como REALIZADO, os demais como FALTOU.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModais()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="realizarConsulta()">
+          Realizar Consulta
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop para modais -->
+<div class="modal-backdrop fade show" *ngIf="mostrarModalConfirmacao || mostrarModalCancelamento || mostrarModalRealizacao"></div>
