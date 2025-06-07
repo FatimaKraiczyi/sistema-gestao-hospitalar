@@ -11,7 +11,7 @@ services:
       - AUTH_MS_URL=http://auth-service:8081
       - PACIENTE_MS_URL=http://paciente-service:8082
       - CONSULTA_MS_URL=http://consulta-service:8083
-      - JWT_SECRET_KEY=${JWT_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
     env_file:
       - .env
     depends_on:
@@ -30,7 +30,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://auth-db:5432/authdb
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-      - JWT_SECRET_KEY=${JWT_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
       - EMAIL_USERNAME=${EMAIL_USERNAME}
       - EMAIL_PASSWORD=${EMAIL_PASSWORD}
     env_file:
@@ -67,7 +67,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://paciente-db:5432/pacientedb
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-      - JWT_SECRET_KEY=${JWT_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
     env_file:
       - .env
     depends_on:
@@ -102,7 +102,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://consulta-db:5432/consultadb
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-      - JWT_SECRET_KEY=${JWT_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
     env_file:
       - .env
     depends_on:
