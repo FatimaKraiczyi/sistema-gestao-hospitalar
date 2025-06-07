@@ -3,34 +3,39 @@ package br.com.gestao_hospitalar.paciente_service.controller;
 import br.com.gestao_hospitalar.paciente_service.dto.PacienteRequestDTO;
 import br.com.gestao_hospitalar.paciente_service.dto.PacienteResponseDTO;
 import br.com.gestao_hospitalar.paciente_service.service.PacienteService;
+import jakarta.validation.Valid;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("")
-@RequiredArgsConstructor
 public class PacienteController {
 
-  private final PacienteService pacienteService;
+  @Autowired
+  private PacienteService pacienteService;
 
   @PostMapping("/completar")
   public ResponseEntity<PacienteResponseDTO> completarCadastro(
-    @RequestHeader("x-user-id") UUID id,
-    @RequestHeader("x-user-cpf") String cpf,
-    @RequestHeader("x-user-email") String email,
+    @RequestHeader Map<String, String> headers,
     @RequestBody PacienteRequestDTO dto
   ) {
-    return ResponseEntity.ok(
-      pacienteService.completarCadastro(id, cpf, email, dto)
-    );
-  }
+    headers.forEach((key, value) -> System.out.println(key + " = " + value));
 
-  @GetMapping("/perfil")
-  public ResponseEntity<PacienteResponseDTO> buscarPaciente(
-    @RequestHeader("x-user-id") UUID id
-  ) {
-    return ResponseEntity.ok(pacienteService.buscarPaciente(id));
+    UUID id = UUID.fromString(headers.get("x-user-id"));
+    String cpf = headers.get("x-user-cpf");
+    String email = headers.get("x-user-email");
+
+    PacienteResponseDTO response = pacienteService.completarCadastro(
+      id,
+      cpf,
+      email,
+      dto
+    );
+    return ResponseEntity.ok(response);
   }
 }

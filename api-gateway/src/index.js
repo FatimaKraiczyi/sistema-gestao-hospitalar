@@ -28,13 +28,13 @@ app.use(
 // Proxy para Paciente Service (com autenticação obrigatória e validação de autorização)
 app.use(
   "/api/paciente",
-  authenticateToken, // Middleware de autenticação
-  authorizeRoles("PACIENTE"), // Middleware de autorização para pacientes
+  authenticateToken, // valida o JWT
+  authorizeRoles("PACIENTE"),
   createProxyMiddleware({
     target: PACIENTE_MS_URL,
     changeOrigin: true,
     onProxyReq: (proxyReq, req) => {
-      proxyReq.setHeader("Authorization", req.headers["authorization"]); // Manter o cabeçalho de autorização
+      proxyReq.setHeader("Authorization", req.headers["authorization"]);
       proxyReq.setHeader("x-user-id", req.user.id);
       proxyReq.setHeader("x-user-cpf", req.user.cpf);
       proxyReq.setHeader("x-user-email", req.user.email);

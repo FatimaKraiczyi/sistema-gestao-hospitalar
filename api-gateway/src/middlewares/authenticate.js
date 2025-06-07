@@ -14,9 +14,16 @@ function authenticateToken(req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, jwtSecret);
-    req.user = decoded;
-    next();
+    jwt.verify(token, jwtSecret, (err, user) => {
+      if (err) return res.sendStatus(403);
+      req.user = {
+        id: user.sub,
+        cpf: user.cpf,
+        email: user.email,
+        type: user.type,
+      };
+      next();
+    });
   } catch (error) {
     return res.status(401).json({ message: "Invalid token" });
   }
