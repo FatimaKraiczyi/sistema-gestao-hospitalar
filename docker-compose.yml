@@ -41,7 +41,7 @@ services:
     container_name: auth-db
     restart: always
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_DB: authdb
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
@@ -49,6 +49,72 @@ services:
     volumes:
       - ./auth-service/init/init.sql:/docker-entrypoint-initdb.d/init.sql 
       - auth-data:/var/lib/postgresql/data 
+    env_file:
+      - .env
+    networks:
+      - hospital-network
+
+  paciente-service:
+    build: ./paciente-service
+    container_name: paciente-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://paciente-db:5432/pacientedb
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+    env_file:
+      - .env
+    depends_on:
+      - paciente-db
+    networks:
+      - hospital-network
+
+  paciente-db:
+    image: postgres:15
+    container_name: paciente-db
+    environment:
+      POSTGRES_DB: pacientedb
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5434:5432"
+    volumes:
+      - paciente-data:/var/lib/postgresql/data 
+    env_file:
+      - .env
+    networks:
+      - hospital-network
+
+  consulta-service:
+    build: ./consulta-service
+    container_name: consulta-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://consulta-db:5432/consultadb
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+    env_file:
+      - .env
+    depends_on:
+      - consulta-db
+    networks:
+      - hospital-network
+
+  consulta-db:
+    image: postgres:15
+    container_name: consulta-db
+    environment:
+      POSTGRES_DB: consultadb
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5435:5432"
+    volumes:
+      - consulta-data:/var/lib/postgresql/data 
     env_file:
       - .env
     networks:
@@ -71,6 +137,8 @@ services:
 
 volumes:
   auth-data:
+  paciente-data:
+  consulta-data:
 
 networks:
   hospital-network:
