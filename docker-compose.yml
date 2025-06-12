@@ -8,11 +8,13 @@ services:
       - "3000:3000"
     environment:
       AUTH_MS_URL: http://auth-service:8081
+      PACIENTE_MS_URL: http://paciente-service:8082
       JWT_SECRET: ${JWT_SECRET}
     env_file:
       - .env
     depends_on:
       - auth-service
+      - paciente-service
     networks:
       - hospital-network
 
@@ -37,7 +39,7 @@ services:
       - hospital-network
 
   auth-db:
-    image: postgres:15
+    image: postgres:17
     container_name: auth-db
     restart: always
     environment:
@@ -47,7 +49,6 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - ./auth-service/init/init.sql:/docker-entrypoint-initdb.d/init.sql 
       - auth-data:/var/lib/postgresql/data 
     env_file:
       - .env
@@ -72,7 +73,7 @@ services:
       - hospital-network
 
   paciente-db:
-    image: postgres:15
+    image: postgres:17
     container_name: paciente-db
     environment:
       POSTGRES_DB: pacientedb
@@ -105,8 +106,9 @@ services:
       - hospital-network
 
   consulta-db:
-    image: postgres:15
+    image: postgres:17
     container_name: consulta-db
+    restart: always
     environment:
       POSTGRES_DB: consultadb
       POSTGRES_USER: ${POSTGRES_USER}

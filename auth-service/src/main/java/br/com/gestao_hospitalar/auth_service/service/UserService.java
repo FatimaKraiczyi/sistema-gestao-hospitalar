@@ -110,7 +110,9 @@ public class UserService {
 
     private String generateToken(User user) {
         return Jwts.builder()
-            .setSubject(user.getEmail())
+				    .setSubject(user.getId().toString())
+            .claim("uuid", user.getId().toString())
+						.claim("email", user.getEmail())
             .claim("cpf", user.getCpf())
             .claim("type", user.getType().name())
             .setIssuedAt(new Date())

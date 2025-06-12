@@ -7,7 +7,8 @@ app.use(cors());
 app.use(express.json());
 
 // Suas rotas
-app.use('/auth', require('./routes/auth')); // rotas do auth-service
+app.use('/api', require('./routes/auth')); // rotas do auth-service
+app.use('/api', require('./routes/paciente')); // rotas do paciente-service
 
 // Middleware global de tratamento de erros (único e no fim, **depois** das rotas)
 app.use((err, req, res, next) => {
