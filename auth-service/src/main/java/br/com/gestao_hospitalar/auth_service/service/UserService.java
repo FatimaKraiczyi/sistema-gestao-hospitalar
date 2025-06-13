@@ -2,6 +2,7 @@ package br.com.gestao_hospitalar.auth_service.service;
 
 import br.com.gestao_hospitalar.auth_service.dto.*;
 import br.com.gestao_hospitalar.auth_service.entity.User;
+import br.com.gestao_hospitalar.auth_service.enums.UserType;
 import br.com.gestao_hospitalar.auth_service.repository.UserRepository;
 import br.com.gestao_hospitalar.auth_service.security.CustomPasswordEncoder;
 import io.jsonwebtoken.Jwts;
@@ -12,9 +13,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.util.Date;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -22,15 +28,19 @@ public class UserService {
     @Autowired
     private UserRepository repository;
 
-		@Autowired
+	@Autowired
     private CustomPasswordEncoder customPasswordEncoder;
 
-		@Autowired
+	@Autowired
     private JavaMailSender mailSender;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
 
+    // Adiciona o RestTemplate para comunicação entre serviços
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    @Transactional // Garante que a operação seja atômica (ou tudo funciona, ou nada)
     public ApiResponse registerUser(RegisterRequest request) {
         if (repository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("E-mail já registrado");
@@ -43,14 +53,38 @@ public class UserService {
         String hashedPassword = customPasswordEncoder.encodeWithSHA256(generatedPassword);
 
         User newUser = new User();
+
+        // Gera um ID único para o novo usuário
+        newUser.setId(UUID.randomUUID());
         newUser.setCpf(request.getCpf());
         newUser.setEmail(request.getEmail());
-        newUser.setType(request.getType());
-				newUser.setPassword(hashedPassword);
+        // Define o tipo de usuário como PACIENTE, que é o correto para esta rota
+        newUser.setType(UserType.PACIENTE);
+        newUser.setPassword(hashedPassword);
 
-        // Salva no banco
+        // 1. Salva o usuário no banco de dados do auth-service
         repository.save(newUser);
 
+        // 2. Prepara a chamada para o paciente-service
+        try {
+            String pacienteServiceUrl = "http://paciente-service:8082/pacientes";
+            // Cria o objeto com os dados para o paciente-service
+            PacienteRequestDTO pacienteRequest = new PacienteRequestDTO();
+            pacienteRequest.setId(newUser.getId()); // Usa o mesmo ID
+            pacienteRequest.setCpf(request.getCpf());
+            pacienteRequest.setEmail(request.getEmail());
+            pacienteRequest.setNome(request.getName());
+            pacienteRequest.setCep(request.getCep());
+
+            // 3. Chama o paciente-service para criar o paciente
+            restTemplate.postForObject(pacienteServiceUrl, pacienteRequest, String.class);
+
+        } catch (Exception e) {
+            // Se a chamada para o paciente-service falhar, desfaz o cadastro do usuário
+            throw new RuntimeException("Falha ao criar registro do paciente. Cadastro não concluído.", e);
+        }
+
+        // 4. Envia a senha por e-mail apenas se tudo deu certo
         sendPasswordByEmail(newUser.getEmail(), generatedPassword);
 
         return new ApiResponse("Usuário registrado com sucesso. Senha enviada para o e-mail: " + newUser.getEmail());

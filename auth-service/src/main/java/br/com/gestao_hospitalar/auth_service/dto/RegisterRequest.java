@@ -14,10 +14,16 @@ public class RegisterRequest {
 		@Size(min = 11, max = 11, message = "CPF deve conter 11 dígitos")
     private String cpf;
 
+    @NotBlank
+    private String name;
+
     @Email(message = "E-mail inválido")
     @NotBlank(message = "E-mail é obrigatório")
     private String email;
 
-    @NotNull
-    private UserType type;
+    @NotBlank
+    private String cep;
+
+    // @NotNull
+    // private UserType type;
 }

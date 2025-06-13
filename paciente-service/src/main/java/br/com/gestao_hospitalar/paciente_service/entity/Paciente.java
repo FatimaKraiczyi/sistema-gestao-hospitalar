@@ -13,7 +13,6 @@ public class Paciente {
     @Id
     private UUID id;  // mesmo UUID do auth-service
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long pacienteId; // ID interno (não é chave primária)
 
     @Column(unique = true, nullable = false, length = 11)

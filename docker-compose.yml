@@ -124,6 +124,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
+    user: "root"
     container_name: pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
