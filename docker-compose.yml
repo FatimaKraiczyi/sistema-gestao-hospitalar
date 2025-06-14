@@ -9,6 +9,7 @@ services:
     environment:
       AUTH_MS_URL: http://auth-service:8081
       PACIENTE_MS_URL: http://paciente-service:8082
+      CONSULTA_MS_URL: http://consulta-service:8083
       JWT_SECRET: ${JWT_SECRET}
     env_file:
       - .env
