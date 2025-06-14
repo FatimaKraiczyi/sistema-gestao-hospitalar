@@ -8,6 +8,7 @@ module.exports = function authenticateToken(req, res, next) {
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) return res.sendStatus(403);
     req.user = {
+      id: user.uuid,
       cpf: user.cpf,
       email: user.email,
       tipo: user.tipo,
