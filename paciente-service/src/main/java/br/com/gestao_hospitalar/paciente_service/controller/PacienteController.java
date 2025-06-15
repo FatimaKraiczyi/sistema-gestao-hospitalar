@@ -4,6 +4,7 @@ import br.com.gestao_hospitalar.paciente_service.dto.PacienteRequestDTO;
 import br.com.gestao_hospitalar.paciente_service.dto.PacienteResponseDTO;
 import br.com.gestao_hospitalar.paciente_service.entity.Paciente;
 import br.com.gestao_hospitalar.paciente_service.service.PacienteService;
+import br.com.gestao_hospitalar.paciente_service.service.ViaCepResponse; 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,5 +30,14 @@ public class PacienteController {
         Paciente paciente = pacienteService.buscarPorId(id);
         PacienteResponseDTO responseDTO = pacienteService.toResponseDTO(paciente);
         return ResponseEntity.ok(responseDTO);
+    }
+
+    @GetMapping("/cep/{cep}")
+    public ResponseEntity<ViaCepResponse> consultarCep(@PathVariable String cep) {
+        ViaCepResponse endereco = pacienteService.consultarCep(cep);
+        if (endereco.getErro() != null && endereco.getErro()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(endereco);
     }
 }

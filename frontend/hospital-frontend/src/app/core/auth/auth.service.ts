@@ -89,8 +89,14 @@ export class AuthService {
   }
 
   // Registro de novo paciente
-  register(userData: { cpf: string, name: string, email: string, cep: string }): Observable<any> {
-    // O backend irá definir o tipo de usuário como PACIENTE automaticamente.
+  register(userData: { 
+    cpf: string, 
+    name: string, 
+    email: string, 
+    cep: string, 
+    numero: string,
+    complemento: string
+  }): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/register`, userData);
   }
 

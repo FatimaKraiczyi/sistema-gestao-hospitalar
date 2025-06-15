@@ -67,7 +67,7 @@ public class UserService {
 
         // 2. Prepara a chamada para o paciente-service
         try {
-            String pacienteServiceUrl = "http://paciente-service:8082/pacientes";
+            String pacienteServiceUrl = "http://paciente-service:8082/paciente";
             // Cria o objeto com os dados para o paciente-service
             PacienteRequestDTO pacienteRequest = new PacienteRequestDTO();
             pacienteRequest.setId(newUser.getId()); // Usa o mesmo ID
@@ -75,6 +75,8 @@ public class UserService {
             pacienteRequest.setEmail(request.getEmail());
             pacienteRequest.setNome(request.getName());
             pacienteRequest.setCep(request.getCep());
+            pacienteRequest.setNumero(request.getNumero());
+            pacienteRequest.setComplemento(request.getComplemento());
 
             // 3. Chama o paciente-service para criar o paciente
             restTemplate.postForObject(pacienteServiceUrl, pacienteRequest, String.class);

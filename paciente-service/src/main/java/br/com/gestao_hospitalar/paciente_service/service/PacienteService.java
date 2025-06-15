@@ -46,7 +46,7 @@ public class PacienteService {
 
     public Paciente buscarPorId(UUID id) {
         return pacienteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
+        .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
     }
 
     public PacienteResponseDTO toResponseDTO(Paciente paciente) {
@@ -67,19 +67,26 @@ public class PacienteService {
         return dto;
     }
 
-    private void preencherEnderecoViaCep(Paciente paciente, String cep) {
+    public ViaCepResponse consultarCep(String cep) {
         String url = "https://viacep.com.br/ws/" + cep + "/json/";
         try {
-            ViaCepResponse response = restTemplate.getForObject(url, ViaCepResponse.class);
-            if (response != null && response.getCep() != null && Boolean.FALSE.equals(response.getErro())) {
-                paciente.setCep(response.getCep());
-                paciente.setLogradouro(response.getLogradouro());
-                paciente.setBairro(response.getBairro());
-                paciente.setCidade(response.getLocalidade());
-                paciente.setEstado(response.getUf());
-            }
+            return restTemplate.getForObject(url, ViaCepResponse.class);
         } catch (Exception e) {
             System.err.println("Erro ao buscar endereço via CEP: " + e.getMessage());
+            ViaCepResponse errorResponse = new ViaCepResponse();
+            errorResponse.setErro(true);
+            return errorResponse;
+        }
+    }
+
+    private void preencherEnderecoViaCep(Paciente paciente, String cep) {
+        ViaCepResponse response = consultarCep(cep);
+        if (response != null && (response.getErro() == null || !response.getErro())) {
+            paciente.setCep(response.getCep().replaceAll("\\D", ""));
+            paciente.setLogradouro(response.getLogradouro());
+            paciente.setBairro(response.getBairro());
+            paciente.setCidade(response.getLocalidade());
+            paciente.setEstado(response.getUf());
         }
     }
 }

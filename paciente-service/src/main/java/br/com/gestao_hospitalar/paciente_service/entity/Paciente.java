@@ -2,7 +2,6 @@ package br.com.gestao_hospitalar.paciente_service.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.util.UUID;
 
 @Entity
@@ -11,9 +10,7 @@ import java.util.UUID;
 public class Paciente {
 
     @Id
-    private UUID id;  // mesmo UUID do auth-service
-
-    private Long pacienteId; // ID interno (não é chave primária)
+    private UUID id;
 
     @Column(unique = true, nullable = false, length = 11)
     private String cpf;

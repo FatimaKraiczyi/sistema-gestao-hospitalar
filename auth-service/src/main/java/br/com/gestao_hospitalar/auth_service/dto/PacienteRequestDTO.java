@@ -10,4 +10,6 @@ public class PacienteRequestDTO {
     private String email;
     private String nome;
     private String cep;
+    private String numero;
+    private String complemento;
 }

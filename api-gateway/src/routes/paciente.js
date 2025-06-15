@@ -29,5 +29,15 @@ router.post('/paciente/cadastro', authenticateToken, authorizeRoles('PACIENTE'),
   }
 });
 
+router.get('/paciente/cep/:cep', async (req, res, next) => {
+    try {
+        const { cep } = req.params;
+        const response = await axios.get(`${PACIENTE_SERVICE_URL}/paciente/cep/${cep}`);
+        res.status(response.status).json(response.data);
+    } catch (err) {
+        next(err);
+    }
+});
+
 
 module.exports = router;

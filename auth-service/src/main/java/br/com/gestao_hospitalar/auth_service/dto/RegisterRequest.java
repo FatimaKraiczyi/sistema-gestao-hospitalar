@@ -23,6 +23,10 @@ public class RegisterRequest {
 
     @NotBlank
     private String cep;
+    
+    private String numero;
+    
+    private String complemento;
 
     // @NotNull
     // private UserType type;
