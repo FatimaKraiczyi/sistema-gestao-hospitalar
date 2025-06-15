@@ -7,45 +7,72 @@ const CONSULTA_SERVICE_URL = process.env.CONSULTA_MS_URL;
 const authenticateToken = require('../middlewares/authenticate');
 const authorizeRoles = require('../middlewares/authorize');
 
-// helper para encaminhar as requisições
-const proxyRequest = (method) => async (req, res, next) => {
+router.get('/agendamentos/paciente', authenticateToken, authorizeRoles('PACIENTE'), async (req, res, next) => {
+  try {
+    const { id: pacienteId } = req.user; // Pega o ID do paciente logado a partir do token
+    
+    const response = await axios.get(`${CONSULTA_SERVICE_URL}/agendamentos/paciente/${pacienteId}`);
+    
+    res.status(response.status).json(response.data);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/agendamentos', authenticateToken, authorizeRoles('PACIENTE'), async (req, res, next) => {
     try {
-        const url = `${CONSULTA_SERVICE_URL}${req.path}`;
-        const { data, status } = await axios({
-            method,
-            url,
-            data: req.body,
-            params: req.query,
-            headers: {
-                ...(req.headers.authorization && { Authorization: req.headers.authorization })
-            }
-        });
-        res.status(status).json(data);
+        const response = await axios.post(`${CONSULTA_SERVICE_URL}/agendamentos`, req.body);
+        res.status(response.status).json(response.data);
     } catch (err) {
         next(err);
     }
-};
-
-// rotas públicas para paciente e funcionário
-router.get('/especialidades', authenticateToken, proxyRequest('get'));
-router.get('/medicos', authenticateToken, proxyRequest('get'));
-router.get('/consultas', authenticateToken, proxyRequest('get'));
-router.get('/agendamentos', authenticateToken, (req, res, next) => {
-    // filtra o agendamento do paciente pelo id
-    if (req.user.tipo === 'PACIENTE') {
-        req.query.paciente = req.user.id;
-    }
-    proxyRequest('get')(req, res, next);
 });
 
-// rotas só do paciente
-router.post('/agendamentos', authenticateToken, authorizeRoles('PACIENTE'), proxyRequest('post'));
-router.patch('/agendamentos/:id/status', authenticateToken, authorizeRoles('PACIENTE', 'FUNCIONARIO'), proxyRequest('patch'));
+router.patch('/agendamentos/:id/status', authenticateToken, authorizeRoles('PACIENTE'), async (req, res, next) => {
+     try {
+        const { id } = req.params;
+        const { status } = req.query;
+        const response = await axios.patch(`${CONSULTA_SERVICE_URL}/agendamentos/${id}/status?status=${status}`);
+        res.status(response.status).json(response.data);
+    } catch (err) {
+        next(err);
+    }
+});
 
-// rotas só do funcionário
-router.post('/consultas', authenticateToken, authorizeRoles('FUNCIONARIO'), proxyRequest('post'));
-router.put('/consultas/:codigo', authenticateToken, authorizeRoles('FUNCIONARIO'), proxyRequest('put'));
-router.patch('/consultas/:codigo/status', authenticateToken, authorizeRoles('FUNCIONARIO'), proxyRequest('patch'));
-router.delete('/consultas/:codigo', authenticateToken, authorizeRoles('FUNCIONARIO'), proxyRequest('delete'));
+router.get('/consultas', authenticateToken, async (req, res, next) => {
+    try {
+        const response = await axios.get(`${CONSULTA_SERVICE_URL}/consultas`, { params: req.query });
+        res.status(response.status).json(response.data);
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.get('/especialidades', authenticateToken, async (req, res, next) => {
+    try {
+        const response = await axios.get(`${CONSULTA_SERVICE_URL}/especialidades`);
+        res.status(response.status).json(response.data);
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.get('/medicos', authenticateToken, async (req, res, next) => {
+    try {
+        const response = await axios.get(`${CONSULTA_SERVICE_URL}/medicos`, { params: req.query });
+        res.status(response.status).json(response.data);
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.post('/consultas', authenticateToken, authorizeRoles('FUNCIONARIO'), async (req, res, next) => {
+    try {
+        const response = await axios.post(`${CONSULTA_SERVICE_URL}/consultas`, req.body);
+        res.status(response.status).json(response.data);
+    } catch (err) {
+        next(err);
+    }
+});
 
 module.exports = router;

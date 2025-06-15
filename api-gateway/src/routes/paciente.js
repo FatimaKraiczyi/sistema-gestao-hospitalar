@@ -39,5 +39,16 @@ router.get('/paciente/cep/:cep', async (req, res, next) => {
     }
 });
 
+router.get('/paciente', authenticateToken, authorizeRoles('PACIENTE'), async (req, res, next) => {
+    try {
+        const { id: userId } = req.user;
+        const response = await axios.get(`${PACIENTE_SERVICE_URL}/paciente/${userId}`, {
+            headers: { Authorization: req.headers.authorization }
+        });
+        res.status(response.status).json(response.data);
+    } catch (err) {
+        next(err);
+    }
+});
 
 module.exports = router;

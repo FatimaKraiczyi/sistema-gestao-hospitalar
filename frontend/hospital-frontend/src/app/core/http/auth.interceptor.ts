@@ -1,40 +1,36 @@
-import { Injectable } from '@angular/core';
-import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor,
-  HttpErrorResponse
-} from '@angular/common/http';
+import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Router } from '@angular/router';
 
-@Injectable()
-export class AuthInterceptor implements HttpInterceptor {
+export const AuthInterceptor: HttpInterceptorFn = (
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn
+): Observable<HttpEvent<unknown>> => {
   
-  constructor(private router: Router) {}
+  const router = inject(Router);
+  const token = localStorage.getItem('token');
 
-  intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    const token = localStorage.getItem('token');
-    
-    if (token) {
-      const cloned = request.clone({
-        headers: request.headers.set('Authorization', `Bearer ${token}`)
-      });
-      
-      return next.handle(cloned).pipe(
-        catchError((error: HttpErrorResponse) => {
-          // Se receber 401 (não autorizado), faz logout automaticamente
-          if (error.status === 401) {
-            localStorage.removeItem('token');
-            this.router.navigate(['/login']);
-          }
-          return throwError(() => error);
-        })
-      );
-    }
-    
-    return next.handle(request);
+  // Se não houver token, apenas continua a requisição
+  if (!token) {
+    return next(req);
   }
-}
+
+  // Se houver token, clona a requisição e adiciona o cabeçalho de autorização
+  const clonedReq = req.clone({
+    headers: req.headers.set('Authorization', `Bearer ${token}`),
+  });
+
+  // Envia a requisição clonada e trata possíveis erros
+  return next(clonedReq).pipe(
+    catchError((error: HttpErrorResponse) => {
+      // Se o erro for 401 (Não Autorizado), desloga o usuário e o redireciona para a tela de login
+      if (error.status === 401) {
+        localStorage.removeItem('token');
+        router.navigate(['/login']);
+      }
+      return throwError(() => error);
+    })
+  );
+};

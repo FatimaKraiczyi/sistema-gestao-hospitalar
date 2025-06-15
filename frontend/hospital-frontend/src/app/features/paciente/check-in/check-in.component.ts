@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
-import { ConsultaService, Agendamento } from '../../../core/services/consulta.service';
+import { ConsultaService } from '../../../core/services/consulta.service';
 
 @Component({
   selector: 'app-check-in',
@@ -12,8 +12,8 @@ import { ConsultaService, Agendamento } from '../../../core/services/consulta.se
 })
 export class CheckInComponent implements OnInit {
   agendamentoId: string | null = null;
-  agendamentosDisponiveis: Agendamento[] = [];
-  agendamentoSelecionado: Agendamento | null = null;
+  agendamentoSelecionado: any; // Mude para o tipo correto: Agendamento | null = null;
+  agendamentosDisponiveis: any[] = [];
   carregando: boolean = true;
   realizandoCheckIn: boolean = false;
   erro: string = '';
@@ -26,61 +26,45 @@ export class CheckInComponent implements OnInit {
   ) {}
   
   ngOnInit(): void {
-    // Verificar se foi especificado um ID de agendamento na rota
-    this.agendamentoId = this.route.snapshot.paramMap.get('id');
-    
-    if (this.agendamentoId) {
-      // Modo de agendamento específico
-      this.carregarAgendamentoEspecifico();
+    this.agendamentoId = this.route.snapshot.paramMap.get('id')!;
+    if(this.agendamentoId){
+      this.carregarAgendamento();
     } else {
-      // Modo de lista de agendamentos
       this.carregarAgendamentosDisponiveis();
     }
   }
-  
-  carregarAgendamentoEspecifico(): void {
-    this.consultaService.getAgendamentosPaciente().subscribe({
-      next: (agendamentos) => {
-        if (this.agendamentoId) {
-          const agendamento = agendamentos.find(a => a.id === this.agendamentoId);
-          
-          if (agendamento && agendamento.status === 'CRIADO') {
-            this.agendamentoSelecionado = agendamento;
-          } else if (agendamento) {
-            this.erro = 'Este agendamento não está disponível para check-in.';
-          } else {
-            this.erro = 'Agendamento não encontrado.';
-          }
+
+  carregarAgendamento(): void {
+    this.carregando = true;
+    this.consultaService.getAgendamentos().subscribe({
+      next: (agendamentos: any[]) => {
+        // CORREÇÃO: Use a propriedade com o nome correto
+        this.agendamentoSelecionado = agendamentos.find(a => a.id === this.agendamentoId);
+        if (!this.agendamentoSelecionado) {
+          this.erro = "Agendamento não encontrado ou não disponível para check-in.";
         }
-        
         this.carregando = false;
       },
-      error: (erro) => {
-        console.error('Erro ao carregar agendamento:', erro);
-        this.erro = 'Não foi possível carregar as informações do agendamento.';
+      error: (erro: any) => {
+        this.erro = 'Falha ao carregar dados do agendamento.';
         this.carregando = false;
       }
     });
   }
   
   carregarAgendamentosDisponiveis(): void {
-    this.consultaService.getAgendamentosPaciente().subscribe({
-      next: (agendamentos) => {
-        // Filtrar apenas agendamentos com status 'CRIADO' e dentro das próximas 48h
-        const agora = new Date();
-        const limite = new Date(agora.getTime() + (48 * 60 * 60 * 1000)); // 48 horas
-        
-        this.agendamentosDisponiveis = agendamentos.filter(a => 
-          a.status === 'CRIADO' && a.data <= limite
-        );
-        
-        this.carregando = false;
-      },
-      error: (erro) => {
-        console.error('Erro ao carregar agendamentos:', erro);
-        this.erro = 'Não foi possível carregar os agendamentos disponíveis para check-in.';
-        this.carregando = false;
-      }
+    this.carregando = true;
+    this.consultaService.getAgendamentos().subscribe({
+        next: (agendamentos: any[]) => {
+            this.agendamentosDisponiveis = agendamentos.filter(a =>
+                a.status === 'CRIADO' 
+            );
+            this.carregando = false;
+        },
+        error: (erro: any) => {
+            this.erro = 'Falha ao carregar agendamentos disponíveis.';
+            this.carregando = false;
+        }
     });
   }
   

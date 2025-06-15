@@ -3,6 +3,7 @@ import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { SharedStateService } from './shared-state-service';
 import { Transacao } from './paciente.service';
+import { ApiService } from '../http/api.service';
 
 export interface Especialidade {
   codigo: string;
@@ -105,7 +106,7 @@ export class ConsultaService {
         }
     ];
 
-    constructor(private sharedState: SharedStateService) { }
+    constructor(private sharedState: SharedStateService, private apiService: ApiService) { }
 
     // Obter todas as especialidades
     getEspecialidades(): Observable<Especialidade[]> {
@@ -236,9 +237,7 @@ export class ConsultaService {
         return of(true).pipe(delay(800));
     }
 
-    // Obter agendamentos do paciente
-    getAgendamentosPaciente(): Observable<Agendamento[]> {
-        const agendamentos = this.mockAgendamentos.filter(a => a.codigoPaciente === '2');
-        return of(agendamentos).pipe(delay(800));
+    getAgendamentos(): Observable<any[]> {
+        return this.apiService.get('/agendamentos/paciente');
     }
 }

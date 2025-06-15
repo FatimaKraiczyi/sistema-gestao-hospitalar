@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
-import { ConsultaService, Agendamento } from '../../../core/services/consulta.service';
+import { ConsultaService } from '../../../core/services/consulta.service';
 
 @Component({
   selector: 'app-agendamento-detalhes',
@@ -12,7 +12,7 @@ import { ConsultaService, Agendamento } from '../../../core/services/consulta.se
 })
 export class AgendamentoDetalhesComponent implements OnInit {
   agendamentoId: string = '';
-  agendamento: Agendamento | null = null;
+  agendamento: any;
   carregando: boolean = true;
   erro: string = '';
   
@@ -33,22 +33,16 @@ export class AgendamentoDetalhesComponent implements OnInit {
   }
   
   carregarAgendamento(): void {
-    this.consultaService.getAgendamentosPaciente().subscribe({
-      next: (agendamentos) => {
-        const agendamento = agendamentos.find(a => a.id === this.agendamentoId);
-        
-        if (agendamento) {
-          this.agendamento = agendamento;
-        } else {
-          this.erro = 'Agendamento não encontrado.';
+    this.consultaService.getAgendamentos().subscribe({
+      next: (agendamentos: any[]) => { // Mude any[] para seu tipo: Agendamento[]
+        this.agendamento = agendamentos.find(a => a.id === this.agendamentoId);
+        if (!this.agendamento) {
+          this.erro = "Agendamento não encontrado.";
         }
-        
-        this.carregando = false;
       },
-      error: (erro) => {
-        console.error('Erro ao carregar agendamento:', erro);
-        this.erro = 'Não foi possível carregar as informações do agendamento.';
-        this.carregando = false;
+      error: (erro: any) => {
+        this.erro = 'Falha ao carregar detalhes do agendamento.';
+        console.error(erro);
       }
     });
   }

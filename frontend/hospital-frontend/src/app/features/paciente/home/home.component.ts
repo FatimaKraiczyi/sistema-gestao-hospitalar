@@ -1,8 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../../core/auth/auth.service';
 import { PacienteService } from '../../../core/services/paciente.service';
-import { ConsultaService, Agendamento } from '../../../core/services/consulta.service';
+import { ConsultaService } from '../../../core/services/consulta.service';
+import { User } from '../../../models/user.model';
+
 
 @Component({
   selector: 'app-paciente-home',
@@ -12,50 +15,47 @@ import { ConsultaService, Agendamento } from '../../../core/services/consulta.se
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
+  currentUser: User | null = null;
+  pacienteInfo: any = null;
+  agendamentos: any[] = [];
   saldoPontos: number = 0;
-  agendamentos: Agendamento[] = [];
   carregandoPontos: boolean = true;
   carregandoAgendamentos: boolean = true;
   erroCarregamento: string = '';
 
   constructor(
+    private authService: AuthService,
     private pacienteService: PacienteService,
     private consultaService: ConsultaService
   ) {}
 
   ngOnInit(): void {
-    this.carregarSaldoPontos();
-    this.carregarAgendamentos();
+    this.currentUser = this.authService.getCurrentUser();
+    this.carregarDados();
   }
 
-  carregarSaldoPontos(): void {
-    this.carregandoPontos = true;
-    this.pacienteService.getSaldoPontos().subscribe({
-      next: (saldo) => {
-        this.saldoPontos = saldo;
-        this.carregandoPontos = false;
-      },
-      error: (erro) => {
-        console.error('Erro ao carregar saldo de pontos:', erro);
-        this.erroCarregamento = 'Não foi possível carregar o saldo de pontos.';
-        this.carregandoPontos = false;
-      }
+  carregarDados(): void {
+    // Buscar informações do paciente (incluindo pontos)
+    this.pacienteService.getPacienteInfo().subscribe(data => {
+      this.pacienteInfo = data;
+    });
+
+    // Buscar histórico de agendamentos
+    this.consultaService.getAgendamentos().subscribe(data => {
+      this.agendamentos = data;
     });
   }
 
-  carregarAgendamentos(): void {
-    this.carregandoAgendamentos = true;
-    this.consultaService.getAgendamentosPaciente().subscribe({
-      next: (agendamentos) => {
-        this.agendamentos = agendamentos;
-        this.carregandoAgendamentos = false;
-      },
-      error: (erro) => {
-        console.error('Erro ao carregar agendamentos:', erro);
-        this.erroCarregamento = 'Não foi possível carregar os agendamentos.';
-        this.carregandoAgendamentos = false;
-      }
-    });
+  get agendamentosFuturos() {
+    return this.agendamentos.filter(a => ['CRIADO', 'CHECK-IN'].includes(a.status));
+  }
+
+  get agendamentosRealizados() {
+    return this.agendamentos.filter(a => a.status === 'REALIZADO');
+  }
+
+  get agendamentosCancelados() {
+    return this.agendamentos.filter(a => ['CANCELADO', 'FALTOU'].includes(a.status));
   }
 
   getStatusClass(status: string): string {

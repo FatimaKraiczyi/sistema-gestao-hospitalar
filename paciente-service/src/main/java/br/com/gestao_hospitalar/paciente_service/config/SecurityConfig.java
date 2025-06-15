@@ -19,9 +19,8 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/paciente/cep/**").permitAll()
-                
                 .requestMatchers(HttpMethod.POST, "/paciente").permitAll()
-                
+                .requestMatchers(HttpMethod.GET, "/paciente/**").permitAll()
                 .anyRequest().authenticated()
             );
 

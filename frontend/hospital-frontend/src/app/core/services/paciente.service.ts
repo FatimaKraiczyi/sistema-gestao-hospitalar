@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 import { SharedStateService } from './shared-state-service';
+import { ApiService } from '../http/api.service';
 
 export interface Paciente {
   id: string;
@@ -40,7 +41,7 @@ export class PacienteService {
     { id: '3', data: new Date(2025, 4, 8), tipo: 'ENTRADA', descricao: 'CANCELAMENTO DE AGENDAMENTO', valor: 0, pontos: 5 }
   ];
 
-  constructor(private sharedState: SharedStateService) {
+  constructor(private sharedState: SharedStateService, private apiService: ApiService) {
     // Inicializar o estado compartilhado
     this.sharedState.updatePontosSaldo(this.mockPaciente.pontos);
     
@@ -50,11 +51,8 @@ export class PacienteService {
     });
   }
 
-  // Obter dados do paciente
-  getPacienteData(): Observable<Paciente> {
-    // Sempre atualizar os pontos no objeto do mock com o valor mais recente do estado compartilhado
-    this.mockPaciente.pontos = this.sharedState.getPontosSaldo();
-    return of(this.mockPaciente).pipe(delay(800));
+  getPacienteInfo(): Observable<any> {
+    return this.apiService.get('/paciente');
   }
 
   // Obter saldo de pontos
