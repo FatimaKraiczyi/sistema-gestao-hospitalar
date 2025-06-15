@@ -2,120 +2,133 @@ package br.com.gestao_hospitalar.auth_service.service;
 
 import br.com.gestao_hospitalar.auth_service.dto.*;
 import br.com.gestao_hospitalar.auth_service.entity.User;
+import br.com.gestao_hospitalar.auth_service.exception.ApiException;
 import br.com.gestao_hospitalar.auth_service.repository.UserRepository;
 import br.com.gestao_hospitalar.auth_service.security.CustomPasswordEncoder;
+import br.com.gestao_hospitalar.auth_service.security.JwtTokenProvider;
 import io.jsonwebtoken.Jwts;
-import org.springframework.beans.factory.annotation.Autowired;
 import io.jsonwebtoken.SignatureAlgorithm;
+import java.util.Date;
+import java.util.Random;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.Random;
-
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository repository;
+  @Autowired
+  private UserRepository repository;
 
-		@Autowired
-    private CustomPasswordEncoder customPasswordEncoder;
+  @Autowired
+  private CustomPasswordEncoder customPasswordEncoder;
 
-		@Autowired
-    private JavaMailSender mailSender;
+  @Autowired
+  private JavaMailSender mailSender;
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
+  @Autowired
+  private JwtTokenProvider jwtTokenProvider;
 
-    public ApiResponse registerUser(RegisterRequest request) {
-        if (repository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("E-mail já registrado");
-        }
-        if (repository.existsByCpf(request.getCpf())) {
-            throw new RuntimeException("CPF já registrado");
-        }
-
-        String generatedPassword = generateRandomPassword(); 
-        String hashedPassword = customPasswordEncoder.encodeWithSHA256(generatedPassword);
-
-        User newUser = new User();
-        newUser.setCpf(request.getCpf());
-        newUser.setEmail(request.getEmail());
-        newUser.setType(request.getType());
-				newUser.setPassword(hashedPassword);
-
-        // Salva no banco
-        repository.save(newUser);
-
-        sendPasswordByEmail(newUser.getEmail(), generatedPassword);
-
-        return new ApiResponse("Usuário registrado com sucesso. Senha enviada para o e-mail: " + newUser.getEmail());
+  public ApiResponse registerUser(RegisterRequest request) {
+    if (repository.existsByEmail(request.getEmail())) {
+      throw new ApiException("E-mail já registrado", HttpStatus.CONFLICT);
+    }
+    if (repository.existsByCpf(request.getCpf())) {
+      throw new ApiException("CPF já registrado", HttpStatus.CONFLICT);
     }
 
-    public AuthResponse authenticate(AuthRequest request) {
-        User user = repository.findByEmail(request.getEmail())
-            .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+    String generatedPassword = generateRandomPassword();
+    String hashedPassword = customPasswordEncoder.encodeWithSHA256(
+      generatedPassword
+    );
 
-        if (!customPasswordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Senha inválida");
-        }
+    User newUser = new User();
+    newUser.setCpf(request.getCpf());
+    newUser.setEmail(request.getEmail());
+    newUser.setType(request.getType());
+    newUser.setPassword(hashedPassword);
 
-        return new AuthResponse(generateToken(user));
+    // Salva no banco
+    repository.save(newUser);
+
+    sendPasswordByEmail(newUser.getEmail(), generatedPassword);
+
+    return new ApiResponse(
+      "Usuário registrado com sucesso. Senha enviada para o e-mail: " +
+      newUser.getEmail()
+    );
+  }
+
+  public AuthResponse authenticate(AuthRequest request) {
+    User user = repository
+      .findByEmail(request.getEmail())
+      .orElseThrow(() ->
+        new ApiException("Usuário não encontrado", HttpStatus.NOT_FOUND)
+      );
+
+    if (
+      !customPasswordEncoder.matches(request.getPassword(), user.getPassword())
+    ) {
+      throw new ApiException("Senha inválida", HttpStatus.BAD_REQUEST);
     }
 
-    public ApiResponse handleForgotPassword(ForgotPasswordRequest request) {
-        User user = repository.findByEmail(request.getEmail())
-            .orElseThrow(() -> new RuntimeException("E-mail não encontrado"));
+    return new AuthResponse(jwtTokenProvider.generateToken(user));
+  }
 
-        String newPassword = generateRandomPassword();
-        String hashedPassword = customPasswordEncoder.encodeWithSHA256(newPassword);
+  public ApiResponse handleForgotPassword(ForgotPasswordRequest request) {
+    User user = repository
+      .findByEmail(request.getEmail())
+      .orElseThrow(() ->
+        new ApiException("E-mail não encontrado", HttpStatus.NOT_FOUND)
+      );
 
-        user.setPassword(hashedPassword);
-        repository.save(user);
+    String newPassword = generateRandomPassword();
+    String hashedPassword = customPasswordEncoder.encodeWithSHA256(newPassword);
 
-        sendPasswordByEmail(user.getEmail(), newPassword);
+    user.setPassword(hashedPassword);
+    repository.save(user);
 
-        return new ApiResponse("Nova senha enviada para o e-mail: " + user.getEmail());
-    }
+    sendPasswordByEmail(user.getEmail(), newPassword);
 
-    public ApiResponse handleForgotEmail(ForgotEmailRequest request) {
-        User user = repository.findByCpf(request.getCpf())
-            .orElseThrow(() -> new RuntimeException("CPF não encontrado"));
+    return new ApiResponse(
+      "Nova senha enviada para o e-mail: " + user.getEmail()
+    );
+  }
 
-        return new ApiResponse("Seu email cadastrado é: " + user.getEmail());
-    }
+  public ApiResponse handleForgotEmail(ForgotEmailRequest request) {
+    User user = repository
+      .findByCpf(request.getCpf())
+      .orElseThrow(() ->
+        new ApiException("CPF não encontrado", HttpStatus.NOT_FOUND)
+      );
 
-    private String generateRandomPassword() {
-        return String.format("%04d", new Random().nextInt(10000));
-    }
+    return new ApiResponse("Seu email cadastrado é: " + user.getEmail());
+  }
 
-    private void sendPasswordByEmail(String to, String password) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject("Senha de acesso");
-        message.setText(String.format("""
-            Bem-vindo ao Sistema de Gestão Hospitalar!
+  private String generateRandomPassword() {
+    return String.format("%04d", new Random().nextInt(10000));
+  }
 
-            Sua senha de acesso é: %s
+  private void sendPasswordByEmail(String to, String password) {
+    SimpleMailMessage message = new SimpleMailMessage();
+    message.setTo(to);
+    message.setSubject("Senha de acesso");
+    message.setText(
+      String.format(
+        """
+        Bem-vindo ao Sistema de Gestão Hospitalar!
 
-            Equipe TI Hospitalar
-            """, password)
-        );
-        mailSender.send(message);
-    }
+        Sua senha de acesso é: %s
 
-    private String generateToken(User user) {
-        return Jwts.builder()
-            .setSubject(user.getEmail())
-            .claim("cpf", user.getCpf())
-            .claim("type", user.getType().name())
-            .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 24h
-            .signWith(SignatureAlgorithm.HS256, jwtSecret)
-            .compact();
-    }
+        Equipe TI Hospitalar
+        """,
+        password
+      )
+    );
+    mailSender.send(message);
+  }
 }

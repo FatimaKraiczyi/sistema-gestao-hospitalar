@@ -91,7 +91,6 @@ docker/volumes/*
 
 # Arquivos de dump de banco de dados
 *.dump
-*.sql
 *.bak
 
 # Arquivos temporários
