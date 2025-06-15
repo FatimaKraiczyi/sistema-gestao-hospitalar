@@ -5,9 +5,9 @@ services:
     container_name: api-gateway
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3333:3333"
     environment:
-      - PORT=3000
+      - PORT=3333
       - AUTH_MS_URL=http://auth-service:8081
       - PACIENTE_MS_URL=http://paciente-service:8082
       - CONSULTA_MS_URL=http://consulta-service:8083
@@ -71,6 +71,7 @@ services:
     env_file:
       - .env
     depends_on:
+      - auth-service
       - paciente-db
     networks:
       - hospital-network
