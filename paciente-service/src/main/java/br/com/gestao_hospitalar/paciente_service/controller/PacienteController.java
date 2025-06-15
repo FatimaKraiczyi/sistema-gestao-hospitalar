@@ -4,6 +4,7 @@ import br.com.gestao_hospitalar.paciente_service.dto.PacienteRequestDTO;
 import br.com.gestao_hospitalar.paciente_service.dto.PacienteResponseDTO;
 import br.com.gestao_hospitalar.paciente_service.service.PacienteService;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +38,35 @@ public class PacienteController {
       dto
     );
     return ResponseEntity.ok(response);
+  }
+
+  @PostMapping("/pontos/confirmar-compra")
+  public ResponseEntity<String> confirmarCompraStripe(
+    @RequestHeader("x-user-id") String userId,
+    @RequestBody String stripeJson
+  ) {
+    UUID pacienteId = UUID.fromString(userId);
+    pacienteService.confirmarCompraStripe(pacienteId, stripeJson);
+    return ResponseEntity.ok("Compra confirmada e pontos creditados.");
+  }
+
+  @GetMapping("/pontos/saldo")
+  public ResponseEntity<Integer> consultarSaldo(
+		@RequestHeader Map<String, String> headers,
+  ) {
+    UUID pacienteId = UUID.fromString(userId);
+    int saldo = pacienteService.consultarSaldo(pacienteId);
+    return ResponseEntity.ok(saldo);
+  }
+
+  @GetMapping("/pontos/historico")
+  public ResponseEntity<List<TransacaoPontosResponseDTO>> consultarHistorico(
+		@RequestHeader Map<String, String> headers,
+    @RequestHeader("x-user-id") String userId
+  ) {
+    UUID pacienteId = UUID.fromString(userId);
+    List<TransacaoPontosResponseDTO> historico =
+      pacienteService.consultarHistorico(pacienteId);
+    return ResponseEntity.ok(historico);
   }
 }

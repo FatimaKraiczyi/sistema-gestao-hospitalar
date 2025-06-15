@@ -16,10 +16,11 @@ CREATE TABLE paciente (
 
 CREATE TABLE transacao_pontos (
     id SERIAL PRIMARY KEY,
-    pacienteId UUID REFERENCES paciente(id) ON DELETE CASCADE,
+    paciente_id UUID REFERENCES paciente(id) ON DELETE CASCADE,
     tipo VARCHAR(20),
     descricao TEXT,
-    valor INTEGER,
+    quantidade INTEGER,
+    valorReais DOUBLE PRECISION,
     data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

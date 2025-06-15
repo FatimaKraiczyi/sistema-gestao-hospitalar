@@ -29,12 +29,7 @@ public class SecurityConfig {
       .sessionManagement()
       .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
       .and()
-      .authorizeHttpRequests(auth ->
-        auth
-          // .requestMatchers("/public/**").permitAll() // Descomente se quiser endpoints públicos
-          .anyRequest()
-          .authenticated()
-      )
+      .authorizeHttpRequests(paciente -> paciente.anyRequest().authenticated())
       .addFilterBefore(
         jwtAuthenticationFilter,
         UsernamePasswordAuthenticationFilter.class
