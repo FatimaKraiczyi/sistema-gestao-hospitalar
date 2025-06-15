@@ -140,6 +140,8 @@ public class PacienteService {
 
   public void confirmarCompraStripe(UUID pacienteId, String stripeJson) {
     try {
+      // Log do JSON recebido para debug
+      System.out.println("[Stripe JSON recebido]: " + stripeJson);
       com.fasterxml.jackson.databind.ObjectMapper mapper =
         new com.fasterxml.jackson.databind.ObjectMapper();
       JsonNode root = mapper.readTree(stripeJson);
@@ -151,39 +153,47 @@ public class PacienteService {
         !"paid".equalsIgnoreCase(paymentStatus)
       ) {
         throw new ApiException(
-          "Pagamento não está completo ou não foi pago.",
+          "Pagamento não está completo ou não foi pago. Status: " +
+          status +
+          ", payment_status: " +
+          paymentStatus,
           HttpStatus.BAD_REQUEST
         );
       }
       // Extrair CPF
-      String cpf = null;
+      String cpfTemp = null;
       JsonNode customFields = root.path("custom_fields");
       if (customFields.isArray()) {
         for (JsonNode field : customFields) {
           if (field.path("key").asText().equals("cpf")) {
-            cpf = field.path("numeric").path("value").asText(null);
+            cpfTemp = field.path("numeric").path("value").asText(null);
           }
         }
       }
       // Extrair email
-      String email = null;
+      String emailTemp = null;
       if (root.has("customer") && root.path("customer").has("email")) {
-        email = root.path("customer").path("email").asText(null);
+        emailTemp = root.path("customer").path("email").asText(null);
       }
-      if (cpf == null || email == null) {
+      final String cpf = cpfTemp;
+      final String emailFinal = emailTemp;
+      if (cpf == null || emailFinal == null) {
         throw new ApiException(
-          "CPF ou e-mail não informado no pagamento.",
+          "CPF ou e-mail não informado no pagamento. JSON recebido: " +
+          stripeJson,
           HttpStatus.BAD_REQUEST
         );
       }
       // Buscar paciente por CPF e email
-      final String emailFinal = email;
       Paciente paciente = pacienteRepository
         .findByCpf(cpf)
         .filter(p -> emailFinal.equalsIgnoreCase(p.getEmail()))
         .orElseThrow(() ->
           new ApiException(
-            "Paciente com CPF e e-mail não localizado.",
+            "Paciente com CPF e e-mail não localizado. CPF: " +
+            cpf +
+            ", Email: " +
+            emailFinal,
             HttpStatus.NOT_FOUND
           )
         );
