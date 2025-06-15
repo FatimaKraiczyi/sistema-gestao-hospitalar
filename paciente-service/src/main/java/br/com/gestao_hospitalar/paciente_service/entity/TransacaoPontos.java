@@ -27,7 +27,7 @@ public class TransacaoPontos {
   @Column(nullable = false)
   private Integer quantidade; // quantidade de pontos
 
-  @Column(nullable = false)
+  @Column(name = "valor", nullable = false)
   private Double valorReais; // valor em reais (para compras)
 
   @Column(nullable = false)

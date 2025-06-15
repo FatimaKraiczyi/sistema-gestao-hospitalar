@@ -9,9 +9,7 @@ import br.com.gestao_hospitalar.paciente_service.exception.ApiException;
 import br.com.gestao_hospitalar.paciente_service.repository.PacienteRepository;
 import br.com.gestao_hospitalar.paciente_service.repository.TransacaoPontosRepository;
 import br.com.gestao_hospitalar.paciente_service.via_cep.ViaCepResponse;
-import com.stripe.Stripe;
-import com.stripe.model.checkout.Session;
-import com.stripe.param.checkout.SessionCreateParams;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -179,9 +177,10 @@ public class PacienteService {
         );
       }
       // Buscar paciente por CPF e email
+      final String emailFinal = email;
       Paciente paciente = pacienteRepository
         .findByCpf(cpf)
-        .filter(p -> email.equalsIgnoreCase(p.getEmail()))
+        .filter(p -> emailFinal.equalsIgnoreCase(p.getEmail()))
         .orElseThrow(() ->
           new ApiException(
             "Paciente com CPF e e-mail não localizado.",

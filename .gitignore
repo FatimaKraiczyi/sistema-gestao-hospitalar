@@ -1,14 +1,6 @@
 # Arquivos e pastas específicos do PGAdmin
 pgadmin-data/
 
-# Ignore environment variables
-.env
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
 # Logs
 logs/
 *.log
@@ -23,8 +15,6 @@ node_modules/
 dist/
 dist-ssr/
 *.local
-.env
-.env.*
 !.env.example
 
 # Arquivos de build Java/Spring Boot
