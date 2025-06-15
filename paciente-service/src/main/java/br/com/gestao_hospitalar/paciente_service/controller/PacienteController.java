@@ -5,6 +5,7 @@ import br.com.gestao_hospitalar.paciente_service.dto.PacienteResponseDTO;
 import br.com.gestao_hospitalar.paciente_service.entity.Paciente;
 import br.com.gestao_hospitalar.paciente_service.service.PacienteService;
 import br.com.gestao_hospitalar.paciente_service.service.ViaCepResponse; 
+import br.com.gestao_hospitalar.paciente_service.dto.PontosDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,5 +40,15 @@ public class PacienteController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(endereco);
+    }
+
+    @PostMapping("/{id}/pontos")
+    public ResponseEntity<PacienteResponseDTO> comprarPontos(
+            @PathVariable UUID id,
+            @RequestBody PontosDTO pontosDTO) {
+        
+        Paciente pacienteAtualizado = pacienteService.comprarPontos(id, pontosDTO);
+        PacienteResponseDTO responseDTO = pacienteService.toResponseDTO(pacienteAtualizado);
+        return ResponseEntity.ok(responseDTO);
     }
 }

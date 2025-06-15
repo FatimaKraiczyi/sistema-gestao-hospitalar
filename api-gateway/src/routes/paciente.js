@@ -7,6 +7,28 @@ const PACIENTE_SERVICE_URL = process.env.PACIENTE_MS_URL;
 const authenticateToken = require('../middlewares/authenticate');
 const authorizeRoles = require('../middlewares/authorize');
 
+router.get('/paciente', authenticateToken, authorizeRoles('PACIENTE'), async (req, res, next) => {
+    try {
+        const { id: userId } = req.user;
+        const response = await axios.get(`${PACIENTE_SERVICE_URL}/paciente/${userId}`);
+        res.status(response.status).json(response.data);
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.post('/paciente/pontos', authenticateToken, authorizeRoles('PACIENTE'), async (req, res, next) => {
+    try {
+        const { id: pacienteId } = req.user;
+        const { quantidade } = req.body;
+        const response = await axios.post(`${PACIENTE_SERVICE_URL}/paciente/${pacienteId}/pontos`, { quantidade });
+        res.status(response.status).json(response.data);
+    } catch (err) {
+        next(err);
+    }
+});
+
+
 router.post('/paciente/cadastro', authenticateToken, authorizeRoles('PACIENTE'), async (req, res, next) => {
   try {
     const { id: userId, cpf, email } = req.user; // id = UUID vindo do token JWT
@@ -33,18 +55,6 @@ router.get('/paciente/cep/:cep', async (req, res, next) => {
     try {
         const { cep } = req.params;
         const response = await axios.get(`${PACIENTE_SERVICE_URL}/paciente/cep/${cep}`);
-        res.status(response.status).json(response.data);
-    } catch (err) {
-        next(err);
-    }
-});
-
-router.get('/paciente', authenticateToken, authorizeRoles('PACIENTE'), async (req, res, next) => {
-    try {
-        const { id: userId } = req.user;
-        const response = await axios.get(`${PACIENTE_SERVICE_URL}/paciente/${userId}`, {
-            headers: { Authorization: req.headers.authorization }
-        });
         res.status(response.status).json(response.data);
     } catch (err) {
         next(err);

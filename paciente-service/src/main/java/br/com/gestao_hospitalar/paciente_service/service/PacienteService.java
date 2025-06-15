@@ -3,22 +3,54 @@ package br.com.gestao_hospitalar.paciente_service.service;
 import br.com.gestao_hospitalar.paciente_service.dto.PacienteRequestDTO;
 import br.com.gestao_hospitalar.paciente_service.dto.PacienteResponseDTO;
 import br.com.gestao_hospitalar.paciente_service.entity.Paciente;
-import br.com.gestao_hospitalar.paciente_service.service.ViaCepResponse;
 import br.com.gestao_hospitalar.paciente_service.repository.PacienteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Optional;
 import java.util.UUID;
+
+import br.com.gestao_hospitalar.paciente_service.repository.TransacaoRepository;
+import br.com.gestao_hospitalar.paciente_service.entity.Transacao;
+import br.com.gestao_hospitalar.paciente_service.dto.PontosDTO;
+import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 public class PacienteService {
 
     private final PacienteRepository pacienteRepository;
+    private final TransacaoRepository transacaoRepository;
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public PacienteService(PacienteRepository pacienteRepository) {
+    public PacienteService(PacienteRepository pacienteRepository, TransacaoRepository transacaoRepository) {
         this.pacienteRepository = pacienteRepository;
+        this.transacaoRepository = transacaoRepository;
+    }
+
+    @Transactional
+    public Paciente comprarPontos(UUID pacienteId, PontosDTO pontosDTO) {
+        Paciente paciente = pacienteRepository.findById(pacienteId)
+            .orElseThrow(() -> new RuntimeException("Paciente não encontrado com ID: " + pacienteId));
+
+        int quantidadePontos = pontosDTO.getQuantidade();
+        if (quantidadePontos <= 0) {
+            throw new IllegalArgumentException("A quantidade de pontos para compra deve ser maior que zero.");
+        }
+
+        BigDecimal valorCompra = new BigDecimal("5.00").multiply(new BigDecimal(quantidadePontos));
+        
+        paciente.setPontos(paciente.getPontos() + quantidadePontos);
+        pacienteRepository.save(paciente);
+
+        Transacao transacao = new Transacao();
+        transacao.setPaciente(paciente);
+        transacao.setDescricao("COMPRA DE PONTOS");
+        transacao.setPontos(quantidadePontos);
+        transacao.setValor(valorCompra);
+        transacao.setDataTransacao(LocalDateTime.now());
+        transacaoRepository.save(transacao);
+
+        return paciente;
     }
 
     public Paciente criarOuAtualizarPaciente(PacienteRequestDTO dto) {
@@ -46,7 +78,7 @@ public class PacienteService {
 
     public Paciente buscarPorId(UUID id) {
         return pacienteRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
     }
 
     public PacienteResponseDTO toResponseDTO(Paciente paciente) {

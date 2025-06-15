@@ -9,10 +9,8 @@ const authorizeRoles = require('../middlewares/authorize');
 
 router.get('/agendamentos/paciente', authenticateToken, authorizeRoles('PACIENTE'), async (req, res, next) => {
   try {
-    const { id: pacienteId } = req.user; // Pega o ID do paciente logado a partir do token
-    
+    const { id: pacienteId } = req.user;
     const response = await axios.get(`${CONSULTA_SERVICE_URL}/agendamentos/paciente/${pacienteId}`);
-    
     res.status(response.status).json(response.data);
   } catch (err) {
     next(err);

@@ -61,23 +61,8 @@ export class PacienteService {
   }
 
   // Comprar pontos
-  comprarPontos(quantidade: number): Observable<Transacao> {
-    const valorTotal = quantidade * 5; // 1 ponto = R$ 5,00
-    const novaTransacao: Transacao = {
-      id: (this.mockTransacoes.length + 1).toString(),
-      data: new Date(),
-      tipo: 'ENTRADA',
-      descricao: 'COMPRA DE PONTOS',
-      valor: valorTotal,
-      pontos: quantidade
-    };
-    
-    this.mockTransacoes.push(novaTransacao);
-    
-    // Atualizar o estado compartilhado
-    this.sharedState.addPontos(quantidade, novaTransacao);
-    
-    return of(novaTransacao).pipe(delay(1000));
+  comprarPontos(quantidade: number): Observable<any> {
+      return this.apiService.post('/paciente/pontos', { quantidade });
   }
 
   // Obter histórico de transações

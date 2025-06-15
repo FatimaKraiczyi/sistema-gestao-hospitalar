@@ -21,6 +21,7 @@ public class SecurityConfig {
                 .requestMatchers("/paciente/cep/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/paciente").permitAll()
                 .requestMatchers(HttpMethod.GET, "/paciente/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/paciente/**/pontos").permitAll()
                 .anyRequest().authenticated()
             );
 
