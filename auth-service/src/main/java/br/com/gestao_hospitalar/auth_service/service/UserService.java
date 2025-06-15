@@ -2,6 +2,7 @@ package br.com.gestao_hospitalar.auth_service.service;
 
 import br.com.gestao_hospitalar.auth_service.dto.*;
 import br.com.gestao_hospitalar.auth_service.entity.User;
+import br.com.gestao_hospitalar.auth_service.exception.ApiException;
 import br.com.gestao_hospitalar.auth_service.repository.UserRepository;
 import br.com.gestao_hospitalar.auth_service.security.CustomPasswordEncoder;
 import br.com.gestao_hospitalar.auth_service.security.JwtTokenProvider;
@@ -12,6 +13,7 @@ import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -33,10 +35,10 @@ public class UserService {
 
   public ApiResponse registerUser(RegisterRequest request) {
     if (repository.existsByEmail(request.getEmail())) {
-      throw new RuntimeException("E-mail já registrado");
+      throw new ApiException("E-mail já registrado", HttpStatus.CONFLICT);
     }
     if (repository.existsByCpf(request.getCpf())) {
-      throw new RuntimeException("CPF já registrado");
+      throw new ApiException("CPF já registrado", HttpStatus.CONFLICT);
     }
 
     String generatedPassword = generateRandomPassword();
@@ -64,12 +66,14 @@ public class UserService {
   public AuthResponse authenticate(AuthRequest request) {
     User user = repository
       .findByEmail(request.getEmail())
-      .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+      .orElseThrow(() ->
+        new ApiException("Usuário não encontrado", HttpStatus.NOT_FOUND)
+      );
 
     if (
       !customPasswordEncoder.matches(request.getPassword(), user.getPassword())
     ) {
-      throw new RuntimeException("Senha inválida");
+      throw new ApiException("Senha inválida", HttpStatus.BAD_REQUEST);
     }
 
     return new AuthResponse(jwtTokenProvider.generateToken(user));
@@ -78,7 +82,9 @@ public class UserService {
   public ApiResponse handleForgotPassword(ForgotPasswordRequest request) {
     User user = repository
       .findByEmail(request.getEmail())
-      .orElseThrow(() -> new RuntimeException("E-mail não encontrado"));
+      .orElseThrow(() ->
+        new ApiException("E-mail não encontrado", HttpStatus.NOT_FOUND)
+      );
 
     String newPassword = generateRandomPassword();
     String hashedPassword = customPasswordEncoder.encodeWithSHA256(newPassword);
@@ -96,7 +102,9 @@ public class UserService {
   public ApiResponse handleForgotEmail(ForgotEmailRequest request) {
     User user = repository
       .findByCpf(request.getCpf())
-      .orElseThrow(() -> new RuntimeException("CPF não encontrado"));
+      .orElseThrow(() ->
+        new ApiException("CPF não encontrado", HttpStatus.NOT_FOUND)
+      );
 
     return new ApiResponse("Seu email cadastrado é: " + user.getEmail());
   }

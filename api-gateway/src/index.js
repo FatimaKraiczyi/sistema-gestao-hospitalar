@@ -40,6 +40,31 @@ app.use(
       proxyReq.setHeader("x-user-email", req.user.email);
       proxyReq.setHeader("x-user-type", req.user.type);
     },
+    onError: (err, req, res) => {
+      // Repasse o erro do microserviço para o client
+      if (res.headersSent) return;
+      res.status(502).json({
+        message: "Erro ao comunicar com o serviço de paciente",
+        detail: err.message,
+      });
+    },
+    onProxyRes: (proxyRes, req, res) => {
+      // Permite que o corpo de erro do MS seja repassado para o client
+      let body = Buffer.from("");
+      proxyRes.on("data", function (data) {
+        body = Buffer.concat([body, data]);
+      });
+      proxyRes.on("end", function () {
+        if (proxyRes.statusCode >= 400) {
+          res.status(proxyRes.statusCode);
+          try {
+            res.json(JSON.parse(body.toString()));
+          } catch {
+            res.send(body.toString());
+          }
+        }
+      });
+    },
   })
 );
 

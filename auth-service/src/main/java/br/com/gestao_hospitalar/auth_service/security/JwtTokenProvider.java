@@ -28,7 +28,7 @@ public class JwtTokenProvider {
       .setSubject(user.getId().toString())
       .claim("email", user.getEmail())
       .claim("cpf", user.getCpf())
-      .claim("type", user.getType().name())
+      .claim("type", user.getType())
       .setIssuedAt(new Date())
       .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
       .signWith(getSigningKey(), SignatureAlgorithm.HS256)
