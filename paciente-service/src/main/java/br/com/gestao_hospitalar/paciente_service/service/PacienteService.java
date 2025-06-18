@@ -10,18 +10,25 @@ import br.com.gestao_hospitalar.paciente_service.repository.PacienteRepository;
 import br.com.gestao_hospitalar.paciente_service.repository.TransacaoPontosRepository;
 import br.com.gestao_hospitalar.paciente_service.via_cep.ViaCepResponse;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.stripe.Stripe;
+import com.stripe.model.checkout.Session;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
 public class PacienteService {
+
+  @Value("${stripe.secret}")
+  private String stripeSecret;
 
   @Autowired
   private PacienteRepository pacienteRepository;
@@ -138,78 +145,72 @@ public class PacienteService {
       .collect(Collectors.toList());
   }
 
-  public void confirmarCompraStripe(UUID pacienteId, String stripeJson) {
+  public void confirmarCompraStripeComSessionId(
+    UUID pacienteId,
+    String sessionId
+  ) {
     try {
-      // Log do JSON recebido para debug
-      System.out.println("[Stripe JSON recebido]: " + stripeJson);
-      com.fasterxml.jackson.databind.ObjectMapper mapper =
-        new com.fasterxml.jackson.databind.ObjectMapper();
-      JsonNode root = mapper.readTree(stripeJson);
-      // Extrair status
-      String status = root.path("status").asText("");
-      String paymentStatus = root.path("payment_status").asText("");
-      if (
-        !"complete".equalsIgnoreCase(status) ||
-        !"paid".equalsIgnoreCase(paymentStatus)
-      ) {
-        throw new ApiException(
-          "Pagamento não está completo ou não foi pago. Status: " +
-          status +
-          ", payment_status: " +
-          paymentStatus,
-          HttpStatus.BAD_REQUEST
-        );
-      }
-      // Extrair CPF
-      String cpfTemp = null;
-      JsonNode customFields = root.path("custom_fields");
-      if (customFields.isArray()) {
-        for (JsonNode field : customFields) {
-          if (field.path("key").asText().equals("cpf")) {
-            cpfTemp = field.path("numeric").path("value").asText(null);
+      Stripe.apiKey = stripeSecret;
+
+			PaymentLinkCreateParams params =
+			PaymentLinkCreateParams.builder()
+				.addLineItem(
+					PaymentLinkCreateParams.LineItem.builder()
+						.setPrice("{{PRICE_ID}}")
+						.setQuantity(1L)
+						.build()
+				)
+				.setAfterCompletion(
+					PaymentLinkCreateParams.AfterCompletion.builder()
+						.setType(PaymentLinkCreateParams.AfterCompletion.Type.REDIRECT)
+						.setRedirect(
+							PaymentLinkCreateParams.AfterCompletion.Redirect.builder()
+								.setUrl("https://example.com/after-checkout?session_id={CHECKOUT_SESSION_ID}")
+								.build()
+						)
+						.build()
+				)
+				.build();
+		
+		PaymentLink paymentLink = PaymentLink.create(params);
+  }
+
+  public void processarPagamentoStripe(JSONObject session) {
+    try {
+      // Extrair email e/ou CPF do session
+      String email = session.optString("customer_email", null);
+      // Se você usa custom_fields para CPF, adapte aqui
+      String cpf = null;
+      if (session.has("custom_fields")) {
+        for (Object fieldObj : session.getJSONArray("custom_fields")) {
+          JSONObject field = (JSONObject) fieldObj;
+          if ("cpf".equals(field.optString("key"))) {
+            cpf = field.getJSONObject("numeric").optString("value", null);
           }
         }
       }
-      // Extrair email
-      String emailTemp = null;
-      if (root.has("customer") && root.path("customer").has("email")) {
-        emailTemp = root.path("customer").path("email").asText(null);
+      // Buscar paciente por CPF e/ou email
+      Paciente paciente = null;
+      if (cpf != null) {
+        paciente = pacienteRepository.findByCpf(cpf)
+          .filter(p -> email == null || email.equalsIgnoreCase(p.getEmail()))
+          .orElse(null);
+      } else if (email != null) {
+        paciente = pacienteRepository.findByEmail(email).orElse(null);
       }
-      final String cpf = cpfTemp;
-      final String emailFinal = emailTemp;
-      if (cpf == null || emailFinal == null) {
-        throw new ApiException(
-          "CPF ou e-mail não informado no pagamento. JSON recebido: " +
-          stripeJson,
-          HttpStatus.BAD_REQUEST
-        );
+      if (paciente == null) {
+        throw new ApiException("Paciente não localizado para o pagamento Stripe", HttpStatus.NOT_FOUND);
       }
-      // Buscar paciente por CPF e email
-      Paciente paciente = pacienteRepository
-        .findByCpf(cpf)
-        .filter(p -> emailFinal.equalsIgnoreCase(p.getEmail()))
-        .orElseThrow(() ->
-          new ApiException(
-            "Paciente com CPF e e-mail não localizado. CPF: " +
-            cpf +
-            ", Email: " +
-            emailFinal,
-            HttpStatus.NOT_FOUND
-          )
-        );
-      // Extrair dados da transação
+      // Extrair quantidade e valor
       int quantidade = 1;
       double valorReais = 0.0;
       String descricao = "COMPRA DE PONTOS (Stripe)";
-      JsonNode lineItems = root.path("line_item_group").path("line_items");
-      if (lineItems.isArray() && lineItems.size() > 0) {
-        JsonNode item = lineItems.get(0);
-        quantidade = item.path("quantity").asInt(1);
-        valorReais = item.path("total").asDouble(0) / 100.0;
-        descricao = item.path("name").asText(descricao);
+      if (session.has("line_items")) {
+        JSONObject item = session.getJSONArray("line_items").getJSONObject(0);
+        quantidade = item.optInt("quantity", 1);
+        valorReais = item.optDouble("amount_total", 0.0) / 100.0;
+        descricao = item.optString("description", descricao);
       }
-      // Data da compra
-      LocalDateTime dataCompra = LocalDateTime.now();
       // Atualizar pontos
       paciente.setPontos(paciente.getPontos() + quantidade);
       pacienteRepository.save(paciente);
@@ -220,15 +221,10 @@ public class PacienteService {
       transacao.setDescricao(descricao);
       transacao.setQuantidade(quantidade);
       transacao.setValorReais(valorReais);
-      transacao.setData(dataCompra);
+      transacao.setData(java.time.LocalDateTime.now());
       transacaoPontosRepository.save(transacao);
-    } catch (ApiException e) {
-      throw e;
     } catch (Exception e) {
-      throw new ApiException(
-        "Erro ao processar dados do Stripe: " + e.getMessage(),
-        HttpStatus.BAD_REQUEST
-      );
+      throw new ApiException("Erro ao processar pagamento Stripe: " + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
   }
 }
