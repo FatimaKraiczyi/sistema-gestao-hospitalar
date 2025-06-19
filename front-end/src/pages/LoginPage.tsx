@@ -22,13 +22,11 @@ import { toast } from "react-toastify";
 import { ROUTING } from "../constants/routing";
 
 const validationSchema = Yup.object({
-  email: Yup.string()
-    .email("Địa chỉ email không hợp lệ")
-    .required("Email là bắt buộc"),
+  email: Yup.string().email("E-mail inválido").required("E-mail é obrigatório"),
   password: Yup.string()
-    .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
-    .max(20, "Mật khẩu không được vượt quá 20 ký tự")
-    .required("Mật khẩu là bắt buộc"),
+    .min(8, "A senha deve ter pelo menos 8 caracteres")
+    .max(20, "A senha não pode ter mais de 20 caracteres")
+    .required("Senha é obrigatória"),
 });
 
 export default function LoginPage() {
@@ -53,33 +51,31 @@ export default function LoginPage() {
           const userData = response.data.data;
           if (userData) {
             dispatch(setUser(userData.user));
-            // Lưu thông tin người dùng vào localStorage
-            toast.success("Đăng nhập thành công!");
+            // Salva as informações do usuário no localStorage
+            toast.success("Login realizado com sucesso!");
 
             localStorage.setItem("user", JSON.stringify(userData.user));
             localStorage.setItem("role", userData.role);
             // console.log("userData", userData);
             if (userData.role === "doctor") {
-              setTimeout(() => navigate(ROUTING.DOCTOR), 1500); // Chuyển hướng sau khi hiển thị thông báo
+              setTimeout(() => navigate(ROUTING.DOCTOR), 1500); // Redireciona após exibir a mensagem
             } else if (userData.role === "patient") {
-              setTimeout(() => navigate(ROUTING.PATIENT), 1500); // Chuyển hướng sau khi hiển thị thông báo
+              setTimeout(() => navigate(ROUTING.PATIENT), 1500); // Redireciona após exibir a mensagem
             } else {
               setTimeout(() => navigate(ROUTING.ADMIN), 1500);
             }
           } else {
             toast.error(
               response.data.message ||
-                "Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập."
+                "Falha no login. Por favor, verifique suas credenciais."
             );
           }
         } else {
-          toast.error(
-            "Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập."
-          );
+          toast.error("Falha no login. Por favor, verifique suas credenciais.");
         }
       } catch (error) {
-        console.error("Lỗi đăng nhập:", error);
-        toast.error("Đăng nhập thất bại. Vui lòng thử lại sau.");
+        console.error("Erro ao fazer login:", error);
+        toast.error("Falha no login. Por favor, tente novamente mais tarde.");
       } finally {
         setIsLoading(false);
       }
@@ -87,8 +83,8 @@ export default function LoginPage() {
   });
 
   const handleFaceLogin = () => {
-    console.log("Đăng nhập bằng nhận diện khuôn mặt");
-    // Xử lý đăng nhập bằng nhận diện khuôn mặt
+    console.log("Login com reconhecimento facial");
+    // Implementar login com reconhecimento facial
   };
 
   return (
@@ -103,10 +99,10 @@ export default function LoginPage() {
         }}
       >
         <Typography variant="h5" align="center" gutterBottom>
-          Chào Mừng Trở Lại
+          Bem-vindo de volta
         </Typography>
         <Typography variant="body2" align="center" sx={{ mb: 3 }}>
-          Bạn chưa có tài khoản? <Link href="/register">Tạo tài khoản</Link>
+          Ainda não tem uma conta? <Link href="/register">Crie uma conta</Link>
         </Typography>
 
         <form onSubmit={formik.handleSubmit}>
@@ -116,7 +112,7 @@ export default function LoginPage() {
                 fullWidth
                 id="email"
                 name="email"
-                label="Địa chỉ Email"
+                label="E-mail"
                 value={formik.values.email}
                 onChange={formik.handleChange}
                 error={formik.touched.email && Boolean(formik.errors.email)}
@@ -129,7 +125,7 @@ export default function LoginPage() {
                 fullWidth
                 id="password"
                 name="password"
-                label="Mật khẩu"
+                label="Senha"
                 type={showPassword ? "text" : "password"}
                 value={formik.values.password}
                 onChange={formik.handleChange}
@@ -163,7 +159,7 @@ export default function LoginPage() {
                   mb: 1,
                 }}
               >
-                Quên mật khẩu?
+                Esqueceu a senha?
               </Link>
             </Grid2>
 
@@ -179,7 +175,7 @@ export default function LoginPage() {
                   isLoading && <CircularProgress size={24} color="inherit" />
                 }
               >
-                {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
+                {isLoading ? "Entrando..." : "Entrar"}
               </Button>
             </Grid2>
 
@@ -193,7 +189,7 @@ export default function LoginPage() {
                 onClick={handleFaceLogin}
                 sx={{ mt: 1 }}
               >
-                Đăng nhập bằng Face ID
+                Entrar com Face ID
               </Button>
             </Grid2> */}
           </Grid2>
