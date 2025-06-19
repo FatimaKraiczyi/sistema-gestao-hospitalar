@@ -12,7 +12,7 @@ export const getPatients = async () => {
   return response.data;
 };
 
-// delete patient là thay đổi status của patient thành false
+// Excluir paciente significa alterar o status do paciente para false
 export const deletePatient = async (patientId: string) => {
   const response = await axiosConfig.delete(`${prefix}`, {
     params: {

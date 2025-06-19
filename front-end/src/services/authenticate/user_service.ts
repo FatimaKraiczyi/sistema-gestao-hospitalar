@@ -51,8 +51,8 @@ export const updateBankAccount = async (
   return response;
 };
 
-// Dùng để check, lấy thông tin tài khoản ngân hàng của bệnh nhân
-// Nếu trả về code 200 của data thì có tài khoản ngân hàng
+// Usado para checar e obter informações da conta bancária do paciente
+// Se retornar code 200 em data, então o paciente possui conta bancária
 export const getPatientBankAccount = async (patientId: string) => {
   const response = await axiosConfig.get(`${prefix}/patient/account_bank`, {
     params: {
@@ -68,15 +68,15 @@ export const updatePatientAvatar = async (
 ) => {
   const formData = new FormData();
 
-  // Chuyển đổi chuỗi base64 thành file Blob
+  // Converte a string base64 em um arquivo Blob
   const fetchResponse = await fetch(image.uri);
   const blob = await fetchResponse.blob();
 
-  // Tạo tên file từ timestamp để đảm bảo là duy nhất
+  // Cria um nome de arquivo a partir do timestamp para garantir unicidade
   const fileName = `avatar_${Date.now()}.jpg`;
 
-  // Thêm file vào FormData - đây là phần quan trọng nhất
-  // Đảm bảo name là 'file' trùng với yêu cầu của server
+  // Adiciona o arquivo ao FormData - esta é a parte mais importante
+  // Certifique-se de que o nome seja 'file', conforme exigido pelo servidor
   formData.append("image", blob, fileName);
   formData.append("patientId", patientId);
 
@@ -93,15 +93,15 @@ export const updateDoctorAvatar = async (
   image: { uri: string; type?: string }
 ) => {
   const formData = new FormData();
-  // Chuyển đổi chuỗi base64 thành file Blob
+  // Converte a string base64 em um arquivo Blob
   const fetchResponse = await fetch(image.uri);
   const blob = await fetchResponse.blob();
 
-  // Tạo tên file từ timestamp để đảm bảo là duy nhất
+  // Cria um nome de arquivo a partir do timestamp para garantir unicidade
   const fileName = `avatar_${Date.now()}.jpg`;
 
-  // Thêm file vào FormData - đây là phần quan trọng nhất
-  // Đảm bảo name là 'file' trùng với yêu cầu của server
+  // Adiciona o arquivo ao FormData - esta é a parte mais importante
+  // Certifique-se de que o nome seja 'file', conforme exigido pelo servidor
   formData.append("image", blob, fileName);
   formData.append("doctorId", doctorId);
   const response = await axiosConfig.put(`${prefix}/doctor/avatar`, formData, {

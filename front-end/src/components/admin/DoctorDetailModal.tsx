@@ -54,7 +54,6 @@ interface DoctorDetailModalProps {
   onUpdate: (updatedDoctor: Doctor) => void;
 }
 
-// Component con dùng để hiển thị nội dung của từng tab
 const TabPanel = (props: TabPanelProps) => {
   const { children, value, index, ...other } = props;
 
@@ -90,14 +89,12 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
     useState<DoctorExperience | null>(null);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
 
-  // State để lưu thông tin chi tiết của bác sĩ
   const [certificates, setCertificates] = useState<DoctorCertificate[]>([]);
   const [educations, setEducations] = useState<DoctorEducation[]>([]);
   const [experiences, setExperiences] = useState<DoctorExperience[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Reset tab khi modal đóng/mở
   useEffect(() => {
     if (open) {
       setTabValue(0);
@@ -105,7 +102,6 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
     }
   }, [open]);
 
-  // Lấy thông tin chi tiết của bác sĩ khi modal mở
   const fetchDoctorDetails = async () => {
     if (!doctor) return;
 
@@ -117,85 +113,78 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
       );
 
       if (response && response.data) {
-        console.log("Thông tin chi tiết bác sĩ:", response.data);
         setCertificates(response.data.certificates || []);
         setEducations(response.data.educations || []);
         setExperiences(response.data.experiences || []);
       } else {
-        setError("Không thể tải thông tin chi tiết của bác sĩ");
+        setError(
+          "Não foi possível carregar as informações detalhadas do médico"
+        );
       }
     } catch (error) {
-      console.error("Lỗi khi tải thông tin chi tiết bác sĩ:", error);
-      setError("Đã xảy ra lỗi khi tải thông tin chi tiết của bác sĩ");
+      setError(
+        "Ocorreu um erro ao carregar as informações detalhadas do médico"
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  // Xử lý thay đổi tab
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
-  // Chuyển đổi Diploma enum sang chuỗi hiển thị
   const getDiplomaLabel = (diploma: Diploma) => {
     switch (diploma) {
       case "BACHELOR":
-        return "Cử nhân";
+        return "Bacharel";
       case "MASTER":
-        return "Thạc sĩ";
+        return "Mestre";
       case "DOCTOR":
-        return "Tiến sĩ";
+        return "Doutor";
       case "PROFESSOR":
-        return "Giáo sư";
+        return "Professor";
       default:
-        return "Không xác định";
+        return "Não especificado";
     }
   };
 
-  // Xử lý mở form thêm học vấn mới
   const handleAddEducation = () => {
     setFormMode("add");
     setSelectedEducation(null);
     setIsEducationFormOpen(true);
   };
 
-  // Xử lý mở form sửa học vấn
   const handleEditEducation = (education: DoctorEducation) => {
     setFormMode("edit");
     setSelectedEducation(education);
     setIsEducationFormOpen(true);
   };
 
-  // Xử lý mở form thêm chứng chỉ mới
   const handleAddCertificate = () => {
     setFormMode("add");
     setSelectedCertificate(null);
     setIsCertificateFormOpen(true);
   };
 
-  // Xử lý mở form sửa chứng chỉ
   const handleEditCertificate = (certificate: DoctorCertificate) => {
     setFormMode("edit");
     setSelectedCertificate(certificate);
     setIsCertificateFormOpen(true);
   };
 
-  // Xử lý thêm kinh nghiệm mới
   const handleAddExperience = () => {
     setFormMode("add");
     setSelectedExperience(null);
     setIsExperienceFormOpen(true);
   };
 
-  // Xử lý mở form sửa kinh nghiệm
   const handleEditExperience = (experience: DoctorExperience) => {
     setFormMode("edit");
     setSelectedExperience(experience);
     setIsExperienceFormOpen(true);
   };
 
-  // Xử lý callback khi các form lưu thành công
   const handleEducationSuccess = (updatedEducation: DoctorEducation) => {
     let updatedEducations = [...educations];
 
@@ -262,7 +251,6 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
     }
   };
 
-  // Render nội dung modal
   if (!doctor) {
     return null;
   }
@@ -276,7 +264,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
           alignItems: "center",
         }}
       >
-        Thông tin chi tiết bác sĩ
+        Detalhes do médico
         <IconButton onClick={onClose}>
           <CloseIcon />
         </IconButton>
@@ -318,7 +306,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                 </Typography>
                 <Typography variant="body2" component="div">
                   <Chip
-                    label={doctor.status ? "Đang hoạt động" : "Không hoạt động"}
+                    label={doctor.status ? "Ativo" : "Inativo"}
                     color={doctor.status ? "success" : "error"}
                     size="small"
                     sx={{ mt: 1 }}
@@ -333,10 +321,10 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                 onChange={handleTabChange}
                 aria-label="doctor tabs"
               >
-                <Tab label="Thông tin cơ bản" />
-                <Tab label="Học vấn" />
-                <Tab label="Chứng chỉ" />
-                <Tab label="Kinh nghiệm" />
+                <Tab label="Informações básicas" />
+                <Tab label="Formação" />
+                <Tab label="Certificados" />
+                <Tab label="Experiência" />
               </Tabs>
 
               <TabPanel value={tabValue} index={0}>
@@ -344,7 +332,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">
-                        Mã bác sĩ
+                        ID do médico
                       </Typography>
                       <Typography variant="body1" gutterBottom>
                         {doctor.userId}
@@ -352,27 +340,27 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">
-                        Giới tính
+                        Gênero
                       </Typography>
                       <Typography variant="body1" gutterBottom>
-                        {doctor.sex ? "Nam" : "Nữ"}
+                        {doctor.sex ? "Masculino" : "Feminino"}
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">
-                        Ngày sinh
+                        Data de nascimento
                       </Typography>
                       <Typography variant="body1" gutterBottom>
                         {typeof doctor.dob === "string"
                           ? parseDateFromString(doctor.dob).toLocaleDateString(
-                              "vi-VN"
+                              "pt-BR"
                             )
-                          : new Date(doctor.dob).toLocaleDateString("vi-VN")}
+                          : new Date(doctor.dob).toLocaleDateString("pt-BR")}
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">
-                        Số điện thoại
+                        Telefone
                       </Typography>
                       <Typography variant="body1" gutterBottom>
                         {doctor.phone}
@@ -388,7 +376,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">
-                        Chuyên khoa
+                        Especialidade
                       </Typography>
                       <Typography variant="body1" gutterBottom>
                         {doctor.specialization}
@@ -401,7 +389,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                         color="text.secondary"
                         gutterBottom
                       >
-                        Loại bệnh có thể khám
+                        Tipos de doenças atendidas
                       </Typography>
                       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                         {doctor.typeDisease ? (
@@ -414,7 +402,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                           />
                         ) : (
                           <Typography variant="body2" color="text.secondary">
-                            Chưa có thông tin về loại bệnh có thể khám
+                            Nenhuma informação sobre tipos de doenças atendidas
                           </Typography>
                         )}
                       </Box>
@@ -437,7 +425,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                     startIcon={<AddIcon />}
                     onClick={handleAddEducation}
                   >
-                    Thêm học vấn
+                    Adicionar formação
                   </Button>
                 </Box>
 
@@ -446,10 +434,10 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                     <Table>
                       <TableHead>
                         <TableRow>
-                          <TableCell>Tên trường</TableCell>
-                          <TableCell>Bằng cấp</TableCell>
-                          <TableCell>Thời gian</TableCell>
-                          <TableCell align="right">Thao tác</TableCell>
+                          <TableCell>Nome da instituição</TableCell>
+                          <TableCell>Grau</TableCell>
+                          <TableCell>Período</TableCell>
+                          <TableCell align="right">Ações</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -485,7 +473,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                 ) : (
                   <Paper sx={{ p: 3, textAlign: "center" }}>
                     <Typography color="text.secondary">
-                      Chưa có thông tin về học vấn
+                      Nenhuma informação de formação
                     </Typography>
                   </Paper>
                 )}
@@ -505,7 +493,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                     startIcon={<AddIcon />}
                     onClick={handleAddCertificate}
                   >
-                    Thêm chứng chỉ
+                    Adicionar certificado
                   </Button>
                 </Box>
 
@@ -514,9 +502,9 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                     <Table>
                       <TableHead>
                         <TableRow>
-                          <TableCell>Tên chứng chỉ</TableCell>
-                          <TableCell>Ngày cấp</TableCell>
-                          <TableCell align="right">Thao tác</TableCell>
+                          <TableCell>Nome do certificado</TableCell>
+                          <TableCell>Data de emissão</TableCell>
+                          <TableCell align="right">Ações</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -526,7 +514,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                             <TableCell>
                               {parseDateFromString(
                                 certificate.issueDate
-                              ).toLocaleDateString("vi-VN")}
+                              ).toLocaleDateString("pt-BR")}
                             </TableCell>
                             <TableCell align="right">
                               <IconButton
@@ -547,7 +535,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                 ) : (
                   <Paper sx={{ p: 3, textAlign: "center" }}>
                     <Typography color="text.secondary">
-                      Chưa có thông tin về chứng chỉ
+                      Nenhuma informação de certificado
                     </Typography>
                   </Paper>
                 )}
@@ -567,7 +555,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                     startIcon={<AddIcon />}
                     onClick={handleAddExperience}
                   >
-                    Thêm kinh nghiệm
+                    Adicionar experiência
                   </Button>
                 </Box>
 
@@ -576,10 +564,10 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                     <Table>
                       <TableHead>
                         <TableRow>
-                          <TableCell>Tên công ty/Cơ sở y tế</TableCell>
-                          <TableCell>Chuyên môn</TableCell>
-                          <TableCell>Thời gian</TableCell>
-                          <TableCell align="right">Thao tác</TableCell>
+                          <TableCell>Nome da empresa/hospital</TableCell>
+                          <TableCell>Especialidade</TableCell>
+                          <TableCell>Período</TableCell>
+                          <TableCell align="right">Ações</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -592,12 +580,12 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                             <TableCell>
                               {parseDateFromString(
                                 experience.startDate
-                              ).toLocaleDateString("vi-VN")}
+                              ).toLocaleDateString("pt-BR")}
                               {experience.endDate
                                 ? ` - ${parseDateFromString(
                                     experience.endDate
-                                  ).toLocaleDateString("vi-VN")}`
-                                : " - Hiện tại"}
+                                  ).toLocaleDateString("pt-BR")}`
+                                : " - Atual"}
                             </TableCell>
                             <TableCell align="right">
                               <IconButton
@@ -616,7 +604,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                 ) : (
                   <Paper sx={{ p: 3, textAlign: "center" }}>
                     <Typography color="text.secondary">
-                      Chưa có thông tin về kinh nghiệm
+                      Nenhuma informação de experiência
                     </Typography>
                   </Paper>
                 )}
@@ -627,10 +615,9 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose}>Đóng</Button>
+        <Button onClick={onClose}>Fechar</Button>
       </DialogActions>
 
-      {/* Form chỉnh sửa học vấn */}
       <EducationForm
         open={isEducationFormOpen}
         onClose={() => setIsEducationFormOpen(false)}
@@ -640,7 +627,6 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
         doctorId={doctor?.userId || 0}
       />
 
-      {/* Form chỉnh sửa chứng chỉ */}
       <CertificateForm
         open={isCertificateFormOpen}
         onClose={() => setIsCertificateFormOpen(false)}
@@ -650,7 +636,6 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
         doctorId={doctor?.userId || 0}
       />
 
-      {/* Form chỉnh sửa kinh nghiệm */}
       <ExperienceForm
         open={isExperienceFormOpen}
         onClose={() => setIsExperienceFormOpen(false)}

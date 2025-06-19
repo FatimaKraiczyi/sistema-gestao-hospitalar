@@ -24,7 +24,6 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import CloseIcon from "@mui/icons-material/Close";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
-import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import BookAppointment from "../../components/appointments/BookAppointment";
@@ -51,7 +50,7 @@ import {
 } from "../../utils/dateUtils";
 import { ROUTING } from "../../constants/routing";
 
-// Định nghĩa TypeDay enum để phù hợp với mô hình UML
+// Definição do enum TypeDay para corresponder ao modelo UML
 enum TypeDay {
   MONDAY = "MONDAY",
   TUESDAY = "TUESDAY",
@@ -62,52 +61,51 @@ enum TypeDay {
   SUNDAY = "SUNDAY",
 }
 
-// Enum để định nghĩa các khoảng thời gian trong ngày - giống DoctorCurrentSchedulePage
+// Enum para definir os períodos do dia - igual ao DoctorCurrentSchedulePage
 enum TimePeriod {
-  MORNING = "morning", // Buổi sáng
-  AFTERNOON = "afternoon", // Buổi chiều
+  MORNING = "morning", // Manhã
+  AFTERNOON = "afternoon", // Tarde
 }
 
-// Định nghĩa các ngày trong tuần sử dụng enum TypeDay
+// Definição dos dias da semana usando o enum TypeDay
 const DAYS_OF_WEEK = [
-  { key: TypeDay.MONDAY, label: "Thứ 2" },
-  { key: TypeDay.TUESDAY, label: "Thứ 3" },
-  { key: TypeDay.WEDNESDAY, label: "Thứ 4" },
-  { key: TypeDay.THURSDAY, label: "Thứ 5" },
-  { key: TypeDay.FRIDAY, label: "Thứ 6" },
-  { key: TypeDay.SATURDAY, label: "Thứ 7" },
-  { key: TypeDay.SUNDAY, label: "Chủ nhật" },
+  { key: TypeDay.MONDAY, label: "Segunda-feira" },
+  { key: TypeDay.TUESDAY, label: "Terça-feira" },
+  { key: TypeDay.WEDNESDAY, label: "Quarta-feira" },
+  { key: TypeDay.THURSDAY, label: "Quinta-feira" },
+  { key: TypeDay.FRIDAY, label: "Sexta-feira" },
+  { key: TypeDay.SATURDAY, label: "Sábado" },
+  { key: TypeDay.SUNDAY, label: "Domingo" },
 ];
 
-// Định nghĩa giao diện Appointment - lịch hẹn khám bệnh của bệnh nhân
+// Interface Appointment - agendamento de consulta do paciente
 interface Appointment {
   id: number;
-  workScheduleId: number; // ID của lịch làm việc
-  date: string; // Định dạng: dd-MM-yyyy
-  startTime: string; // Định dạng: HH:mm
-  endTime: string; // Định dạng: HH:mm
-  status: "WAITING" | "IN_PROGRESS" | "DONE" | "CANCELLED"; // Trạng thái cuộc hẹn
-  doctorName: string; // Tên bác sĩ
-  specialization: string; // Chuyên khoa
-  reason?: string; // Lý do khám
-  // Thêm trường để phù hợp với WorkSchedule
-  doctorId?: number; // ID của bác sĩ
-  typeDay?: TypeDay; // Ngày trong tuần
-  shiftId?: number; // ID ca khám
-  numericalOrder?: number; // Số thứ tự
+  workScheduleId: number; // ID da agenda de trabalho
+  date: string; // Formato: dd-MM-yyyy
+  startTime: string; // Formato: HH:mm
+  endTime: string; // Formato: HH:mm
+  status: "WAITING" | "IN_PROGRESS" | "DONE" | "CANCELLED"; // Status da consulta
+  doctorName: string; // Nome do médico
+  specialization: string; // Especialidade
+  reason?: string; // Motivo da consulta
+  // Adicionar campo para compatibilidade com WorkSchedule
+  doctorId?: number; // ID do médico
+  typeDay?: TypeDay; // Dia da semana
+  shiftId?: number; // ID do turno
+  numericalOrder?: number; // Ordem numérica
 }
 
-// Định nghĩa giao diện Shift để phù hợp với mô hình UML
+// Interface Shift para corresponder ao modelo UML
 interface Shift {
-  id: number; // ID của ca
-  shift: number; // Số thứ tự ca (1 hoặc 2)
-  start: string; // Thời gian bắt đầu, định dạng: HH:mm
-  end: string; // Thời gian kết thúc, định dạng: HH:mm
-  status: boolean; // Trạng thái hoạt động của ca
+  id: number; // ID do turno
+  shift: number; // Número do turno (1 ou 2)
+  start: string; // Hora de início, formato: HH:mm
+  end: string; // Hora de término, formato: HH:mm
+  status: boolean; // Status do turno
 }
 
 const AppointmentPage = () => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const [showBooking, setShowBooking] = useState(false);
   const user = useSelector((state: any) => state.user.user);
@@ -130,12 +128,12 @@ const AppointmentPage = () => {
       // Tính toán ngày cuối tuần một cách chính xác sử dụng date-fns để đảm bảo tính nhất quán
       const weekEnd = addDays(currentWeekStart, 6);
 
-      console.log("Bắt đầu lấy dữ liệu cho tuần:", {
+      console.log("Iniciando busca de dados para a semana:", {
         start: formatDateToString(currentWeekStart),
         end: formatDateToString(weekEnd),
       });
 
-      // Xóa lịch hẹn trong khi đang tải
+      // Limpar agendamentos enquanto carrega
       setAppointments([]);
 
       const response = await getAppointmentPatientBookInWeek(
@@ -145,20 +143,20 @@ const AppointmentPage = () => {
       );
 
       if (!response?.data?.data) {
-        console.log("Không nhận được dữ liệu lịch hẹn");
+        console.log("Não recebeu dados de agendamento");
         setAppointments([]);
         return;
       }
 
       const result = response.data.data;
-      console.log("Phản hồi API cho tuần:", {
+      console.log("Resposta da API para a semana:", {
         startDate: formatDateToString(currentWeekStart),
         data: result,
       });
 
-      // Nếu không có kết quả, đặt mảng rỗng
+      // Se não houver resultados, definir array vazio
       if (!result || result.length === 0) {
-        console.log("Không tìm thấy lịch hẹn nào trong tuần này");
+        console.log("Nenhum agendamento encontrado nesta semana");
         setAppointments([]);
         return;
       }
@@ -181,20 +179,20 @@ const AppointmentPage = () => {
           " " +
           item.work_schedule.doctor.firstName,
         specialization: item.work_schedule.doctor.specialization,
-        reason: "Khám " + item.work_schedule.doctor.typeDisease.name,
+        reason: "Consulta " + item.work_schedule.doctor.typeDisease.name,
         doctorId: item.work_schedule.doctor.userId,
         shiftId: item.work_schedule.shift.id,
         numericalOrder: item.book_appointment.numericalOrder,
       }));
 
-      console.log("Đặt lịch hẹn cho tuần:", {
+      console.log("Agendamentos definidos para a semana:", {
         count: appointmentsData.length,
         dates: appointmentsData.map((a) => a.date),
       });
 
       setAppointments(appointmentsData);
     } catch (error) {
-      console.error("Lỗi khi lấy lịch hẹn:", error);
+      console.error("Erro ao buscar agendamentos:", error);
       setAppointments([]);
     }
   };
@@ -429,7 +427,7 @@ const AppointmentPage = () => {
             color="text.secondary"
             sx={{ fontStyle: "italic" }}
           >
-            Không có lịch hẹn
+            Não há agendamentos
           </Typography>
         </Box>
       );
@@ -485,13 +483,13 @@ const AppointmentPage = () => {
         appointment.status !== "WAITING" &&
         appointment.status !== "IN_PROGRESS"
       ) {
-        return "Chỉ có thể tham gia khám khi trạng thái là Đang chờ hoặc Đang khám";
+        return "Só é possível participar quando o status for Aguardando ou Em atendimento";
       }
 
       const today = new Date();
       const appointmentDate = appointment.date.split("-").reverse().join("-");
       if (today.toISOString().split("T")[0] !== appointmentDate) {
-        return "Chỉ có thể tham gia khám vào đúng ngày hẹn";
+        return "Só é possível participar no dia agendado";
       }
 
       const currentHour = today.getHours();
@@ -507,14 +505,14 @@ const AppointmentPage = () => {
       const endTimeInMinutes = endHour * 60 + endMinute;
 
       if (currentTimeInMinutes < startTimeInMinutes) {
-        return `Chỉ có thể tham gia khám từ ${appointment.startTime}`;
+        return `Só é possível participar a partir de ${appointment.startTime}`;
       }
 
       if (currentTimeInMinutes > endTimeInMinutes) {
-        return "Đã quá thời gian khám";
+        return "O horário da consulta já passou";
       }
 
-      return "Nhấp để tham gia phòng khám";
+      return "Clique para entrar na sala de consulta";
     };
 
     // Hiển thị thông tin lịch hẹn với tooltip

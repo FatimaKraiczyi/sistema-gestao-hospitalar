@@ -70,14 +70,14 @@ const PatientMedicalRecordModal: React.FC<PatientMedicalRecordModalProps> = ({
       console.log("Medical records response:", response);
 
       if (response.data && Array.isArray(response.data)) {
-        // Chuyển đổi dữ liệu API để phù hợp với định dạng mong muốn của component
+        // Converte os dados da API para o formato esperado pelo componente
         const formattedRecords = response.data.map((item) => {
           const doctor = item.workSchedule?.doctor || {};
           const doctorFirstName = doctor.firstName || "";
           const doctorLastName = doctor.lastName || "";
           const doctorName = `Dr. ${doctorLastName} ${doctorFirstName}`.trim();
 
-          // Lấy dữ liệu hồ sơ y tế (xử lý cấu trúc mảng)
+          // Obtém os dados do prontuário médico (tratamento de estrutura de array)
           const medicalRecord =
             item.medicalRecord && item.medicalRecord.length > 0
               ? item.medicalRecord[0]
@@ -105,7 +105,7 @@ const PatientMedicalRecordModal: React.FC<PatientMedicalRecordModalProps> = ({
       }
     } catch (error) {
       console.error("Error fetching medical records:", error);
-      setRecordsError("Không thể tải lịch sử khám bệnh");
+      setRecordsError("Não foi possível carregar o histórico de consultas");
     } finally {
       setRecordsLoading(false);
     }
@@ -114,16 +114,16 @@ const PatientMedicalRecordModal: React.FC<PatientMedicalRecordModalProps> = ({
   const handleToggleRecord = (recordId: number) => {
     setExpandedRecords((prev) => {
       if (prev.includes(recordId)) {
-        // Nếu recordId đã tồn tại trong mảng, loại bỏ nó
+        // Se o recordId já existe no array, remova-o
         return prev.filter((id) => id !== recordId);
       } else {
-        // Nếu recordId không tồn tại trong mảng, thêm nó
+        // Se o recordId não existe no array, adicione-o
         return [...prev, recordId];
       }
     });
   };
 
-  // Tính tuổi từ ngày sinh
+  // Calcula a idade a partir da data de nascimento
   const calculateAge = (dateOfBirth: string) => {
     const dob = new Date(dateOfBirth.split("-").reverse().join("-"));
     const today = new Date();

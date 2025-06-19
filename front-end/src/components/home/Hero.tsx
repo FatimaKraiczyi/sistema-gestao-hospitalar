@@ -19,7 +19,6 @@ const FeatureCard = styled(Box)(({ theme }) => ({
 export default function Hero() {
   const navigate = useNavigate();
   const handleBookAppointment = () => {
-    // Handle booking appointment logic here
     navigate(ROUTING.LOGIN);
   };
   return (
@@ -28,11 +27,11 @@ export default function Hero() {
         <Grid2 container spacing={4} alignItems="center">
           <Grid2 size={{ xs: 12, md: 6 }}>
             <Typography variant="h1" gutterBottom>
-              Sức Khỏe Tinh Thần Của Bạn Là Ưu Tiên Hàng Đầu.
+              Sua Saúde é Nossa Prioridade.
             </Typography>
             <Typography variant="body1" paragraph>
-              Chúng tôi cung cấp các dịch vụ y tế toàn diện nhất, để mọi người
-              đều có cơ hội nhận được sự chăm sóc y tế chất lượng.
+              Oferecemos os serviços médicos mais completos, para que todos
+              tenham a oportunidade de receber cuidados de saúde de qualidade.
             </Typography>
             <Button
               variant="contained"
@@ -40,14 +39,14 @@ export default function Hero() {
               sx={{ mt: 2 }}
               onClick={handleBookAppointment}
             >
-              Đặt Lịch Hẹn
+              Agendar Consulta
             </Button>
           </Grid2>
           <Grid2 size={{ xs: 12, md: 6 }}>
             <Box
               component="img"
               src="/doctor3.png"
-              alt="Bác sĩ"
+              alt="Médico"
               sx={{
                 width: "100%",
                 maxWidth: 500,
@@ -59,9 +58,9 @@ export default function Hero() {
         </Grid2>
         <Grid2 container spacing={2} sx={{ mt: 4 }}>
           {[
-            "Tư Vấn Trực Tuyến",
-            "Đội Ngũ Chuyên Gia",
-            "Chăm Sóc Chất Lượng Cao",
+            "Agendamento Online",
+            "Equipe de Especialistas",
+            "Atendimento de Alta Qualidade",
           ].map((feature) => (
             <Grid2 size={{ xs: 12, md: 4 }} key={feature}>
               <FeatureCard>

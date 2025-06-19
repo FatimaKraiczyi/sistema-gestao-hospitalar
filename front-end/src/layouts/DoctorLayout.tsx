@@ -77,12 +77,6 @@ export default function DoctorLayout() {
           </ListItemIcon>
           <ListItemText primary="Prescriptions" />
         </ListItemButton> */}
-        {/* <ListItemButton onClick={() => handleNavigation("/doctor/chat")}>
-          <ListItemIcon>
-            <ChatIcon />
-          </ListItemIcon>
-          <ListItemText primary="Messages" />
-        </ListItemButton> */}
       </List>
     </>
   );

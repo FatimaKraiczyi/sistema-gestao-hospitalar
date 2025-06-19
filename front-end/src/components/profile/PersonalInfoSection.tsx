@@ -37,7 +37,7 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   const addressString =
     address != null
       ? `${address.number} ${address.street}, ${address.ward}, ${address.district}, ${address.city}, ${address.country}`
-      : "Không có dữ liệu";
+      : "Sem dados disponíveis";
 
   return (
     <Paper elevation={2} sx={{ p: 3, mb: 3 }}>

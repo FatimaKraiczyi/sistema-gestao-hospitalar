@@ -16,7 +16,7 @@ export const getAllBookings = async () => {
   return response;
 };
 
-// Đánh dấu là đã hoàn tiền
+// Marcar como reembolsado
 export const assignPayback = async (bookAppointmentId: string) => {
   const response = await axiosConfig.post(
     `${prefix}/assign_paybackment`,

@@ -18,16 +18,15 @@ import {
   TablePagination,
   Stack,
 } from "@mui/material";
-import { useTranslation } from "react-i18next";
 // import { getDoctorsBySpecialty } from "../../services/doctor_service";
 import MedicationIcon from "@mui/icons-material/Medication";
 import { getAllDoctorByTypeDiseaseName } from "../../services/authenticate/typeDisease_service.ts";
 
 /**
- * Props cho component DoctorList
- * @param specialty - Loại dịch vụ/chuyên khoa được chọn
- * @param onSelect - Hàm callback khi người dùng chọn một bác sĩ
- * @param onBack - Hàm callback khi người dùng quay lại bước trước
+ * Props para o componente DoctorList
+ * @param specialty - Serviço/especialidade selecionado
+ * @param onSelect - Função callback quando o usuário seleciona um médico
+ * @param onBack - Função callback quando o usuário volta para o passo anterior
  */
 interface DoctorListProps {
   specialty: any; // Now represents a service
@@ -35,7 +34,7 @@ interface DoctorListProps {
   // onBack: () => void;
 }
 
-// Dữ liệu mẫu cho danh sách bác sĩ theo chuyên khoa
+// Dados de exemplo para a lista de médicos por especialidade
 const mockDoctorsBySpecialty = {
   "1": [
     // Cardiology
@@ -175,7 +174,6 @@ const DoctorList: React.FC<DoctorListProps> = ({
   onSelect,
   // onBack,
 }) => {
-  const { t } = useTranslation();
   // State lưu trạng thái đang tải dữ liệu
   const [loading, setLoading] = useState(true);
   // State lưu danh sách bác sĩ

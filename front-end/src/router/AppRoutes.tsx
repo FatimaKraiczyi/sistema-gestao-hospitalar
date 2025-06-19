@@ -138,7 +138,6 @@ export const AppRoutes = () => {
               path={ROUTING.PRESCRIPTIONS}
               element={<div>Prescriptions</div>}
             />
-            <Route path={ROUTING.CHAT} element={<div>Chat</div>} />
           </Route>
 
           {/* Patient routes - with role protection */}
@@ -167,7 +166,6 @@ export const AppRoutes = () => {
               path={ROUTING.MEDICAL_RECORDS}
               element={<PatientMedicalRecord />}
             />
-            <Route path={ROUTING.CHAT} element={<div>Chat</div>} />
             <Route path={ROUTING.BANK_ACCOUNT} element={<BankAccountPage />} />
           </Route>
 

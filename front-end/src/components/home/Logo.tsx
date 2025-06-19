@@ -24,7 +24,7 @@ export default function Logo() {
         }}
       />
       <Typography variant="h6" color="primary.main" sx={{ fontWeight: "bold" }}>
-        TADSHosp
+        TADS Medical
       </Typography>
     </Box>
   );

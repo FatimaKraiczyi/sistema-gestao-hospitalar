@@ -139,7 +139,6 @@ export default function ExaminationRoomPage() {
   // Kết nối socket cho giao tiếp thời gian thực
   const [socket, setSocket] = useState<Socket>(
     io(`wss://${import.meta.env.VITE_HOST}`, {
-      path: "/chat",
       transports: ["websocket", "polling"],
       reconnection: true,
       reconnectionAttempts: 10,

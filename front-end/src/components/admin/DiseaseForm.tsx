@@ -14,20 +14,20 @@ import { Disease } from "../../types/typeDisease";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
-// Interface định nghĩa các props cho component DiseaseForm
+// Interface que define as props para o componente DiseaseForm
 interface DiseaseFormProps {
-  open: boolean; // Trạng thái hiển thị của modal
-  onClose: () => void; // Hàm xử lý khi đóng modal
-  onSubmit: (disease: Partial<Disease>) => void; // Hàm xử lý khi submit form
-  disease?: Disease | null; // Thông tin loại bệnh (khi chỉnh sửa)
-  mode: "add" | "edit"; // Chế độ form: thêm mới hoặc chỉnh sửa
+  open: boolean; // Estado de exibição do modal
+  onClose: () => void; // Função para fechar o modal
+  onSubmit: (disease: Partial<Disease>) => void; // Função para submit do formulário
+  disease?: Disease | null; // Informações da doença (ao editar)
+  mode: "add" | "edit"; // Modo do formulário: adicionar ou editar
 }
 
-// Schema validation sử dụng Yup
+// Schema de validação usando Yup
 const validationSchema = Yup.object({
   name: Yup.string()
-    .required("Tên loại bệnh là bắt buộc")
-    .max(255, "Tên loại bệnh không được vượt quá 255 ký tự"),
+    .required("O nome da doença é obrigatório")
+    .max(255, "O nome da doença não pode exceder 255 caracteres"),
 });
 
 const DiseaseForm: React.FC<DiseaseFormProps> = ({
@@ -37,7 +37,7 @@ const DiseaseForm: React.FC<DiseaseFormProps> = ({
   disease,
   mode,
 }) => {
-  // Sử dụng formik để quản lý form và validation
+  // Usando formik para gerenciar o formulário e validação
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -49,8 +49,8 @@ const DiseaseForm: React.FC<DiseaseFormProps> = ({
     },
   });
 
-  // Effect để cập nhật giá trị form khi chuyển sang chế độ chỉnh sửa
-  // Hoặc reset form khi chuyển sang chế độ thêm mới
+  // Effect para atualizar os valores do formulário ao editar
+  // Ou resetar ao adicionar novo
   useEffect(() => {
     if (disease && mode === "edit") {
       formik.setValues({
@@ -66,16 +66,16 @@ const DiseaseForm: React.FC<DiseaseFormProps> = ({
     }
   }, [disease, mode, open]);
 
-  // Xử lý đóng modal và reset form
+  // Lida com o fechamento do modal e reseta o formulário
   const handleClose = () => {
     formik.resetForm();
     onClose();
   };
 
-  // Xác định tiêu đề và nút bấm dựa trên chế độ form
+  // Define título e botão conforme o modo do formulário
   const title =
-    mode === "add" ? "Thêm loại bệnh mới" : "Chỉnh sửa thông tin loại bệnh";
-  const buttonText = mode === "add" ? "Thêm loại bệnh" : "Lưu thay đổi";
+    mode === "add" ? "Adicionar nova doença" : "Editar informações da doença";
+  const buttonText = mode === "add" ? "Adicionar doença" : "Salvar alterações";
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
@@ -86,7 +86,7 @@ const DiseaseForm: React.FC<DiseaseFormProps> = ({
             <Grid item xs={12}>
               <TextField
                 name="name"
-                label="Tên loại bệnh"
+                label="Nome da doença"
                 value={formik.values.name}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -105,14 +105,14 @@ const DiseaseForm: React.FC<DiseaseFormProps> = ({
                     onChange={formik.handleChange}
                   />
                 }
-                label="Hoạt động"
+                label="Ativo"
               />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="error">
-            Hủy
+            Cancelar
           </Button>
           <Button
             type="submit"

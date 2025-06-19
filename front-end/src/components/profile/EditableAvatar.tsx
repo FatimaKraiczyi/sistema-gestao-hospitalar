@@ -9,9 +9,9 @@ interface EditableAvatarProps {
   onEditAvatar: () => void;
 }
 /*
-Chỉ hiển thị avatar hiện tại cùng với hiệu ứng hover để hiển thị nút chỉnh sửa (icon camera)
-Khi người dùng nhấn vào nút chỉnh sửa, nó gọi hàm onEditAvatar để mở modal upload
-Không thực hiện việc tải lên ảnh mới
+Exibe apenas o avatar atual com efeito hover para mostrar o botão de edição (ícone de câmera)
+Quando o usuário clica no botão de editar, chama a função onEditAvatar para abrir o modal de upload
+Não realiza o upload de uma nova imagem
 */
 const EditableAvatar: React.FC<EditableAvatarProps> = ({
   src,
@@ -58,7 +58,7 @@ const EditableAvatar: React.FC<EditableAvatarProps> = ({
             borderRadius: "50%",
           }}
         >
-          <Tooltip title="Thay đổi ảnh đại diện">
+          <Tooltip title="Alterar foto do perfil">
             <IconButton
               onClick={onEditAvatar}
               size="small"

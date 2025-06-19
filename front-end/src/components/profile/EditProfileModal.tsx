@@ -1,4 +1,4 @@
-// Import các thư viện và components cần thiết
+// Importar as bibliotecas e componentes necessários
 import React, { useState } from "react";
 import {
   Dialog,
@@ -26,11 +26,11 @@ import { Formik, Form, Field, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import { format, parse, isValid } from "date-fns";
 
-// Định nghĩa kiểu dữ liệu cho props của component
+// Definir o tipo de dados das props do componente
 interface EditProfileModalProps {
-  open: boolean; // Trạng thái hiển thị của modal
-  onClose: () => void; // Hàm đóng modal
-  onSave: (data: any) => void; // Hàm xử lý khi lưu thông tin
+  open: boolean; // Estado de exibição do modal
+  onClose: () => void; // Função para fechar o modal
+  onSave: (data: any) => void; // Função para salvar as informações
   userData: {
     firstName: string;
     lastName: string;
@@ -39,10 +39,10 @@ interface EditProfileModalProps {
     dob: string;
     sex: boolean | string;
     address: Address | null;
-  }; // Dữ liệu người dùng hiện tại
+  }; // Dados atuais do usuário
 }
 
-// Component modal chỉnh sửa thông tin cá nhân
+// Componente modal para editar informações pessoais
 export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   open,
   onClose,
@@ -50,54 +50,54 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   userData,
 }) => {
   const dispatch = useDispatch();
-  // State quản lý trạng thái loading
+  // Gerencia o estado de loading
   const [loading, setLoading] = useState(false);
-  // State quản lý thông báo snackbar
+  // Gerencia o estado do snackbar de notificação
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success" as "success" | "error",
   });
 
-  // Chuyển đổi định dạng ngày từ DD-MM-YYYY sang YYYY-MM-DD cho input date
+  // Converte a data do formato DD-MM-YYYY para YYYY-MM-DD para o input date
   const formatDateForInput = (dateStr: string) => {
     if (!dateStr) return "";
 
-    // Thử phân tích ngày với định dạng DD-MM-YYYY
+    // Tenta analisar a data no formato DD-MM-YYYY
     let date = parse(dateStr, "dd-MM-yyyy", new Date());
 
-    // Nếu ngày hợp lệ, chuyển đổi sang định dạng YYYY-MM-DD
+    // Se a data for válida, converte para o formato YYYY-MM-DD
     if (isValid(date)) {
       return format(date, "yyyy-MM-dd");
     }
 
-    // Kiểm tra xem ngày đã ở định dạng YYYY-MM-DD chưa
+    // Verifica se a data já está no formato YYYY-MM-DD
     date = parse(dateStr, "yyyy-MM-dd", new Date());
     if (isValid(date)) {
       return dateStr;
     }
 
-    // Trả về chuỗi gốc nếu không thể phân tích
+    // Retorna a string original se não conseguir analisar
     return dateStr;
   };
 
-  // Chuyển đổi định dạng ngày từ YYYY-MM-DD về DD-MM-YYYY cho API
+  // Converte a data do formato YYYY-MM-DD para DD-MM-YYYY para a API
   const formatDateForApi = (dateStr: string) => {
     if (!dateStr) return "";
 
-    // Thử phân tích ngày với định dạng YYYY-MM-DD
+    // Tenta analisar a data no formato YYYY-MM-DD
     const date = parse(dateStr, "yyyy-MM-dd", new Date());
 
-    // Nếu ngày hợp lệ, chuyển đổi sang định dạng DD-MM-YYYY
+    // Se a data for válida, converte para o formato DD-MM-YYYY
     if (isValid(date)) {
       return format(date, "dd-MM-yyyy");
     }
 
-    // Trả về chuỗi gốc nếu không thể phân tích
+    // Retorna a string original se não conseguir analisar
     return dateStr;
   };
 
-  // Giá trị ban đầu của form
+  // Valores iniciais do formulário
   const initialValues = {
     firstName: userData.firstName || "",
     lastName: userData.lastName || "",
@@ -108,7 +108,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
     address: userData.address || null,
   };
 
-  // Xác thực form sử dụng Yup
+  // Validação do formulário usando Yup
   const validationSchema = Yup.object({
     firstName: Yup.string()
       .required("Tên là bắt buộc")
@@ -126,7 +126,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
     // Xác thực địa chỉ đã được loại bỏ theo yêu cầu
   });
 
-  // Xử lý khi người dùng gửi form
+  // Xử lý quando o usuário envia o formulário
   const handleSubmit = async (
     values: typeof initialValues,
     { setSubmitting }: FormikHelpers<typeof initialValues>

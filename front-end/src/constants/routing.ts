@@ -29,7 +29,6 @@ export const ROUTING = {
   SCHEDULE_DETAIL: "schedule/:scheduleId", // New route for appointment details
   PATIENTS: "patients",
   PRESCRIPTIONS: "prescriptions",
-  CHAT: "chat",
   PROFILE: "profile",
   SCHEDULE: "schedule",
   CURRENT_SCHEDULE: "current-schedule",

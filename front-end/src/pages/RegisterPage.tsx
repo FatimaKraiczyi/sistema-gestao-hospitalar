@@ -34,32 +34,32 @@ import { toast } from "react-toastify";
 import { ROUTING } from "../constants/routing";
 import { registerFace } from "../services/image_detect/detect_service";
 
-// Schema xác thực dữ liệu đầu vào cho form đăng ký
+// Esquema de validação dos dados de entrada para o formulário de cadastro
 const validationSchema = Yup.object({
   firstName: Yup.string()
-    .required("Tên là bắt buộc")
-    .min(2, "Tên phải có ít nhất 2 ký tự"),
+    .required("Nome é obrigatório")
+    .min(2, "Nome deve ter pelo menos 2 caracteres"),
   lastName: Yup.string()
-    .required("Họ là bắt buộc")
-    .min(2, "Họ phải có ít nhất 2 ký tự"),
+    .required("Sobrenome é obrigatório")
+    .min(2, "Sobrenome deve ter pelo menos 2 caracteres"),
   username: Yup.string()
-    .required("Tên đăng nhập là bắt buộc")
-    .min(3, "Tên đăng nhập phải có ít nhất 3 ký tự"),
+    .required("Nome de usuário é obrigatório")
+    .min(3, "Nome de usuário deve ter pelo menos 3 caracteres"),
   email: Yup.string()
-    .email("Địa chỉ email không hợp lệ")
-    .required("Email là bắt buộc"),
+    .email("Endereço de email inválido")
+    .required("Email é obrigatório"),
   phone: Yup.string()
-    .matches(/^[0-9]+$/, "Số điện thoại chỉ được chứa chữ số")
-    .min(10, "Số điện thoại phải có ít nhất 10 chữ số")
-    .required("Số điện thoại là bắt buộc"),
+    .matches(/^[0-9]+$/, "O telefone deve conter apenas números")
+    .min(10, "O telefone deve ter pelo menos 10 dígitos")
+    .required("Telefone é obrigatório"),
   password: Yup.string()
-    .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
-    .max(20, "Mật khẩu không được vượt quá 20 ký tự")
-    .required("Mật khẩu là bắt buộc"),
+    .min(8, "A senha deve ter pelo menos 8 caracteres")
+    .max(20, "A senha não pode ter mais de 20 caracteres")
+    .required("Senha é obrigatória"),
   birthDate: Yup.date()
-    .max(new Date(), "Ngày sinh không thể là ngày trong tương lai")
-    .required("Ngày sinh là bắt buộc"),
-  gender: Yup.string().required("Giới tính là bắt buộc"),
+    .max(new Date(), "A data de nascimento não pode ser no futuro")
+    .required("Data de nascimento é obrigatória"),
+  gender: Yup.string().required("Gênero é obrigatório"),
   rememberMe: Yup.boolean(),
 });
 

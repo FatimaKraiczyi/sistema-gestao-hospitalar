@@ -14,7 +14,6 @@ import {
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { useTranslation } from "react-i18next";
 import { format, addDays, isBefore, isToday } from "date-fns";
 import {
   formatDateToString,
@@ -27,10 +26,10 @@ import { getAppointmentPatientDetail } from "../../services/appointment/booking_
 import DoctorDetails from "./DoctorDetails"; // Import DoctorDetails component
 
 /**
- * Props cho component SelectDateTime
- * @param doctor - Thông tin bác sĩ được chọn
- * @param onSelect - Hàm callback khi người dùng chọn ngày và ca khám
- * @param onBack - Hàm callback khi người dùng quay lại bước trước
+ * Props para o componente SelectDateTime
+ * @param doctor - Informações do médico selecionado
+ * @param onSelect - Função callback quando o usuário seleciona data e turno
+ * @param onBack - Função callback quando o usuário volta para o passo anterior
  */
 interface SelectDateTimeProps {
   doctor: any;
@@ -42,8 +41,8 @@ interface SelectDateTimeProps {
 // Loại bỏ định nghĩa SHIFTS cố định
 
 /**
- * Component cho phép bệnh nhân chọn ngày và ca khám
- * Hiển thị lịch để chọn ngày và các ca khám có sẵn trong ngày đó
+ * Componente que permite ao paciente escolher a data e o turno da consulta
+ * Exibe o calendário para selecionar a data e os turnos disponíveis para aquele dia
  */
 const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   doctor,
@@ -51,16 +50,14 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   patientId,
   // onBack,
 }) => {
-  const { t } = useTranslation();
-
-  // State lưu ngày được chọn, mặc định là ngày hiện tại
+  // Estado para armazenar a data selecionada, padrão é a data atual
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
 
-  // State lưu ca khám được chọn
+  // Estado para armazenar o turno selecionado
   const [selectedShift, setSelectedShift] = useState<string>("");
   const [selectedShiftInfo, setSelectedShiftInfo] = useState<any>(null);
 
-  // State lưu danh sách các ca khám có sẵn
+  // Estado para armazenar a lista de turnos disponíveis
   const [availableShifts, setAvailableShifts] = useState<
     {
       id: number;
@@ -71,26 +68,26 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
     }[]
   >([]);
 
-  // State cho trạng thái loading khi đang tải dữ liệu
+  // Estado para o status de carregamento ao buscar dados
   const [loading, setLoading] = useState(false);
 
-  // State lưu thông báo lỗi nếu có
+  // Estado para armazenar mensagens de erro
   const [error, setError] = useState<string | null>(null);
 
-  // State để kiểm soát trạng thái đã đặt lịch
+  // Estado para controlar se já existe agendamento
   const [hasExistingAppointment, setHasExistingAppointment] =
     useState<boolean>(false);
 
-  // State để kiểm tra xem có lịch làm việc nào trong ngày đã chọn không
+  // Estado para verificar se há agenda de trabalho no dia selecionado
   const [hasWorkSchedules, setHasWorkSchedules] = useState<boolean>(true);
 
-  // State lưu trữ thông tin lịch làm việc
+  // Estado para armazenar informações da agenda de trabalho
   const [workSchedules, setWorkSchedules] = useState<any>(null);
-  // lịch được chọn
+  // Agenda selecionada
   const [workScheduleTarget, setWorkScheduleTarget] = useState<any>(null);
 
   /**
-   * Gọi API để lấy danh sách ca khám mỗi khi ngày hoặc bác sĩ thay đổi
+   * Chama a API para buscar os turnos disponíveis sempre que a data ou médico mudar
    */
   useEffect(() => {
     if (selectedDate && doctor) {
@@ -99,8 +96,8 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   }, [selectedDate, doctor]);
 
   /**
-   * Hàm gọi API lấy danh sách ca làm việc của bác sĩ theo ngày
-   * Đã sửa để xử lý linh hoạt các ca làm việc theo dữ liệu từ API
+   * Função que chama a API para buscar a lista de turnos do médico por data
+   * Foi ajustada para lidar de forma flexível com os turnos de trabalho conforme os dados da API
    * @param date - Ngày cần kiểm tra lịch
    */
   const fetchAvailableShifts = async (date: Date) => {

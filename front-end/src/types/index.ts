@@ -6,9 +6,7 @@ export * from "./patient";
 export * from "./medical";
 export * from "./appointment";
 export * from "./enums";
-export * from "./chat";
 export * from "./room";
-export * from "./call";
 
 // export interface User {
 //   id: string;

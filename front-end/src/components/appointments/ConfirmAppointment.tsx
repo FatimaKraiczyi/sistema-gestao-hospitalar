@@ -17,16 +17,15 @@ import EventIcon from "@mui/icons-material/Event";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PersonIcon from "@mui/icons-material/Person";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 
 /**
- * Props cho component ConfirmAppointment
- * @param date - Ngày khám đã chọn
- * @param time - Thời gian khám đã chọn
- * @param doctor - Thông tin bác sĩ đã chọn
- * @param specialty - Thông tin dịch vụ/chuyên khoa đã chọn (tuỳ chọn)
- * @param onDone - Hàm callback khi người dùng hoàn tất quy trình đặt lịch
+ * Props para o componente ConfirmAppointment
+ * @param date - Data da consulta selecionada
+ * @param time - Horário da consulta selecionado
+ * @param doctor - Informações do médico selecionado
+ * @param specialty - Informações do serviço/especialidade selecionado (opcional)
+ * @param onDone - Função callback quando o usuário finaliza o agendamento
  */
 interface ConfirmAppointmentProps {
   date: Date;
@@ -37,8 +36,8 @@ interface ConfirmAppointmentProps {
 }
 
 /**
- * Component hiển thị màn hình xác nhận đặt lịch thành công
- * Hiển thị tóm tắt thông tin cuộc hẹn: ngày, giờ, bác sĩ và dịch vụ
+ * Componente que exibe a tela de confirmação de agendamento bem-sucedido
+ * Mostra um resumo das informações do agendamento: data, hora, médico e serviço
  */
 const ConfirmAppointment: React.FC<ConfirmAppointmentProps> = ({
   date,
@@ -47,14 +46,12 @@ const ConfirmAppointment: React.FC<ConfirmAppointmentProps> = ({
   specialty, // Giờ đại diện cho dịch vụ
   onDone,
 }) => {
-  const { t } = useTranslation();
-
   return (
     <Box sx={{ textAlign: "center", py: 3 }}>
-      {/* Biểu tượng đặt lịch thành công */}
+      {/* Ícone de agendamento bem-sucedido */}
       <CheckCircleIcon sx={{ fontSize: 64, color: "success.main", mb: 2 }} />
 
-      {/* Thông báo đặt lịch thành công */}
+      {/* Mensagem de agendamento bem-sucedido */}
       <Typography variant="h5" gutterBottom>
         {t("patient.appointments.booking_successful")}
       </Typography>
@@ -63,16 +60,16 @@ const ConfirmAppointment: React.FC<ConfirmAppointmentProps> = ({
         {t("patient.appointments.booking_confirmation_message")}
       </Typography>
 
-      {/* Khung hiển thị chi tiết cuộc hẹn */}
+      {/* Caixa com detalhes do agendamento */}
       <Paper sx={{ maxWidth: 600, mx: "auto", mt: 4, p: 3 }}>
         <Typography variant="h6" gutterBottom>
           {t("patient.appointments.appointment_details")}
         </Typography>
         <Divider sx={{ mb: 2 }} />
 
-        {/* Danh sách các thông tin chi tiết */}
+        {/* Lista de detalhes */}
         <List>
-          {/* Ngày khám */}
+          {/* Data da consulta */}
           <ListItem>
             <ListItemAvatar>
               <Avatar>
@@ -85,7 +82,7 @@ const ConfirmAppointment: React.FC<ConfirmAppointmentProps> = ({
             />
           </ListItem>
 
-          {/* Giờ khám */}
+          {/* Horário da consulta */}
           <ListItem>
             <ListItemAvatar>
               <Avatar>
@@ -98,7 +95,7 @@ const ConfirmAppointment: React.FC<ConfirmAppointmentProps> = ({
             />
           </ListItem>
 
-          {/* Thông tin bác sĩ */}
+          {/* Informações do médico */}
           <ListItem>
             <ListItemAvatar>
               <Avatar src={doctor.avatar ?? ""}>

@@ -31,5 +31,5 @@ export const getAge = (dob: Date): number => {
   return age;
 };
 
-// Do admin không khác biệt nhiều so với User
+// O admin não é muito diferente do User
 export type Admin = User;

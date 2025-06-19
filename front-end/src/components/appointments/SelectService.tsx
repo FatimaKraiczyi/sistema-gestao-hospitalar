@@ -9,7 +9,6 @@ import {
   CircularProgress,
   Paper,
 } from "@mui/material";
-import { useTranslation } from "react-i18next";
 // import { getSpecialties } from "../../services/specialty_service";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import { getAllTypeDiseases } from "../../services/authenticate/typeDisease_service.ts";
@@ -19,7 +18,6 @@ interface SelectSpecialtyProps {
 }
 
 const SelectService: React.FC<SelectSpecialtyProps> = ({ onSelect }) => {
-  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [services, setServices] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +37,7 @@ const SelectService: React.FC<SelectSpecialtyProps> = ({ onSelect }) => {
             return [];
           });
 
-        // lọc các dịch vụ đang hoạt động
+        // filtrar apenas os serviços ativos
         const activeServices = result.filter(
           (service: any) => service.status === true
         );

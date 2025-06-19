@@ -43,7 +43,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
               />
             )}
             {name && <Typography variant="h5">{name}</Typography>}
-            <IconButton aria-label="Chỉnh sửa" sx={{ marginLeft: "auto" }}>
+            <IconButton aria-label="Editar" sx={{ marginLeft: "auto" }}>
               <EditIcon />
             </IconButton>
           </Box>

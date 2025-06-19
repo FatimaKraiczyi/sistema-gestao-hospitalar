@@ -18,10 +18,10 @@ export const importDoctor = async (doctors: any) => {
   return response.data;
 };
 
-// api dành cho việc thêm và update chứng chỉ của bác sĩ
-// nếu certId khác 0 thì là update, không có thì là add
+// API para adicionar e atualizar certificados do médico
+// Se certId for diferente de 0 é atualização, se não existe é adição
 export const updateAddCertificate = async (
-  doctorId: string, // userId của bác sĩ
+  doctorId: string, // userId do médico
   certificate: {
     certName: string;
     issueDate: string; // dd-mm-yyyy
@@ -30,7 +30,7 @@ export const updateAddCertificate = async (
 ) => {
   const { certName, issueDate } = certificate;
 
-  console.log("Gọi API thêm/cập nhật chứng chỉ:", {
+  console.log("Chamar API para adicionar/atualizar certificado:", {
     doctorId,
     certId,
     requestBody: { certName, issueDate },
@@ -41,14 +41,14 @@ export const updateAddCertificate = async (
     { certName, issueDate }
   );
 
-  console.log("Kết quả API chứng chỉ:", response.data);
+  console.log("Resultado da API de certificado:", response.data);
   return response.data;
 };
 
-// api dành cho việc thêm và update kinh nghiệm của bác sĩ
-// nếu experienceId khác 0 thì là update, không có thì là add
+// API para adicionar e atualizar experiência do médico
+// Se experienceId for diferente de 0 é atualização, se não existe é adição
 export const updateAddExperience = async (
-  doctorId: string, // userId của bác sĩ
+  doctorId: string, // userId do médico
   experience: {
     companyName: string;
     specialization: string;
@@ -86,7 +86,7 @@ export const updateAddExperience = async (
     description,
   };
 
-  console.log("Gọi API thêm/cập nhật kinh nghiệm:", {
+  console.log("Chamar API para adicionar/atualizar experiência:", {
     doctorId,
     experienceId,
     requestBody,
@@ -97,14 +97,14 @@ export const updateAddExperience = async (
     requestBody
   );
 
-  console.log("Kết quả API kinh nghiệm:", response.data);
+  console.log("Resultado da API de experiência:", response.data);
   return response.data;
 };
 
-// api dành cho việc thêm và update thông tin học vấn của bác sĩ
-// nếu educationId khác 0 thì là update, không có thì là add
+// API para adicionar e atualizar informações acadêmicas do médico
+// Se educationId for diferente de 0 é atualização, se não existe é adição
 export const updateAddEducation = async (
-  doctorId: string, // userId của bác sĩ
+  doctorId: string, // userId do médico
   education: {
     schoolName: string;
     joinDate: string; // dd-mm-yyyy
@@ -117,7 +117,7 @@ export const updateAddEducation = async (
 
   const requestBody = { schoolName, joinDate, graduateDate, diploma };
 
-  console.log("Gọi API thêm/cập nhật học vấn:", {
+  console.log("Chamar API para adicionar/atualizar formação acadêmica:", {
     doctorId,
     educationId,
     requestBody,
@@ -128,11 +128,11 @@ export const updateAddEducation = async (
     requestBody
   );
 
-  console.log("Kết quả API học vấn:", response.data);
+  console.log("Resultado da API de formação acadêmica:", response.data);
   return response.data;
 };
 
-// delete thật ra là thay đổi trạng thái của bác sĩ
+// Exclusão na verdade é alteração do status do médico
 export const deleteDoctor = async (doctorId: string) => {
   const response = await axiosConfig.delete(`${prefix}`, {
     params: {

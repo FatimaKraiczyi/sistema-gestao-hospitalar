@@ -24,7 +24,6 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import { format } from "date-fns";
 import { getPatientDashboard } from "../../services/appointment/dashboard_service";
-import ChatBot from "../../components/chatbot/ChatBot";
 
 interface Appointment {
   id: number;
@@ -583,7 +582,6 @@ const PatientDashboard: React.FC = () => {
           </Paper>
         </Grid>
       </Grid>
-      <ChatBot />
     </>
   );
 };

@@ -36,10 +36,10 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 /**
- * Là modal xuất hiện sau khi người dùng nhấn vào nút chỉnh sửa từ EditableAvatar
-Cho phép người dùng chọn file ảnh mới từ máy tính để upload
-Hiển thị preview ảnh mới trước khi lưu
-Xử lý việc tương tác với API để tải ảnh lên server
+ * Modal exibido após o usuário clicar no botão de editar do EditableAvatar
+Permite ao usuário escolher uma nova imagem do computador para upload
+Exibe o preview da nova imagem antes de salvar
+Faz a interação com a API para enviar a imagem ao servidor
  */
 const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
   open,
@@ -80,7 +80,7 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
-      <DialogTitle>Thay đổi ảnh đại diện</DialogTitle>
+      <DialogTitle>Alterar foto do perfil</DialogTitle>
       <DialogContent>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -108,7 +108,7 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
             startIcon={<CloudUploadIcon />}
             disabled={isLoading}
           >
-            Tải ảnh lên
+            Enviar imagem
             <VisuallyHiddenInput
               type="file"
               accept="image/*"
@@ -126,7 +126,7 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="inherit" disabled={isLoading}>
-          Hủy bỏ
+          Cancelar
         </Button>
         <Button
           onClick={handleSave}
@@ -135,7 +135,7 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
           disabled={isLoading || !file}
           startIcon={isLoading ? <CircularProgress size={20} /> : null}
         >
-          {isLoading ? "Đang lưu..." : "Lưu"}
+          {isLoading ? "Salvando..." : "Salvar"}
         </Button>
       </DialogActions>
     </Dialog>

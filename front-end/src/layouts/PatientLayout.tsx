@@ -22,7 +22,6 @@ export default function PatientLayout() {
     appointments: "My Appointments",
     "find-doctor": "Find Doctor",
     "medical-records": "Hồ sơ bệnh án của tôi",
-    chat: "Messages",
   };
 
   const handleNavigation = (path: string) => {
@@ -45,12 +44,6 @@ export default function PatientLayout() {
           </ListItemIcon>
           <ListItemText primary="Lịch hẹn" />
         </ListItemButton>
-        {/* <ListItemButton onClick={() => handleNavigation(ROUTING.FIND_DOCTOR)}>
-          <ListItemIcon>
-            <LocalHospitalIcon />
-          </ListItemIcon>
-          <ListItemText primary="Find Doctor" />
-        </ListItemButton> */}
       </List>
       <Divider />
       <List>
@@ -62,12 +55,6 @@ export default function PatientLayout() {
           </ListItemIcon>
           <ListItemText primary="Hồ sơ bệnh án" />
         </ListItemButton>
-        {/* <ListItemButton onClick={() => handleNavigation(ROUTING.CHAT)}>
-          <ListItemIcon>
-            <ChatIcon />
-          </ListItemIcon>
-          <ListItemText primary="Messages" />
-        </ListItemButton> */}
       </List>
     </>
   );
