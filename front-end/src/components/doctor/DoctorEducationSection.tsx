@@ -46,7 +46,7 @@ export const DoctorEducationSection: React.FC<DoctorEducationProps> = ({
                 />
               </Box>
               <Typography variant="body2" color="text.secondary">
-                {edu.joinDate} - {edu.graduateDate}
+                {edu.joinedDate} - {edu.graduateDate}
               </Typography>
             </Box>
           </Box>

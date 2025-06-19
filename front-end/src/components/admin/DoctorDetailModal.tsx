@@ -12,7 +12,6 @@ import {
   Avatar,
   Grid,
   Paper,
-  Divider,
   Table,
   TableBody,
   TableCell,
@@ -100,6 +99,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
       setTabValue(0);
       fetchDoctorDetails();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const fetchDoctorDetails = async () => {
@@ -121,6 +121,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
           "Não foi possível carregar as informações detalhadas do médico"
         );
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       setError(
         "Ocorreu um erro ao carregar as informações detalhadas do médico"
@@ -130,7 +131,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
     }
   };
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
@@ -449,7 +450,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                             </TableCell>
                             <TableCell>
                               {parseDateFromString(
-                                education.joinDate || education.joinedDate
+                                education.joinedDate
                               ).getFullYear()}{" "}
                               -{" "}
                               {parseDateFromString(
@@ -573,9 +574,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                       <TableBody>
                         {experiences.map((experience) => (
                           <TableRow key={experience.id}>
-                            <TableCell>
-                              {experience.companyName || experience.compName}
-                            </TableCell>
+                            <TableCell>{experience.compName}</TableCell>
                             <TableCell>{experience.specialization}</TableCell>
                             <TableCell>
                               {parseDateFromString(
@@ -624,7 +623,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
         onSuccess={handleEducationSuccess}
         education={selectedEducation}
         mode={formMode}
-        doctorId={doctor?.userId || 0}
+        doctorId={Number(doctor?.userId) || 0}
       />
 
       <CertificateForm
@@ -633,7 +632,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
         onSuccess={handleCertificateSuccess}
         certificate={selectedCertificate}
         mode={formMode}
-        doctorId={doctor?.userId || 0}
+        doctorId={Number(doctor?.userId) || 0}
       />
 
       <ExperienceForm
@@ -642,7 +641,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
         onSuccess={handleExperienceSuccess}
         experience={selectedExperience}
         mode={formMode}
-        doctorId={doctor?.userId || 0}
+        doctorId={Number(doctor?.userId) || 0}
       />
     </Dialog>
   );

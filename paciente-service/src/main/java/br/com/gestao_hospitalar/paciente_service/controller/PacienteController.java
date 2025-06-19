@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,18 +43,6 @@ public class PacienteController {
     return ResponseEntity.ok(response);
   }
 
-  @PostMapping("/pontos/confirmar-compra")
-  public ResponseEntity<String> confirmarCompraStripe(
-    @RequestBody StripeSessionDTO dto
-  ) {
-    UUID pacienteId = getPacienteIdFromToken();
-    pacienteService.confirmarCompraStripeComSessionId(
-      pacienteId,
-      dto.getSessionId()
-    );
-    return ResponseEntity.ok("Compra confirmada e pontos creditados.");
-  }
-
   @GetMapping("/pontos/saldo")
   public ResponseEntity<Integer> consultarSaldo() {
     UUID pacienteId = getPacienteIdFromToken();
@@ -69,32 +56,6 @@ public class PacienteController {
     List<TransacaoPontosResponseDTO> historico =
       pacienteService.consultarHistorico(pacienteId);
     return ResponseEntity.ok(historico);
-  }
-
-  @PostMapping("/pontos/stripe-webhook")
-  public ResponseEntity<String> stripeWebhook(
-    @RequestBody String payload,
-    @RequestHeader(
-      value = "Stripe-Signature",
-      required = false
-    ) String sigHeader
-  ) {
-    try {
-      // (Opcional) Validar assinatura do Stripe usando sigHeader e endpoint secret
-      JSONObject eventJson = new JSONObject(payload);
-      String eventType = eventJson.getString("type");
-      if ("checkout.session.completed".equals(eventType)) {
-        JSONObject session = eventJson
-          .getJSONObject("data")
-          .getJSONObject("object");
-        pacienteService.processarPagamentoStripe(session);
-      }
-      return ResponseEntity.ok("");
-    } catch (Exception e) {
-      return ResponseEntity.status(400).body(
-        "Webhook error: " + e.getMessage()
-      );
-    }
   }
 
   private UUID getPacienteIdFromToken() {

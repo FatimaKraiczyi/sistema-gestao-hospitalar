@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from 'react'
 import {
   Dialog,
   DialogActions,
@@ -11,98 +11,105 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  FormHelperText,
-} from "@mui/material";
-import { User } from "../../types/user";
-import { useFormik } from "formik";
-import * as Yup from "yup";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { vi } from "date-fns/locale";
+  FormHelperText
+} from '@mui/material'
+import { User } from '../../types/user'
+import { useFormik } from 'formik'
+import * as Yup from 'yup'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { vi } from 'date-fns/locale'
 
 // Interface định nghĩa các props cho component PatientForm
 // Cho phép sử dụng chung một form cho cả thêm mới và chỉnh sửa
 interface PatientFormProps {
-  open: boolean; // Trạng thái hiển thị của modal
-  onClose: () => void; // Hàm xử lý khi đóng modal
-  onSubmit: (patient: Partial<User>) => void; // Hàm xử lý khi submit form
-  patient?: User | null; // Thông tin bệnh nhân (khi chỉnh sửa)
-  mode: "add" | "edit"; // Chế độ form: thêm mới hoặc chỉnh sửa
+  open: boolean // Trạng thái hiển thị của modal
+  onClose: () => void // Hàm xử lý khi đóng modal
+  onSubmit: (patient: Partial<User>) => void // Hàm xử lý khi submit form
+  patient?: User | null // Thông tin bệnh nhân (khi chỉnh sửa)
+  mode: 'add' | 'edit' // Chế độ form: thêm mới hoặc chỉnh sửa
 }
 
 // Schema validation sử dụng Yup
 // Định nghĩa các quy tắc kiểm tra dữ liệu nhập vào
 const validationSchema = Yup.object({
   firstName: Yup.string()
-    .required("Tên là bắt buộc")
-    .min(2, "Tên phải có ít nhất 2 ký tự"),
+    .required('Tên là bắt buộc')
+    .min(2, 'Tên phải có ít nhất 2 ký tự'),
   lastName: Yup.string()
-    .required("Họ là bắt buộc")
-    .min(2, "Họ phải có ít nhất 2 ký tự"),
-  sex: Yup.boolean().required("Giới tính là bắt buộc"),
+    .required('Họ là bắt buộc')
+    .min(2, 'Họ phải có ít nhất 2 ký tự'),
+  sex: Yup.string().oneOf(['male', 'female']).required('Giới tính là bắt buộc'),
   dob: Yup.date()
-    .required("Ngày sinh là bắt buộc")
-    .max(new Date(), "Ngày sinh không thể là ngày trong tương lai"),
+    .required('Ngày sinh là bắt buộc')
+    .max(new Date(), 'Ngày sinh không thể là ngày trong tương lai'),
   phone: Yup.string()
-    .required("Số điện thoại là bắt buộc")
-    .matches(/^[0-9]{10,11}$/, "Số điện thoại phải có 10-11 chữ số"),
-  email: Yup.string().required("Email là bắt buộc").email("Email không hợp lệ"),
-  status: Yup.boolean().required("Trạng thái là bắt buộc"),
-});
+    .required('Số điện thoại là bắt buộc')
+    .matches(/^[0-9]{10,11}$/, 'Số điện thoại phải có 10-11 chữ số'),
+  email: Yup.string().required('Email là bắt buộc').email('Email không hợp lệ'),
+  status: Yup.string()
+    .oneOf(['active', 'inactive'])
+    .required('Trạng thái là bắt buộc')
+})
 
 const PatientForm: React.FC<PatientFormProps> = ({
   open,
   onClose,
   onSubmit,
   patient,
-  mode,
+  mode
 }) => {
   // Sử dụng formik để quản lý form và validation
   const formik = useFormik({
     initialValues: {
-      firstName: "",
-      lastName: "",
-      sex: true,
-      dob: new Date().toISOString().split("T")[0],
-      phone: "",
-      email: "",
-      status: true,
+      firstName: '',
+      lastName: '',
+      sex: 'male',
+      dob: new Date().toISOString().split('T')[0],
+      phone: '',
+      email: '',
+      status: 'active'
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
-      onSubmit(values);
-    },
-  });
+      const submitValues = {
+        ...values,
+        sex: values.sex === 'male',
+        status: values.status === 'active'
+      }
+      onSubmit(submitValues)
+    }
+  })
 
   // Effect để cập nhật giá trị form khi chuyển sang chế độ chỉnh sửa
   // Hoặc reset form khi chuyển sang chế độ thêm mới
   useEffect(() => {
-    if (patient && mode === "edit") {
+    if (patient && mode === 'edit') {
       formik.setValues({
         firstName: patient.firstName,
         lastName: patient.lastName,
-        sex: patient.sex,
+        sex: patient.sex === false ? 'female' : 'male',
         dob: patient.dob,
         phone: patient.phone,
         email: patient.email,
-        status: patient.status,
-      });
-    } else if (mode === "add") {
-      formik.resetForm();
+        status: patient.status === false ? 'inactive' : 'active'
+      })
+    } else if (mode === 'add') {
+      formik.resetForm()
     }
-  }, [patient, mode]);
+  }, [patient, mode])
 
   // Xử lý đóng modal và reset form
   const handleClose = () => {
-    formik.resetForm();
-    onClose();
-  };
+    formik.resetForm()
+    onClose()
+  }
 
   // Xác định tiêu đề và nút bấm dựa trên chế độ form
   const title =
-    mode === "add" ? "Thêm bệnh nhân mới" : "Chỉnh sửa thông tin bệnh nhân";
-  const buttonText = mode === "add" ? "Thêm bệnh nhân" : "Lưu thay đổi";
+    mode === 'add' ? 'Thêm bệnh nhân mới' : 'Chỉnh sửa thông tin bệnh nhân'
+  const buttonText = mode === 'add' ? 'Thêm bệnh nhân' : 'Lưu thay đổi'
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
@@ -154,8 +161,8 @@ const PatientForm: React.FC<PatientFormProps> = ({
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 >
-                  <MenuItem value={false}>Nam</MenuItem>
-                  <MenuItem value={true}>Nữ</MenuItem>
+                  <MenuItem value="male">Nam</MenuItem>
+                  <MenuItem value="female">Nữ</MenuItem>
                 </Select>
                 {formik.touched.sex && formik.errors.sex && (
                   <FormHelperText>{formik.errors.sex as string}</FormHelperText>
@@ -172,8 +179,8 @@ const PatientForm: React.FC<PatientFormProps> = ({
                   value={new Date(formik.values.dob)}
                   onChange={(newValue) => {
                     if (newValue) {
-                      const dateStr = newValue.toISOString().split("T")[0];
-                      formik.setFieldValue("dob", dateStr);
+                      const dateStr = newValue.toISOString().split('T')[0]
+                      formik.setFieldValue('dob', dateStr)
                     }
                   }}
                   slotProps={{
@@ -182,8 +189,8 @@ const PatientForm: React.FC<PatientFormProps> = ({
                       error: formik.touched.dob && Boolean(formik.errors.dob),
                       helperText:
                         formik.touched.dob && (formik.errors.dob as string),
-                      onBlur: () => formik.setFieldTouched("dob", true),
-                    },
+                      onBlur: () => formik.setFieldTouched('dob', true)
+                    }
                   }}
                 />
               </LocalizationProvider>
@@ -228,8 +235,8 @@ const PatientForm: React.FC<PatientFormProps> = ({
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 >
-                  <MenuItem value={true}>Đang hoạt động</MenuItem>
-                  <MenuItem value={false}>Không hoạt động</MenuItem>
+                  <MenuItem value="active">Đang hoạt động</MenuItem>
+                  <MenuItem value="inactive">Không hoạt động</MenuItem>
                 </Select>
                 {formik.touched.status && formik.errors.status && (
                   <FormHelperText>
@@ -255,7 +262,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
         </DialogActions>
       </form>
     </Dialog>
-  );
-};
+  )
+}
 
-export default PatientForm;
+export default PatientForm

@@ -10,24 +10,14 @@ import lombok.Data;
 @Data
 public class RegisterRequest {
 
-		@NotBlank(message = "CPF é obrigatório")
-		@Size(min = 11, max = 11, message = "CPF deve conter 11 dígitos")
-    private String cpf;
+  @NotBlank(message = "CPF é obrigatório")
+  @Size(min = 11, max = 11, message = "CPF deve conter 11 dígitos")
+  private String cpf;
 
-    @NotBlank
-    private String name;
+  @Email(message = "E-mail inválido")
+  @NotBlank(message = "E-mail é obrigatório")
+  private String email;
 
-    @Email(message = "E-mail inválido")
-    @NotBlank(message = "E-mail é obrigatório")
-    private String email;
-
-    @NotBlank
-    private String cep;
-    
-    private String numero;
-    
-    private String complemento;
-
-    // @NotNull
-    // private UserType type;
+  @NotNull
+  private UserType type;
 }

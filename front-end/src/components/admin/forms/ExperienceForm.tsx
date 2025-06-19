@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -8,11 +9,9 @@ import {
   TextField,
   Grid,
   Typography,
-  Box,
   CircularProgress,
   Alert,
   Collapse,
-  FormHelperText,
 } from "@mui/material";
 import { Formik, Form, Field, FormikProps } from "formik";
 import * as Yup from "yup";
@@ -91,7 +90,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
   const [endDate, setEndDate] = useState<Date | null>(null);
 
   // State quản lý thông báo lỗi validation ngày tháng
-  const [dateValidation, setDateValidation] = useState<DateValidationErrors>({
+  const [, setDateValidation] = useState<DateValidationErrors>({
     hasError: false,
     messages: [],
   });
@@ -171,7 +170,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     if (!experience) return initialValues;
 
     return {
-      compName: experience.compName || experience.companyName || "",
+      compName: experience.compName || experience.compName || "",
       specialization: experience.specialization || "",
       startDate: experience.startDate || "",
       endDate: experience.endDate || "",
@@ -250,10 +249,16 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
           const updatedExperience: DoctorExperience = {
             ...submissionData,
             id: experienceId || response.data?.id || Date.now(),
-            compName: values.compName,
-            companyName: values.compName,
-            compAddress: values.address,
-            doctorId: doctorId,
+            compName: "",
+            compAddress: {
+              id: experience?.compAddress?.id || 0,
+              number: submissionData.address.number,
+              street: submissionData.address.street,
+              ward: submissionData.address.ward,
+              district: submissionData.address.district,
+              city: submissionData.address.city,
+              country: submissionData.address.country,
+            },
           };
           onSuccess(updatedExperience);
         }
@@ -407,16 +412,16 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 <Grid item xs={12} md={6}>
                   <Field
                     as={TextField}
-                    name="compAddress.city"
+                    name="address.city"
                     label="Thành phố"
                     fullWidth
                     error={
-                      formik.touched.compAddress?.city &&
-                      Boolean(formik.errors.compAddress?.city)
+                      formik.touched.address?.city &&
+                      Boolean(formik.errors.address?.city)
                     }
                     helperText={
-                      formik.touched.compAddress?.city &&
-                      formik.errors.compAddress?.city
+                      formik.touched.address?.city &&
+                      formik.errors.address?.city
                     }
                   />
                 </Grid>
@@ -424,7 +429,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 <Grid item xs={12} md={6}>
                   <Field
                     as={TextField}
-                    name="compAddress.country"
+                    name="address.country"
                     label="Quốc gia"
                     fullWidth
                   />
@@ -433,7 +438,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 <Grid item xs={12} md={6}>
                   <Field
                     as={TextField}
-                    name="compAddress.district"
+                    name="address.district"
                     label="Quận/Huyện"
                     fullWidth
                   />
@@ -442,7 +447,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 <Grid item xs={12} md={4}>
                   <Field
                     as={TextField}
-                    name="compAddress.ward"
+                    name="address.ward"
                     label="Phường/Xã"
                     fullWidth
                   />
@@ -451,7 +456,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 <Grid item xs={12} md={6}>
                   <Field
                     as={TextField}
-                    name="compAddress.street"
+                    name="address.street"
                     label="Đường"
                     fullWidth
                   />
@@ -460,7 +465,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 <Grid item xs={12} md={2}>
                   <Field
                     as={TextField}
-                    name="compAddress.number"
+                    name="address.number"
                     label="Số nhà"
                     fullWidth
                   />

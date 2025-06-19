@@ -50,7 +50,6 @@ interface EducationFormProps {
 interface EducationFormValues {
   schoolName: string;
   joinedDate: string;
-  joinDate?: string;
   graduateDate: string;
   diploma: keyof typeof Diploma;
 }
@@ -82,7 +81,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
   const [graduateDate, setGraduateDate] = useState<Date | null>(null);
 
   // State quản lý thông báo lỗi validation ngày tháng
-  const [dateValidation, setDateValidation] = useState<DateValidationErrors>({
+  const [, setDateValidation] = useState<DateValidationErrors>({
     hasError: false,
     messages: [],
   });
@@ -93,10 +92,8 @@ const EducationForm: React.FC<EducationFormProps> = ({
   // Cập nhật giá trị ngày tháng khi thông tin học vấn thay đổi
   useEffect(() => {
     if (education) {
-      if (education.joinedDate || education.joinDate) {
-        setJoinedDate(
-          parseDateFromString(education.joinedDate || education.joinDate || "")
-        );
+      if (education.joinedDate) {
+        setJoinedDate(parseDateFromString(education.joinedDate));
       }
       if (education.graduateDate) {
         setGraduateDate(parseDateFromString(education.graduateDate));
@@ -158,17 +155,16 @@ const EducationForm: React.FC<EducationFormProps> = ({
 
     return {
       schoolName: education.schoolName || "",
-      joinedDate: education.joinedDate || education.joinDate || "",
-      joinDate: education.joinDate || education.joinedDate || "",
+      joinedDate: education.joinedDate || "",
       graduateDate: education.graduateDate || "",
-      diploma: education.diploma || "BACHELOR",
+      diploma: (education.diploma as keyof typeof Diploma) || "BACHELOR",
     };
   };
 
   // Xử lý khi submit form
   const handleFormSubmit = async (
     values: EducationFormValues,
-    { setSubmitting }: any
+    { setSubmitting }: import("formik").FormikHelpers<EducationFormValues>
   ) => {
     // Kiểm tra lỗi ngày tháng trước khi gửi form
     const dateValidationResult = validateDates();
@@ -220,9 +216,10 @@ const EducationForm: React.FC<EducationFormProps> = ({
         if (onSuccess) {
           const updatedEducation: DoctorEducation = {
             ...submissionData,
-            id: educationId || response.data?.id || Date.now(), // Fallback nếu API không trả về ID
-            joinedDate: values.joinedDate,
+            id: educationId || response.data?.id || Date.now(),
             doctorId: doctorId,
+            joinedDate: "",
+            diploma: values.diploma as Diploma,
           };
           onSuccess(updatedEducation);
         }

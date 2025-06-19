@@ -33,7 +33,7 @@ export const DoctorExperienceSection: React.FC<DoctorExperienceProps> = ({
               <WorkIcon sx={{ mr: 1, color: "primary.main" }} />
               <Box>
                 <Typography variant="h6">
-                  {exp.companyName || "Công ty không xác định"}
+                  {exp.compName || "Công ty không xác định"}
                 </Typography>
                 <Typography variant="subtitle1" color="text.secondary">
                   {exp.specialization || "Thực hành chung"}
