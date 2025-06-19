@@ -1,216 +1,297 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import { Consulta, Agendamento } from './consulta.service';
+
+export interface ConsultaFuncionario {
+  codigo: string;
+  data: Date;
+  especialidade: string;
+  medico: string;
+  valor: number;
+  vagasTotal: number;
+  vagasOcupadas: number;
+  status: 'DISPONIVEL' | 'CANCELADA' | 'REALIZADA';
+  agendamentos: AgendamentoFuncionario[];
+}
+
+export interface AgendamentoFuncionario {
+  id: string;
+  codigoConsulta: string;
+  pacienteNome: string;
+  pacienteCpf: string;
+  status: 'CRIADO' | 'CHECK-IN' | 'COMPARECEU' | 'REALIZADO' | 'FALTOU' | 'CANCELADO';
+  pontosUsados: number;
+  valorPago: number;
+}
+
+export interface NovaConsulta {
+  data: Date;
+  especialidade: string;
+  medico: string;
+  valor: number;
+  vagas: number;
+}
 
 export interface Funcionario {
   id: string;
-  cpf: string;
   nome: string;
+  cpf: string;
   email: string;
   telefone: string;
   status: 'ATIVO' | 'INATIVO';
+  dataCadastro: Date;
+}
+
+export interface NovoFuncionario {
+  nome: string;
+  cpf: string;
+  email: string;
+  telefone: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class FuncionarioService {
-  private mockFuncionarios: Funcionario[] = [
-    {
-      id: '1',
-      cpf: '90769281001',
-      nome: 'Funcionário Padrão',
-      email: 'func_pre@hospital.com',
-      telefone: '(41) 99999-0001',
-      status: 'ATIVO'
-    },
-    {
-      id: '3',
-      cpf: '23456789012',
-      nome: 'Dr. Paulo Cardoso',
-      email: 'dr.paulo@hospital.com',
-      telefone: '(41) 99999-0002',
-      status: 'ATIVO'
-    }
-  ];
 
-  private mockConsultas: Consulta[] = [
-    { 
-      codigo: 'CON001', 
-      data: new Date(2025, 7, 10, 10, 30), 
-      especialidade: 'CARD', 
-      medico: 'Dr. Paulo Cardoso', 
-      valor: 300, 
-      vagasTotal: 5, 
-      vagasDisponiveis: 3,
-      status: 'DISPONIVEL'
-    },
-    { 
-      codigo: 'CON002', 
-      data: new Date(2025, 8, 11, 9, 30), 
-      especialidade: 'PED', 
-      medico: 'Dra. Lúcia Silva', 
-      valor: 250, 
-      vagasTotal: 4, 
-      vagasDisponiveis: 2,
-      status: 'DISPONIVEL'
-    }
-  ];
-
-  private mockAgendamentos: Agendamento[] = [
+  private mockConsultas: ConsultaFuncionario[] = [
     {
-      id: '1',
-      codigoConsulta: 'CON001',
-      codigoPaciente: '2',
-      data: new Date(2025, 7, 10, 10, 30),
+      codigo: 'CON001',
+      data: new Date(2025, 5, 5, 10, 30), // Próximas 48h
       especialidade: 'CARD',
       medico: 'Dr. Paulo Cardoso',
       valor: 300,
-      pontosUsados: 5,
-      valorPago: 275,
-      status: 'CRIADO'
+      vagasTotal: 5,
+      vagasOcupadas: 2,
+      status: 'DISPONIVEL',
+      agendamentos: [
+        {
+          id: '1',
+          codigoConsulta: 'CON001',
+          pacienteNome: 'Maria da Silva',
+          pacienteCpf: '12345678900',
+          status: 'CHECK-IN',
+          pontosUsados: 5,
+          valorPago: 275
+        },
+        {
+          id: '2',
+          codigoConsulta: 'CON001',
+          pacienteNome: 'João Santos',
+          pacienteCpf: '98765432100',
+          status: 'CRIADO',
+          pontosUsados: 0,
+          valorPago: 300
+        }
+      ]
+    },
+    {
+      codigo: 'CON004',
+      data: new Date(2025, 5, 6, 14, 0), // Próximas 48h
+      especialidade: 'PED',
+      medico: 'Dra. Lúcia Silva',
+      valor: 250,
+      vagasTotal: 4,
+      vagasOcupadas: 1,
+      status: 'DISPONIVEL',
+      agendamentos: [
+        {
+          id: '3',
+          codigoConsulta: 'CON004',
+          pacienteNome: 'Ana Costa',
+          pacienteCpf: '11122233344',
+          status: 'CRIADO',
+          pontosUsados: 10,
+          valorPago: 200
+        }
+      ]
+    }
+  ];
+
+  private mockFuncionarios: Funcionario[] = [
+    {
+      id: '1',
+      nome: 'Dr. Paulo Cardoso',
+      cpf: '23456789012',
+      email: 'dr.paulo@hospital.com',
+      telefone: '(41) 99999-0001',
+      status: 'ATIVO',
+      dataCadastro: new Date(2024, 0, 15)
+    },
+    {
+      id: '2',
+      nome: 'Dra. Lúcia Silva',
+      cpf: '34567890123',
+      email: 'dra.lucia@hospital.com',
+      telefone: '(41) 99999-0002',
+      status: 'ATIVO',
+      dataCadastro: new Date(2024, 1, 20)
+    },
+    {
+      id: '3',
+      nome: 'Dr. Carlos Santos',
+      cpf: '45678901234',
+      email: 'dr.carlos@hospital.com',
+      telefone: '(41) 99999-0003',
+      status: 'INATIVO',
+      dataCadastro: new Date(2023, 11, 10)
     }
   ];
 
   constructor() { }
 
-  // Listar consultas nas próximas 48h
-  getConsultasProximas48h(): Observable<Consulta[]> {
+  // R08: Obter consultas das próximas 48h
+  getConsultasProximas48h(): Observable<ConsultaFuncionario[]> {
     const agora = new Date();
-    const limite = new Date(agora.getTime() + (48 * 60 * 60 * 1000)); // 48 horas
+    const em48h = new Date(agora.getTime() + 48 * 60 * 60 * 1000);
     
-    const consultasProximas = this.mockConsultas.filter(c => 
-      c.data >= agora && c.data <= limite && c.status === 'DISPONIVEL'
-    );
+    const consultasProximas = this.mockConsultas.filter(consulta => {
+      return consulta.data >= agora && consulta.data <= em48h && consulta.status === 'DISPONIVEL';
+    });
     
     return of(consultasProximas).pipe(delay(800));
   }
 
-  // Confirmar comparecimento do paciente
-  confirmarComparecimento(agendamentoId: string): Observable<boolean> {
-    const agendamento = this.mockAgendamentos.find(a => a.id === agendamentoId);
+  // R09: Confirmar comparecimento
+  confirmarComparecimento(codigoAgendamento: string): Observable<boolean> {
+    const consulta = this.mockConsultas.find(c => 
+      c.agendamentos.some(a => a.id === codigoAgendamento)
+    );
     
-    if (!agendamento || agendamento.status !== 'CHECK-IN') {
-      return of(false).pipe(delay(500));
+    if (consulta) {
+      const agendamento = consulta.agendamentos.find(a => a.id === codigoAgendamento);
+      if (agendamento && agendamento.status === 'CHECK-IN') {
+        agendamento.status = 'COMPARECEU';
+        return of(true).pipe(delay(500));
+      }
     }
     
-    // Atualizar status
-    agendamento.status = 'COMPARECEU';
-    
-    return of(true).pipe(delay(800));
+    return of(false).pipe(delay(500));
   }
 
-  // Cancelar consulta
+  // R10: Cancelar consulta
   cancelarConsulta(codigoConsulta: string): Observable<boolean> {
     const consulta = this.mockConsultas.find(c => c.codigo === codigoConsulta);
     
-    if (!consulta) {
-      return of(false).pipe(delay(500));
-    }
-    
-    // Verificar se menos de 50% das vagas estão ocupadas
-    const vagasOcupadas = consulta.vagasTotal - consulta.vagasDisponiveis;
-    if (vagasOcupadas >= consulta.vagasTotal * 0.5) {
-      return of(false).pipe(delay(500));
-    }
-    
-    // Atualizar status da consulta
-    consulta.status = 'CANCELADA';
-    
-    // Atualizar status dos agendamentos vinculados
-    this.mockAgendamentos
-      .filter(a => a.codigoConsulta === codigoConsulta)
-      .forEach(a => a.status = 'CANCELADO');
-    
-    return of(true).pipe(delay(800));
-  }
-
-  // Realizar consulta
-  realizarConsulta(codigoConsulta: string): Observable<boolean> {
-    const agendamentos = this.mockAgendamentos.filter(a => a.codigoConsulta === codigoConsulta);
-    
-    if (agendamentos.length === 0) {
-      return of(false).pipe(delay(500));
-    }
-    
-    // Atualizar status dos agendamentos
-    agendamentos.forEach(a => {
-      if (a.status === 'COMPARECEU') {
-        a.status = 'REALIZADO';
-      } else if (['CRIADO', 'CHECK-IN'].includes(a.status)) {
-        a.status = 'FALTOU';
+    if (consulta) {
+      const percentualOcupacao = (consulta.vagasOcupadas / consulta.vagasTotal) * 100;
+      
+      if (percentualOcupacao < 50) {
+        consulta.status = 'CANCELADA';
+        consulta.agendamentos.forEach(agendamento => {
+          if (agendamento.status !== 'CANCELADO') {
+            agendamento.status = 'CANCELADO';
+          }
+        });
+        return of(true).pipe(delay(800));
       }
-    });
-    
-    return of(true).pipe(delay(800));
-  }
-
-  // Cadastrar nova consulta
-  cadastrarConsulta(consulta: Omit<Consulta, 'codigo' | 'status' | 'vagasDisponiveis'>): Observable<Consulta> {
-    // Gerar código sequencial
-    const novoCodigo = `CON${(this.mockConsultas.length + 1).toString().padStart(3, '0')}`;
-    
-    const novaConsulta: Consulta = {
-      ...consulta,
-      codigo: novoCodigo,
-      status: 'DISPONIVEL',
-      vagasDisponiveis: consulta.vagasTotal
-    };
-    
-    this.mockConsultas.push(novaConsulta);
-    
-    return of(novaConsulta).pipe(delay(1000));
-  }
-  
-  // Listar funcionários
-  getFuncionarios(): Observable<Funcionario[]> {
-    return of(this.mockFuncionarios).pipe(delay(800));
-  }
-  
-  // Cadastrar funcionário
-  cadastrarFuncionario(funcionario: Omit<Funcionario, 'id' | 'status'>): Observable<Funcionario> {
-    const novoFuncionario: Funcionario = {
-      ...funcionario,
-      id: (this.mockFuncionarios.length + 1).toString(),
-      status: 'ATIVO'
-    };
-    
-    this.mockFuncionarios.push(novoFuncionario);
-    
-    return of(novoFuncionario).pipe(delay(1000));
-  }
-  
-  // Atualizar funcionário
-  atualizarFuncionario(id: string, funcionario: Omit<Funcionario, 'id' | 'cpf' | 'status'>): Observable<Funcionario | null> {
-    const index = this.mockFuncionarios.findIndex(f => f.id === id);
-    
-    if (index === -1) {
-      return of(null).pipe(delay(500));
     }
     
-    const funcionarioAtualizado = {
-      ...this.mockFuncionarios[index],
-      nome: funcionario.nome,
-      email: funcionario.email,
-      telefone: funcionario.telefone
+    return of(false).pipe(delay(500));
+  }
+
+  // R11: Realizar consulta
+  realizarConsulta(codigoConsulta: string): Observable<boolean> {
+    const consulta = this.mockConsultas.find(c => c.codigo === codigoConsulta);
+    
+    if (consulta) {
+      consulta.status = 'REALIZADA';
+      consulta.agendamentos.forEach(agendamento => {
+        if (agendamento.status === 'COMPARECEU') {
+          agendamento.status = 'REALIZADO';
+        } else if (['CRIADO', 'CHECK-IN'].includes(agendamento.status)) {
+          agendamento.status = 'FALTOU';
+        }
+      });
+      return of(true).pipe(delay(1000));
+    }
+    
+    return of(false).pipe(delay(500));
+  }
+
+  // R12: Cadastrar nova consulta
+  cadastrarConsulta(novaConsulta: NovaConsulta): Observable<ConsultaFuncionario> {
+    const codigo = `CON${(this.mockConsultas.length + 1).toString().padStart(3, '0')}`;
+    
+    const consulta: ConsultaFuncionario = {
+      codigo,
+      data: novaConsulta.data,
+      especialidade: novaConsulta.especialidade,
+      medico: novaConsulta.medico,
+      valor: novaConsulta.valor,
+      vagasTotal: novaConsulta.vagas,
+      vagasOcupadas: 0,
+      status: 'DISPONIVEL',
+      agendamentos: []
     };
     
-    this.mockFuncionarios[index] = funcionarioAtualizado;
-    
-    return of(funcionarioAtualizado).pipe(delay(800));
+    this.mockConsultas.push(consulta);
+    return of(consulta).pipe(delay(1200));
   }
-  
-  // Inativar funcionário
+
+  // R13: Listar funcionários
+  getFuncionarios(): Observable<Funcionario[]> {
+    return of([...this.mockFuncionarios]).pipe(delay(600));
+  }
+
+  // R13: Cadastrar funcionário
+  cadastrarFuncionario(novoFuncionario: NovoFuncionario): Observable<Funcionario> {
+    const funcionario: Funcionario = {
+      id: (this.mockFuncionarios.length + 1).toString(),
+      nome: novoFuncionario.nome,
+      cpf: novoFuncionario.cpf,
+      email: novoFuncionario.email,
+      telefone: novoFuncionario.telefone,
+      status: 'ATIVO',
+      dataCadastro: new Date()
+    };
+    
+    this.mockFuncionarios.push(funcionario);
+    return of(funcionario).pipe(delay(1000));
+  }
+
+  // R14: Atualizar funcionário
+  atualizarFuncionario(id: string, dadosAtualizados: Partial<NovoFuncionario>): Observable<boolean> {
+    const funcionario = this.mockFuncionarios.find(f => f.id === id);
+    
+    if (funcionario) {
+      if (dadosAtualizados.nome) funcionario.nome = dadosAtualizados.nome;
+      if (dadosAtualizados.email) funcionario.email = dadosAtualizados.email;
+      if (dadosAtualizados.telefone) funcionario.telefone = dadosAtualizados.telefone;
+      
+      return of(true).pipe(delay(800));
+    }
+    
+    return of(false).pipe(delay(500));
+  }
+
+  // R15: Inativar funcionário
   inativarFuncionario(id: string): Observable<boolean> {
     const funcionario = this.mockFuncionarios.find(f => f.id === id);
     
-    if (!funcionario) {
-      return of(false).pipe(delay(500));
+    if (funcionario) {
+      funcionario.status = 'INATIVO';
+      return of(true).pipe(delay(600));
     }
     
-    funcionario.status = 'INATIVO';
+    return of(false).pipe(delay(500));
+  }
+
+  // Reativar funcionário
+  reativarFuncionario(id: string): Observable<boolean> {
+    const funcionario = this.mockFuncionarios.find(f => f.id === id);
     
-    return of(true).pipe(delay(800));
+    if (funcionario) {
+      funcionario.status = 'ATIVO';
+      return of(true).pipe(delay(600));
+    }
+    
+    return of(false).pipe(delay(500));
+  }
+
+  // Obter funcionário por ID
+  getFuncionarioPorId(id: string): Observable<Funcionario | null> {
+    const funcionario = this.mockFuncionarios.find(f => f.id === id);
+    return of(funcionario || null).pipe(delay(400));
   }
 }

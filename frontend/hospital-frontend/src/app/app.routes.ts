@@ -59,10 +59,20 @@ export const routes: Routes = [
     ]
   },
   
-  // Rotas de funcionário (a serem expandidas)
+  // Rotas de funcionário
   { 
     path: 'funcionario', 
     loadComponent: () => import('./features/funcionario/home/home.component').then(m => m.HomeComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'funcionario/consultas/nova',
+    loadComponent: () => import('./features/funcionario/cadastro-consulta/cadastro-consulta.component').then(m => m.CadastroConsultaComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'funcionario/funcionarios',
+    loadComponent: () => import('./features/funcionario/gerenciar-funcionarios/gerenciar-funcionarios.component').then(m => m.GerenciarFuncionariosComponent),
     canActivate: [authGuard]
   },
   

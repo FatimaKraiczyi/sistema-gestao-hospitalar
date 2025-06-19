@@ -1,29 +1,73 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+require("dotenv").config();
+
+const express = require("express");
+const { createProxyMiddleware } = require("http-proxy-middleware");
+const authenticateToken = require("./middlewares/authenticate");
+const authorizeRoles = require("./middlewares/authorize");
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+const PORT = process.env.PORT || 3000;
 
-// Suas rotas
-app.use('/auth', require('./routes/auth')); // rotas do auth-service
+const AUTH_MS_URL = process.env.AUTH_MS_URL || "http://auth-service:8081";
+const PACIENTE_MS_URL =
+  process.env.PACIENTE_MS_URL || "http://paciente-service:8082";
 
-// Middleware global de tratamento de erros (único e no fim, **depois** das rotas)
-app.use((err, req, res, next) => {
-    console.error('Erro inesperado:', err);
+// Proxy para Auth Service
+app.use(
+  "/api/auth",
+  createProxyMiddleware({
+    target: AUTH_MS_URL,
+    changeOrigin: true,
+    onProxyReq: (proxyReq, req) => {
+      // Removendo o cabeçalho Authorization
+      proxyReq.removeHeader("Authorization");
+    },
+  })
+);
 
-    // Verifica se erro veio de uma chamada axios (microserviço)
-    if (err.response && err.response.data) {
-        res.status(err.response.status).json(err.response.data);
-        return;
-    }
+// Proxy para Paciente Service (com autenticação obrigatória e validação de autorização)
+app.use(
+  "/api/paciente",
+  authenticateToken, // valida o JWT
+  authorizeRoles("PACIENTE"),
+  createProxyMiddleware({
+    target: PACIENTE_MS_URL,
+    changeOrigin: true,
+    onProxyReq: (proxyReq, req) => {
+      proxyReq.setHeader("Authorization", req.headers["authorization"]);
+      proxyReq.setHeader("x-user-id", req.user.id);
+      proxyReq.setHeader("x-user-cpf", req.user.cpf);
+      proxyReq.setHeader("x-user-email", req.user.email);
+      proxyReq.setHeader("x-user-type", req.user.type);
+    },
+    onError: (err, req, res) => {
+      // Repasse o erro do microserviço para o client
+      if (res.headersSent) return;
+      res.status(502).json({
+        message: "Erro ao comunicar com o serviço de paciente",
+        detail: err.message,
+      });
+    },
+    onProxyRes: (proxyRes, req, res) => {
+      // Permite que o corpo de erro do MS seja repassado para o client
+      let body = Buffer.from("");
+      proxyRes.on("data", function (data) {
+        body = Buffer.concat([body, data]);
+      });
+      proxyRes.on("end", function () {
+        if (proxyRes.statusCode >= 400) {
+          res.status(proxyRes.statusCode);
+          try {
+            res.json(JSON.parse(body.toString()));
+          } catch {
+            res.send(body.toString());
+          }
+        }
+      });
+    },
+  })
+);
 
-    // Caso erro genérico no API Gateway
-    res.status(500).json({
-        message: 'Erro interno no servidor'
-    });
+app.listen(PORT, () => {
+  console.log(`API Gateway rodando na porta ${PORT}`);
 });
-
-const PORT = 3000;
-app.listen(PORT, () => console.log(`API Gateway rodando na porta ${PORT}`));
