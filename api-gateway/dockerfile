@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Expõe a porta configurada no .env
-EXPOSE 3000
+EXPOSE 3333
 
 # Comando para iniciar a aplicação
 CMD ["node", "src/index.js"]

@@ -1,16 +1,17 @@
 services:
 
-  # API Gateway Node.js
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
+    restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3333:3333"
     environment:
-      AUTH_MS_URL: http://auth-service:8081
-      PACIENTE_MS_URL: http://paciente-service:8082
-      CONSULTA_MS_URL: http://consulta-service:8083
-      JWT_SECRET: ${JWT_SECRET}
+      - PORT=3333
+      - AUTH_MS_URL=http://auth-service:8081
+      - PACIENTE_MS_URL=http://paciente-service:8082
+      - CONSULTA_MS_URL=http://consulta-service:8083
+      - JWT_SECRET=${JWT_SECRET}
     env_file:
       - .env
     depends_on:
@@ -19,10 +20,10 @@ services:
     networks:
       - hospital-network
 
-  # Auth Service Spring Boot
   auth-service:
     build: ./auth-service
     container_name: auth-service
+    restart: unless-stopped
     ports:
       - "8081:8081"
     environment:
@@ -42,7 +43,7 @@ services:
   auth-db:
     image: postgres:17
     container_name: auth-db
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_DB: authdb
       POSTGRES_USER: ${POSTGRES_USER}
@@ -50,7 +51,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - auth-data:/var/lib/postgresql/data 
+      - auth-data:/var/lib/postgresql/data
     env_file:
       - .env
     networks:
@@ -59,6 +60,7 @@ services:
   paciente-service:
     build: ./paciente-service
     container_name: paciente-service
+    restart: unless-stopped
     ports:
       - "8082:8082"
     environment:
@@ -66,9 +68,11 @@ services:
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
+      - STRIPE_SECRET=${STRIPE_SECRET}
     env_file:
       - .env
     depends_on:
+      - auth-service
       - paciente-db
     networks:
       - hospital-network
@@ -76,6 +80,7 @@ services:
   paciente-db:
     image: postgres:17
     container_name: paciente-db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: pacientedb
       POSTGRES_USER: ${POSTGRES_USER}
@@ -83,7 +88,7 @@ services:
     ports:
       - "5434:5432"
     volumes:
-      - paciente-data:/var/lib/postgresql/data 
+      - paciente-data:/var/lib/postgresql/data
     env_file:
       - .env
     networks:
@@ -92,6 +97,7 @@ services:
   consulta-service:
     build: ./consulta-service
     container_name: consulta-service
+    restart: unless-stopped
     ports:
       - "8083:8083"
     environment:
@@ -109,7 +115,7 @@ services:
   consulta-db:
     image: postgres:17
     container_name: consulta-db
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_DB: consultadb
       POSTGRES_USER: ${POSTGRES_USER}
@@ -117,7 +123,7 @@ services:
     ports:
       - "5435:5432"
     volumes:
-      - consulta-data:/var/lib/postgresql/data 
+      - consulta-data:/var/lib/postgresql/data
     env_file:
       - .env
     networks:
@@ -127,6 +133,7 @@ services:
     image: dpage/pgadmin4
     user: "root"
     container_name: pgadmin
+    restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
@@ -147,4 +154,3 @@ volumes:
 networks:
   hospital-network:
     driver: bridge
-  
