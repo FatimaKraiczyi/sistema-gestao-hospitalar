@@ -1,113 +1,159 @@
 import { createStyles } from 'antd-style'
 
 export const useStyles = createStyles(({ css }) => ({
-  background: css`
+  bodyHome: css`
     position: relative;
     width: 100vw;
     min-height: 100vh;
     background: #fff url('/img-fundo.jpg') no-repeat center center/cover;
     overflow: hidden;
   `,
-  topBar: css`
-    width: 100%;
-    height: 40px;
-    background: #07b4ba;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding: 0 40px;
-    color: #fff;
-    font-size: 16px;
-  `,
-  logoutButton: css`
-    position: absolute;
-    top: 30px;
-    right: 60px;
-    width: 64px;
-    height: 99px;
+  divAgendar: css`
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
-    background: #fff;
-    border: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    z-index: 2;
+    padding: 40px 52px;
+    gap: 51px;
+    width: 457px;
+    height: 247px;
+    background: #c5ebfe;
+    border-radius: 27.1456px;
   `,
-  logoutText: css`
-    font-size: 29px;
-    color: #506175;
-    font-style: italic;
-    font-weight: 500;
-  `,
-  perfilBox: css`
-    position: absolute;
-    top: 127px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 492px;
-    height: 115px;
-    background: #fff;
+  bodyAgendar: css`
     display: flex;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    gap: 34px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    z-index: 3;
+    padding: 0;
+    gap: 51px;
+    width: 308px;
+    height: 31px;
   `,
-  perfilImg: css`
+  textAgendar: css`
+    width: 308px;
+    height: 31px;
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 25.853px;
+    line-height: 31px;
+    color: #000;
+  `,
+  btnAgendar: css`
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    width: 200px;
+    height: 85px;
+    background: #76bfac;
+    border: 5px solid #cfe3e1;
+    border-radius: 25px;
+  `,
+  textBtnAgendar: css`
+    width: 121px;
+    height: 36px;
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 30px;
+    line-height: 36px;
+    color: #fff;
+  `,
+  imgDoctor: css`
     width: 105px;
     height: 105px;
     border-radius: 50%;
     object-fit: cover;
   `,
-  perfilLabel: css`
+  doctorImg: css`
+    width: 674.59px;
+    height: 463px;
+    background-size: cover;
+    background-position: center;
+  `,
+  textEspecialidades: css`
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0;
+    gap: 10px;
+    width: 529px;
+    height: 44px;
+  `,
+  textEspecialidadesTitle: css`
+    width: 529px;
+    height: 44px;
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 44px;
+    text-align: center;
+    color: #000;
+  `,
+  especialidades: css`
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    padding: 0;
+    gap: 61.63px;
+    width: 1174px;
+    min-width: 357.86px;
+    height: 585px;
+  `,
+  cardEspecialidade: css`
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    gap: 9.62px;
+    isolation: isolate;
+    width: 346.38px;
+    height: 236.69px;
+    position: relative;
   `,
-  saudar: css`
-    font-size: 42px !important;
-    font-style: italic;
-    color: #506175 !important;
-    margin: 0 !important;
-    line-height: 1.1;
+  imgEspecialidade: css`
+    box-sizing: border-box;
+    width: 346.38px;
+    height: 178px;
+    background-size: cover;
+    background-position: center;
+    border: 2.8865px solid #000;
+    border-radius: 46.184px;
+    z-index: 0;
   `,
-  clinica: css`
-    font-size: 42px !important;
-    font-style: italic;
-    color: #506175 !important;
-    margin: 0 !important;
-    line-height: 1.1;
-  `,
-  mainOptions: css`
+  retEspecialidade: css`
+    width: 263.63px;
+    height: 49.07px;
+    background: #c5ebfe;
+    border-radius: 46.184px;
     position: absolute;
-    top: 495px;
     left: 50%;
     transform: translateX(-50%);
-    width: 950px;
-    display: flex;
-    gap: 50px;
-    z-index: 4;
+    bottom: 10px;
+    z-index: 1;
   `,
-  optionCard: css`
-    width: 150px !important;
-    height: 139px !important;
-    background: #ecf3f1 !important;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  `,
-  optionIcon: css`
-    font-size: 64px;
-    margin-bottom: 8px;
-    color: #07b4ba;
-  `,
-  optionText: css`
-    font-family: 'Catamaran', sans-serif;
-    font-size: 22px;
-    color: #07b4ba;
+  textEspecialidade: css`
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 20px;
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 29.9791px;
+    line-height: 36px;
     text-align: center;
-    width: 100%;
+    color: #000;
+    z-index: 2;
   `
 }))
