@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { useSelector } from "react-redux";
@@ -11,18 +12,15 @@ import {
   CardContent,
   Button,
   Avatar,
-  Divider,
-  Paper,
+  Tooltip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Tooltip,
 } from "@mui/material";
 import EventIcon from "@mui/icons-material/Event";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PersonIcon from "@mui/icons-material/Person";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -78,9 +76,13 @@ const PatientAppointmentDetailsPage: React.FC = () => {
 
   const fetchAppointmentDetails = async () => {
     try {
+      if (!appointmentId) {
+        setLoading(false);
+        return;
+      }
       const result = await getAppointmentPatientDetail(
         user.userId,
-        appointmentId
+        Number(appointmentId)
       )
         .then((response) => response.data.data)
         .catch((error) => {
@@ -414,18 +416,6 @@ const PatientAppointmentDetailsPage: React.FC = () => {
                 </Typography>
               </Box>
             </Grid>
-
-            {/* <Grid item xs={12} md={4} display="flex" alignItems="center">
-              <LocationOnIcon sx={{ mr: 1, color: "primary.main" }} />
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  Địa điểm
-                </Typography>
-                <Typography variant="body1" fontWeight="medium">
-                  {appointment.location}
-                </Typography>
-              </Box>
-            </Grid> */}
           </Grid>
 
           {/* Lý do khám bệnh */}

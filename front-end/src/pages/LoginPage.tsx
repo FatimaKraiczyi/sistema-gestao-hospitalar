@@ -82,11 +82,6 @@ export default function LoginPage() {
     },
   });
 
-  const handleFaceLogin = () => {
-    console.log("Login com reconhecimento facial");
-    // Implementar login com reconhecimento facial
-  };
-
   return (
     <Container maxWidth="sm">
       <Box
@@ -99,7 +94,7 @@ export default function LoginPage() {
         }}
       >
         <Typography variant="h5" align="center" gutterBottom>
-          Bem-vindo de volta
+          Bem-vindo
         </Typography>
         <Typography variant="body2" align="center" sx={{ mb: 3 }}>
           Ainda não tem uma conta? <Link href="/register">Crie uma conta</Link>
@@ -178,20 +173,6 @@ export default function LoginPage() {
                 {isLoading ? "Entrando..." : "Entrar"}
               </Button>
             </Grid2>
-
-            {/* <Grid2 size={{ xs: 12 }}>
-              <Button
-                fullWidth
-                variant="outlined"
-                color="primary"
-                size="large"
-                startIcon={<Face />}
-                onClick={handleFaceLogin}
-                sx={{ mt: 1 }}
-              >
-                Entrar com Face ID
-              </Button>
-            </Grid2> */}
           </Grid2>
         </form>
       </Box>

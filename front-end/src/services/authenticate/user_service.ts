@@ -1,5 +1,4 @@
 import axiosConfig from "../axiosConfig";
-import mime from "mime";
 
 const prefix = "/authenticate/api/v1/user";
 export const getPatientInfo = async (userId: string) => {
@@ -20,9 +19,18 @@ export const getDoctorInfo = async (userId: string) => {
   return response;
 };
 
-export const updateInfo = async (userId: string, data: any) => {
+// Corrige tipagem do parâmetro data em updateInfo
+export interface PatientUpdateInfo {
+  // Adapte os campos conforme o backend espera
+  name?: string;
+  email?: string;
+  phone?: string;
+  // ...outros campos...
+}
+
+export const updateInfo = async (userId: string, data: PatientUpdateInfo) => {
   const response = await axiosConfig.put(`${prefix}/patient/${userId}`, data);
-  return response;
+  return response.data;
 };
 
 export const addBankAccount = async (

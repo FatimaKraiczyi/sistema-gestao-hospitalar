@@ -15,11 +15,10 @@ import {
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import PersonIcon from "@mui/icons-material/Person";
 import { ROUTING } from "../../constants/routing";
 import { io, Socket } from "socket.io-client";
-import { da } from "date-fns/locale";
 
 /**
  * Trang Phòng Chờ Khám Bệnh dành cho bệnh nhân

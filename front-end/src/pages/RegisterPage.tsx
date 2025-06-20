@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Grid2 } from "@mui/material";
@@ -9,79 +8,31 @@ import {
   Button,
   Typography,
   Link,
-  FormControlLabel,
-  RadioGroup,
-  Radio,
-  FormControl,
-  FormLabel,
-  IconButton,
-  InputAdornment,
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { signUp } from "../services/authenticate/auth_service";
 import { useNavigate } from "react-router";
-import { formatDateToString } from "../utils/dateUtils";
 import { toast } from "react-toastify";
 import { ROUTING } from "../constants/routing";
 
-// Validação dos dados de entrada para o formulário de cadastro
 const validationSchema = Yup.object({
-  firstName: Yup.string()
-    .required("Nome é obrigatório")
-    .min(2, "Nome deve ter pelo menos 2 caracteres"),
-  lastName: Yup.string()
-    .required("Sobrenome é obrigatório")
-    .min(2, "Sobrenome deve ter pelo menos 2 caracteres"),
-  username: Yup.string()
-    .required("Nome de usuário é obrigatório")
-    .min(3, "Nome de usuário deve ter pelo menos 3 caracteres"),
+  cpf: Yup.string()
+    .required("CPF é obrigatório")
+    .matches(/^\d{11}$/, "CPF deve conter 11 dígitos"),
   email: Yup.string().email("E-mail inválido").required("E-mail é obrigatório"),
-  phone: Yup.string()
-    .matches(/^[0-9]+$/, "O telefone deve conter apenas números")
-    .min(10, "O telefone deve ter pelo menos 10 dígitos")
-    .required("Telefone é obrigatório"),
-  password: Yup.string()
-    .min(8, "A senha deve ter pelo menos 8 caracteres")
-    .max(20, "A senha não pode ter mais de 20 caracteres")
-    .required("Senha é obrigatória"),
-  birthDate: Yup.date()
-    .max(new Date(), "A data de nascimento não pode ser no futuro")
-    .required("Data de nascimento é obrigatória"),
-  gender: Yup.string().required("Gênero é obrigatório"),
-  rememberMe: Yup.boolean(),
 });
 
 export default function RegisterPage() {
-  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
-      firstName: "",
-      lastName: "",
-      username: "",
+      cpf: "",
       email: "",
-      phone: "",
-      password: "",
-      birthDate: "",
-      gender: "female",
-      rememberMe: false,
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       try {
-        const isFemale = values.gender === "female";
-        const birthDate = new Date(values.birthDate);
-        const response = await signUp(
-          values.firstName,
-          values.lastName,
-          values.email,
-          values.password,
-          values.username,
-          isFemale,
-          formatDateToString(birthDate),
-          values.phone
-        );
+        const response = await signUp(values.cpf, values.email);
         if (response.status === 200 && response.data.code === 200) {
           toast.success("Conta criada com sucesso!");
           setTimeout(() => navigate(ROUTING.LOGIN), 2000);
@@ -114,46 +65,16 @@ export default function RegisterPage() {
         </Typography>
         <form onSubmit={formik.handleSubmit}>
           <Grid2 container spacing={2}>
-            <Grid2 size={{ xs: 6 }}>
-              <TextField
-                fullWidth
-                id="firstName"
-                name="firstName"
-                label="Nome"
-                value={formik.values.firstName}
-                onChange={formik.handleChange}
-                error={
-                  formik.touched.firstName && Boolean(formik.errors.firstName)
-                }
-                helperText={formik.touched.firstName && formik.errors.firstName}
-              />
-            </Grid2>
-            <Grid2 size={{ xs: 6 }}>
-              <TextField
-                fullWidth
-                id="lastName"
-                name="lastName"
-                label="Sobrenome"
-                value={formik.values.lastName}
-                onChange={formik.handleChange}
-                error={
-                  formik.touched.lastName && Boolean(formik.errors.lastName)
-                }
-                helperText={formik.touched.lastName && formik.errors.lastName}
-              />
-            </Grid2>
             <Grid2 size={{ xs: 12 }}>
               <TextField
                 fullWidth
-                id="username"
-                name="username"
-                label="Nome de usuário"
-                value={formik.values.username}
+                id="cpf"
+                name="cpf"
+                label="CPF"
+                value={formik.values.cpf}
                 onChange={formik.handleChange}
-                error={
-                  formik.touched.username && Boolean(formik.errors.username)
-                }
-                helperText={formik.touched.username && formik.errors.username}
+                error={formik.touched.cpf && Boolean(formik.errors.cpf)}
+                helperText={formik.touched.cpf && formik.errors.cpf}
               />
             </Grid2>
             <Grid2 size={{ xs: 12 }}>
@@ -169,83 +90,6 @@ export default function RegisterPage() {
               />
             </Grid2>
             <Grid2 size={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                id="phone"
-                name="phone"
-                label="Telefone"
-                value={formik.values.phone}
-                onChange={formik.handleChange}
-                error={formik.touched.phone && Boolean(formik.errors.phone)}
-                helperText={formik.touched.phone && formik.errors.phone}
-              />
-            </Grid2>
-            <Grid2 size={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                id="password"
-                name="password"
-                label="Senha"
-                type={showPassword ? "text" : "password"}
-                value={formik.values.password}
-                onChange={formik.handleChange}
-                error={
-                  formik.touched.password && Boolean(formik.errors.password)
-                }
-                helperText={formik.touched.password && formik.errors.password}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowPassword(!showPassword)}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid2>
-            <Grid2 size={{ xs: 6 }}>
-              <TextField
-                fullWidth
-                id="birthDate"
-                name="birthDate"
-                label="Data de nascimento"
-                type="date"
-                value={formik.values.birthDate}
-                onChange={formik.handleChange}
-                error={
-                  formik.touched.birthDate && Boolean(formik.errors.birthDate)
-                }
-                helperText={formik.touched.birthDate && formik.errors.birthDate}
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid2>
-            <Grid2 size={{ xs: 6 }}>
-              <FormControl fullWidth>
-                <FormLabel>Gênero</FormLabel>
-                <RadioGroup
-                  row
-                  name="gender"
-                  value={formik.values.gender}
-                  onChange={formik.handleChange}
-                >
-                  <FormControlLabel
-                    value="female"
-                    control={<Radio />}
-                    label="Feminino"
-                  />
-                  <FormControlLabel
-                    value="male"
-                    control={<Radio />}
-                    label="Masculino"
-                  />
-                </RadioGroup>
-              </FormControl>
-            </Grid2>
-            <Grid2 size={{ xs: 12 }}>
               <Button
                 fullWidth
                 variant="contained"
@@ -254,7 +98,7 @@ export default function RegisterPage() {
                 size="large"
                 sx={{ mt: 1 }}
               >
-                Cadastrar
+                Cadastrar e enviar senha por e-mail
               </Button>
             </Grid2>
           </Grid2>

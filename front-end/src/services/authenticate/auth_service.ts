@@ -19,25 +19,10 @@ export const getUserById = async (id: string | undefined) => {
   return response;
 };
 
-export const signUp = async (
-  firstName: string,
-  lastName: string,
-  email: string,
-  password: string,
-  username: string,
-  sex: boolean,
-  dob: string,
-  phone: string
-) => {
+export const signUp = async (cpf: string, email: string) => {
   const response = await axiosConfig.post(prefix + "/register", {
-    firstName,
-    lastName,
+    cpf,
     email,
-    password,
-    username,
-    sex,
-    dob,
-    phone,
   });
   return response;
 };

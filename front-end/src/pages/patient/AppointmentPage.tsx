@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -13,8 +13,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Chip,
-  Alert,
   Tooltip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -28,24 +26,14 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import BookAppointment from "../../components/appointments/BookAppointment";
 import { getAppointmentPatientBookInWeek } from "../../services/appointment/booking_service";
-import { io, Socket } from "socket.io-client";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { viVN } from "@mui/x-date-pickers/locales";
-import {
-  format,
-  addDays,
-  startOfWeek,
-  addWeeks,
-  subWeeks,
-  getYear,
-  getMonth,
-} from "date-fns";
+import { format, addDays, startOfWeek, addWeeks, subWeeks } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
   formatDateToString,
-  formatTime,
   formatTimeFromTimeString,
 } from "../../utils/dateUtils";
 import { ROUTING } from "../../constants/routing";
@@ -94,15 +82,6 @@ interface Appointment {
   typeDay?: TypeDay; // Dia da semana
   shiftId?: number; // ID do turno
   numericalOrder?: number; // Ordem numérica
-}
-
-// Interface Shift para corresponder ao modelo UML
-interface Shift {
-  id: number; // ID do turno
-  shift: number; // Número do turno (1 ou 2)
-  start: string; // Hora de início, formato: HH:mm
-  end: string; // Hora de término, formato: HH:mm
-  status: boolean; // Status do turno
 }
 
 const AppointmentPage = () => {
@@ -187,7 +166,7 @@ const AppointmentPage = () => {
 
       console.log("Agendamentos definidos para a semana:", {
         count: appointmentsData.length,
-        dates: appointmentsData.map((a) => a.date),
+        dates: appointmentsData.map((a: { date: string }) => a.date),
       });
 
       setAppointments(appointmentsData);
@@ -639,7 +618,7 @@ const AppointmentPage = () => {
           sx={{ display: "flex", alignItems: "center" }}
         >
           <CalendarMonthIcon sx={{ mr: 1, fontSize: 24 }} />
-          {t("patient.appointments.title")}
+          {"Agendamentos"}
         </Typography>
         <Button
           variant="contained"
@@ -647,7 +626,7 @@ const AppointmentPage = () => {
           onClick={handleBookingClick}
           disabled={showBooking}
         >
-          {t("patient.appointments.book_new")}
+          {"Novo agendamento"}
         </Button>
       </Box>
 
