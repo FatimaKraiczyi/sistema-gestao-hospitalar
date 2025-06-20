@@ -1,6 +1,4 @@
-import { use } from "react";
-import { MedicalRecord } from "../../types";
-import axiosConfig from "../axiosConfig";
+import axiosConfig from "../../services/axiosConfig";
 
 const prefix = "appointment/api/v1/medical_record";
 
