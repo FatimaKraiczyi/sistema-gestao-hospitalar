@@ -31,73 +31,73 @@ export const AdminLayout: React.FC = () => {
           <ListItemIcon>
             <DashboardIcon />
           </ListItemIcon>
-          <ListItemText primary="Thống kê" />
+          <ListItemText primary="Estatísticas" />
         </ListItemButton>
         <ListItemButton onClick={() => handleNavigation("/admin/users")}>
           <ListItemIcon>
             <PeopleIcon />
           </ListItemIcon>
-          <ListItemText primary="Quản lí bệnh nhân" />
+          <ListItemText primary="Gerenciar pacientes" />
         </ListItemButton>
         <ListItemButton onClick={() => handleNavigation("/admin/doctors")}>
           <ListItemIcon>
             <LocalHospitalIcon />
           </ListItemIcon>
-          <ListItemText primary="Quản lí bác sĩ" />
+          <ListItemText primary="Gerenciar médicos" />
         </ListItemButton>
-        {/* Medical drug */}
+        {/* Medicamentos */}
         <ListItemButton onClick={() => handleNavigation("/admin/drugs")}>
           <ListItemIcon>
             <MedicationIcon />
           </ListItemIcon>
-          <ListItemText primary="Quản lí thuốc" />
+          <ListItemText primary="Gerenciar medicamentos" />
         </ListItemButton>
-        {/* quản lí ca làm việc */}
+        {/* Gerenciar turnos */}
         <ListItemButton onClick={() => handleNavigation("/admin/shifts")}>
           <ListItemIcon>
             <AccessTimeIcon />
           </ListItemIcon>
-          <ListItemText primary="Quản lí ca làm việc" />
+          <ListItemText primary="Gerenciar turnos" />
         </ListItemButton>
-        {/* Quản lí dịch vụ */}
+        {/* Gerenciar grupos de doenças */}
         <ListItemButton onClick={() => handleNavigation("/admin/diseases")}>
           <ListItemIcon>
             <MedicalServicesIcon />
           </ListItemIcon>
-          <ListItemText primary="Quản lí nhóm bệnh" />
+          <ListItemText primary="Gerenciar grupos de doenças" />
         </ListItemButton>
-        {/* Hoàn tiền */}
+        {/* Gerenciar agendamentos */}
         <ListItemButton
           onClick={() => handleNavigation("/admin/cancel-appointment")}
         >
           <ListItemIcon>
             <EventBusyIcon />
           </ListItemIcon>
-          <ListItemText primary="Quản lí Lịch hẹn" />
+          <ListItemText primary="Gerenciar agendamentos" />
         </ListItemButton>
-        {/* Quản lí giá */}
+        {/* Gerenciar preços */}
         <ListItemButton onClick={() => handleNavigation("/admin/prices")}>
           <ListItemIcon>
             <AttachMoneyIcon />
           </ListItemIcon>
-          <ListItemText primary="Quản lí giá" />
+          <ListItemText primary="Gerenciar preços" />
         </ListItemButton>
       </List>
 
       {/* <Divider /> */}
       {/* <List>
-        <ListItemButton onClick={() => handleNavigation("/admin/settings")}>
-          <ListItemIcon>
-            <SettingsIcon />
-          </ListItemIcon>
-          <ListItemText primary="Settings" />
-        </ListItemButton>
-      </List> */}
+				<ListItemButton onClick={() => handleNavigation("/admin/settings")}>
+					<ListItemIcon>
+						<SettingsIcon />
+					</ListItemIcon>
+					<ListItemText primary="Configurações" />
+				</ListItemButton>
+			</List> */}
     </>
   );
 
   return (
-    <BaseLayout title="Admin Dashboard" sidebarContent={sidebarContent}>
+    <BaseLayout title="Painel Administrativo" sidebarContent={sidebarContent}>
       <Outlet />
     </BaseLayout>
   );

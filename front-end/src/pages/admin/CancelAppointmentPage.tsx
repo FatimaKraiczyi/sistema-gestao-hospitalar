@@ -48,25 +48,19 @@ export default function CancelAppointmentPage() {
   const [bankInfoError, setBankInfoError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
 
-  // Thêm effect để xử lý khi thay đổi trạng thái
   useEffect(() => {
     fetchAppointments(selectedStatus);
   }, [selectedStatus]);
 
-  // Chuyển đổi dữ liệu API sang định dạng hiển thị
   const transformAppointmentData = (apiData: any) => {
-    // Đảm bảo apiData là một mảng
     if (!Array.isArray(apiData)) {
-      console.error("Dữ liệu API không phải là mảng:", apiData);
+      console.error("Os dados da API não são um array:", apiData);
       return [];
     }
-
-    // console.log("Số lượng dữ liệu trước khi chuyển đổi:", apiData.length);
 
     const transformed = apiData
       .map((appointment, index) => {
         try {
-          // Định dạng ngày và giờ
           const dateStr =
             appointment.bookAppointment.workSchedule.dateAppointment;
           const timeStr =
@@ -79,12 +73,6 @@ export default function CancelAppointmentPage() {
               appointment.bookAppointment.workSchedule.shift.end,
               "string"
             );
-
-          // Debug để kiểm tra trạng thái hoàn tiền
-          // console.log(
-          //   `Appointment ${index} - Payment status:`,
-          //   appointment.bookAppointmentPayment.status
-          // );
 
           return {
             id: appointment.bookAppointment.id,
@@ -102,75 +90,56 @@ export default function CancelAppointmentPage() {
             rawData: appointment.bookAppointment,
           };
         } catch (error) {
-          console.error(`Lỗi khi chuyển đổi dữ liệu cuộc hẹn ${index}:`, error);
-          // console.error(
-          //   "Chi tiết appointment gây lỗi:",
-          //   JSON.stringify(appointment, null, 2)
-          // );
+          console.error(
+            `Erro ao converter dados do agendamento ${index}:`,
+            error
+          );
           return null;
         }
       })
       .filter(Boolean);
 
-    // console.log("Số lượng dữ liệu sau khi chuyển đổi:", transformed.length);
     return transformed;
   };
 
-  // Cập nhật hàm fetch để xử lý cả getAllBookings và getBookingsByStatus
   const fetchAppointments = async (status?: string) => {
     try {
       setLoading(true);
       setError(null);
 
-      console.log(`📌 Bắt đầu lọc theo trạng thái:`, status || "ALL");
-
       let response;
       if (status && status !== "ALL") {
-        // console.log(`📌 Gọi API getBookingsByStatus với trạng thái:`, status);
         response = await getBookingsByStatus(status);
       } else {
-        // console.log(`📌 Gọi API getAllBookings`);
         response = await getAllBookings();
       }
 
-      // Kiểm tra cấu trúc dữ liệu
       if (response && response.data && response.data.code === 200) {
         let appointmentsArray = [];
 
         if (response.data.data && Array.isArray(response.data.data)) {
           appointmentsArray = response.data.data;
-          // console.log(
-          //   `📌 Nhận được ${appointmentsArray.length} bản ghi từ API cho trạng thái:`,
-          //   status || "ALL"
-          // );
         } else {
-          console.error("Cấu trúc dữ liệu không mong đợi:", response.data);
+          console.error("Estrutura de dados inesperada:", response.data);
         }
 
         const transformedData = transformAppointmentData(appointmentsArray);
-        console.log(
-          `📌 Dữ liệu đã chuyển đổi cho trạng thái [${status || "ALL"}]:`,
-          transformedData.length,
-          "bản ghi"
-        );
 
         setCanceledAppointments(transformedData);
       } else {
-        throw new Error("Định dạng phản hồi không hợp lệ");
+        throw new Error("Formato de resposta inválido");
       }
     } catch (err) {
-      setError("Không thể lấy danh sách cuộc hẹn");
+      setError("Não foi possível obter a lista de agendamentos");
       console.error(
-        `📌 Lỗi khi lấy dữ liệu cho trạng thái [${status || "ALL"}]:`,
+        `Erro ao buscar dados para o status [${status || "ALL"}]:`,
         err
       );
     } finally {
       setLoading(false);
-      console.log(`📌 Hoàn thành lọc theo trạng thái:`, status || "ALL");
     }
   };
 
-  // Lấy thông tin tài khoản ngân hàng cho một bệnh nhân
   const fetchBankAccountInfo = async (patientId: string) => {
     try {
       setLoadingBankInfo(true);
@@ -185,41 +154,36 @@ export default function CancelAppointmentPage() {
         });
       } else {
         setBankInfo(null);
-        setBankInfoError("Không tìm thấy thông tin tài khoản ngân hàng");
+        setBankInfoError("Informações bancárias não encontradas");
       }
     } catch (err: any) {
-      console.error("Lỗi khi lấy thông tin tài khoản ngân hàng:", err);
+      console.error("Erro ao buscar informações bancárias:", err);
       setBankInfo(null);
 
-      // Xử lý các trường hợp lỗi khác nhau
       if (err.response && err.response.status === 404) {
         setBankInfoError(
-          "Bệnh nhân chưa cập nhật thông tin tài khoản ngân hàng"
+          "O paciente ainda não atualizou as informações bancárias"
         );
       } else {
-        setBankInfoError("Lỗi khi lấy thông tin tài khoản ngân hàng");
+        setBankInfoError("Erro ao buscar informações bancárias");
       }
     } finally {
       setLoadingBankInfo(false);
     }
   };
 
-  // Mở modal với chi tiết cuộc hẹn và lấy thông tin ngân hàng
   const handleViewDetails = async (appointment: any) => {
     setSelectedAppointment(appointment);
     setModalOpen(true);
 
-    // Đặt lại thông tin ngân hàng trước khi lấy
     setBankInfo(null);
     setBankInfoError(null);
 
-    // Lấy thông tin tài khoản ngân hàng bằng patientUserId
     if (appointment.patientUserId) {
       await fetchBankAccountInfo(appointment.patientUserId);
     }
   };
 
-  // Xử lý chuyển đổi trạng thái hoàn tiền - sử dụng API
   const handleRefundToggle = async (appointmentId: string) => {
     if (!selectedAppointment) return;
 
@@ -227,7 +191,6 @@ export default function CancelAppointmentPage() {
       setProcessingRefund(true);
       await assignPayback(appointmentId);
 
-      // Cập nhật trạng thái local sau khi gọi API thành công
       setCanceledAppointments((prevAppointments) =>
         prevAppointments.map((appointment) =>
           appointment.appointmentId === appointmentId
@@ -240,66 +203,64 @@ export default function CancelAppointmentPage() {
         )
       );
 
-      // Đóng modal sau khi hoàn tiền thành công
       setModalOpen(false);
     } catch (err) {
-      setError("Không thể xử lý hoàn tiền. Vui lòng thử lại.");
+      setError("Não foi possível processar o reembolso. Tente novamente.");
       console.error(err);
     } finally {
       setProcessingRefund(false);
     }
   };
 
-  // Định nghĩa các cột cho bảng dữ liệu - đã loại bỏ các cột ngân hàng
   const columns: GridColDef[] = [
     {
       field: "patientId",
-      headerName: "Mã bệnh nhân",
+      headerName: "ID do paciente",
       width: 120,
       flex: 0.8,
     },
     {
       field: "patientName",
-      headerName: "Họ tên",
+      headerName: "Nome do paciente",
       width: 180,
       flex: 1,
     },
     {
       field: "appointmentDateTime",
-      headerName: "Ngày giờ khám",
+      headerName: "Data e hora da consulta",
       width: 150,
       flex: 1,
     },
     {
       field: "appointmentId",
-      headerName: "Mã lịch hẹn",
+      headerName: "ID do agendamento",
       width: 120,
       flex: 0.8,
     },
     {
       field: "status",
-      headerName: "Trạng thái",
+      headerName: "Status",
       width: 150,
       flex: 1,
       renderCell: (params) => {
         let color = "gray";
-        let statusText = "Chưa xác định";
+        let statusText = "Indefinido";
 
         switch (params.row.status) {
           case "DONE":
             color = "green";
-            statusText = "Hoàn thành";
+            statusText = "Concluído";
             break;
           case "WAITING":
             color = "orange";
-            statusText = "Đang đợi";
+            statusText = "Aguardando";
             break;
           case "CANCELLED":
             color = "red";
-            statusText = "Đã hủy";
+            statusText = "Cancelado";
             break;
           default:
-            statusText = params.row.status || "Chưa xác định";
+            statusText = params.row.status || "Indefinido";
         }
 
         return (
@@ -316,29 +277,29 @@ export default function CancelAppointmentPage() {
     },
     {
       field: "paymentStatus",
-      headerName: "Trạng thái thanh toán",
+      headerName: "Status do pagamento",
       width: 150,
       flex: 1,
       renderCell: (params) => {
         let color = "gray";
-        let statusText = "Chưa xác định";
+        let statusText = "Indefinido";
 
         switch (params.row.paymentStatus) {
           case PaymentStatus.PAY_BACK:
             color = "green";
-            statusText = "Đã hoàn tiền";
+            statusText = "Reembolsado";
             break;
           case PaymentStatus.PAYED:
             color = "orange";
-            statusText = "Đã thanh toán";
+            statusText = "Pago";
             break;
           case PaymentStatus.CANCELED:
             color = "red";
-            statusText = "Đã hủy thanh toán";
+            statusText = "Pagamento cancelado";
             break;
           case PaymentStatus.WAITING_PAY:
             color = "blue";
-            statusText = "Đang chờ thanh toán";
+            statusText = "Aguardando pagamento";
             break;
         }
 
@@ -356,7 +317,7 @@ export default function CancelAppointmentPage() {
     },
     {
       field: "actions",
-      headerName: "Thao tác",
+      headerName: "Ações",
       width: 120,
       flex: 1,
       renderCell: (params) => (
@@ -367,50 +328,45 @@ export default function CancelAppointmentPage() {
           startIcon={<VisibilityIcon />}
           onClick={() => handleViewDetails(params.row)}
         >
-          Chi tiết
+          Detalhes
         </Button>
       ),
     },
   ];
 
-  // Xử lý thay đổi trạng thái từ dropdown
   const handleStatusChange = (event: SelectChangeEvent) => {
     setSelectedStatus(event.target.value);
   };
 
   return (
     <Box sx={{ height: "100%", width: "100%", padding: 3 }}>
-      {/* Tiêu đề trang */}
       <Typography variant="h4" component="h1" gutterBottom>
-        Danh sách bệnh nhân đặt lịch hẹn
+        Lista de agendamentos de pacientes
       </Typography>
 
-      {/* Thông báo lỗi */}
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
 
-      {/* Dropdown lọc theo trạng thái - Đã cập nhật để vô hiệu hóa khi đang tải */}
       <FormControl sx={{ mb: 2, minWidth: 200 }}>
-        <InputLabel id="status-select-label">Lọc theo trạng thái</InputLabel>
+        <InputLabel id="status-select-label">Filtrar por status</InputLabel>
         <Select
           labelId="status-select-label"
           id="status-select"
           value={selectedStatus}
-          label="Lọc theo trạng thái"
+          label="Filtrar por status"
           onChange={handleStatusChange}
-          disabled={loading} // Vô hiệu hóa dropdown khi đang tải dữ liệu
+          disabled={loading}
         >
-          <MenuItem value="ALL">Tất cả</MenuItem>
-          <MenuItem value="DONE">Hoàn thành</MenuItem>
-          <MenuItem value="WAITING">Đang đợi</MenuItem>
-          <MenuItem value="CANCELLED">Đã hủy</MenuItem>
+          <MenuItem value="ALL">Todos</MenuItem>
+          <MenuItem value="DONE">Concluído</MenuItem>
+          <MenuItem value="WAITING">Aguardando</MenuItem>
+          <MenuItem value="CANCELLED">Cancelado</MenuItem>
         </Select>
       </FormControl>
 
-      {/* Bảng dữ liệu */}
       <Paper sx={{ width: "100%" }}>
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
@@ -432,7 +388,7 @@ export default function CancelAppointmentPage() {
                 showQuickFilter: true,
                 quickFilterProps: { debounceMs: 500 },
                 csvOptions: {
-                  fileName: "canceled-appointments",
+                  fileName: "agendamentos-cancelados",
                   delimiter: ",",
                   utf8WithBom: true,
                 },
@@ -447,71 +403,68 @@ export default function CancelAppointmentPage() {
         )}
       </Paper>
 
-      {/* Modal thông tin chi tiết ngân hàng */}
       <Dialog
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Thông tin chi tiết hoàn tiền</DialogTitle>
+        <DialogTitle>Detalhes do reembolso</DialogTitle>
 
         <DialogContent>
           {selectedAppointment && (
             <Grid container spacing={2} sx={{ mt: 1 }}>
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
-                  <strong>Bệnh nhân:</strong> {selectedAppointment.patientName}
+                  <strong>Paciente:</strong> {selectedAppointment.patientName}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
-                  <strong>Mã bệnh nhân:</strong>{" "}
+                  <strong>ID do paciente:</strong>{" "}
                   {selectedAppointment.patientUserId}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
-                  <strong>Mã lịch hẹn:</strong>{" "}
+                  <strong>ID do agendamento:</strong>{" "}
                   {selectedAppointment.appointmentId}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
-                  <strong>Ngày giờ khám:</strong>{" "}
+                  <strong>Data e hora da consulta:</strong>{" "}
                   {selectedAppointment.appointmentDateTime}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
-                  <strong>Mã bác sĩ:</strong>{" "}
+                  <strong>ID do médico:</strong>{" "}
                   {selectedAppointment.rawData?.workSchedule?.doctor?.userId ||
-                    "Không có thông tin"}
+                    "Sem informação"}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
-                  <strong>Bác sĩ phụ trách:</strong>{" "}
+                  <strong>Médico responsável:</strong>{" "}
                   {selectedAppointment.rawData?.workSchedule?.doctor
                     ? `${selectedAppointment.rawData.workSchedule.doctor.lastName} ${selectedAppointment.rawData.workSchedule.doctor.firstName}`
-                    : "Không có thông tin"}
+                    : "Sem informação"}
                 </Typography>
               </Grid>
 
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
-                  <strong>Số tiền:</strong>{" "}
-                  {new Intl.NumberFormat("vi-VN", {
+                  <strong>Valor:</strong>{" "}
+                  {new Intl.NumberFormat("pt-BR", {
                     style: "currency",
-                    currency: "VND",
+                    currency: "BRL",
                   }).format(selectedAppointment.price || 0)}
                 </Typography>
               </Grid>
 
               <Grid item xs={12} sx={{ mt: 2 }}>
-                <Typography variant="h6">
-                  Thông tin tài khoản ngân hàng
-                </Typography>
+                <Typography variant="h6">Informações bancárias</Typography>
               </Grid>
 
               {loadingBankInfo ? (
@@ -532,26 +485,26 @@ export default function CancelAppointmentPage() {
                 <>
                   <Grid item xs={12}>
                     <Typography variant="subtitle1">
-                      <strong>Số tài khoản:</strong> {bankInfo.accountNumber}
+                      <strong>Número da conta:</strong> {bankInfo.accountNumber}
                     </Typography>
                   </Grid>
                   <Grid item xs={12}>
                     <Typography variant="subtitle1">
-                      <strong>Tên ngân hàng:</strong> {bankInfo.bankName}
+                      <strong>Banco:</strong> {bankInfo.bankName}
                     </Typography>
                   </Grid>
                 </>
               ) : (
                 <Grid item xs={12}>
                   <Typography variant="body2" color="text.secondary">
-                    Không có thông tin tài khoản ngân hàng
+                    Nenhuma informação bancária disponível
                   </Typography>
                 </Grid>
               )}
 
               <Grid item xs={12} sx={{ mt: 2 }}>
                 <Typography variant="subtitle1">
-                  <strong>Trạng thái hoàn tiền:</strong>{" "}
+                  <strong>Status do reembolso:</strong>{" "}
                   <span
                     style={{
                       color: selectedAppointment.isRefunded ? "green" : "red",
@@ -559,8 +512,8 @@ export default function CancelAppointmentPage() {
                     }}
                   >
                     {selectedAppointment.isRefunded
-                      ? "Đã hoàn tiền"
-                      : "Chưa hoàn tiền"}
+                      ? "Reembolsado"
+                      : "Não reembolsado"}
                   </span>
                 </Typography>
               </Grid>
@@ -569,7 +522,7 @@ export default function CancelAppointmentPage() {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={() => setModalOpen(false)}>Đóng</Button>
+          <Button onClick={() => setModalOpen(false)}>Fechar</Button>
           {selectedAppointment &&
             !selectedAppointment.isRefunded &&
             selectedAppointment.status === "CANCELLED" &&
@@ -582,7 +535,9 @@ export default function CancelAppointmentPage() {
                 }
                 disabled={processingRefund || !bankInfo || loadingBankInfo}
               >
-                {processingRefund ? "Đang xử lý..." : "Đánh dấu đã hoàn tiền"}
+                {processingRefund
+                  ? "Processando..."
+                  : "Marcar como reembolsado"}
               </Button>
             )}
           {selectedAppointment &&
@@ -591,7 +546,7 @@ export default function CancelAppointmentPage() {
             !bankInfo &&
             !loadingBankInfo && (
               <Button variant="contained" color="primary" disabled={true}>
-                Không thể hoàn tiền (không có thông tin tài khoản)
+                Não é possível reembolsar (sem informações bancárias)
               </Button>
             )}
         </DialogActions>
@@ -599,41 +554,3 @@ export default function CancelAppointmentPage() {
     </Box>
   );
 }
-
-// Dữ liệu mẫu được cập nhật để phù hợp với cấu trúc dự kiến
-const mockCanceledAppointments = [
-  {
-    id: 6,
-    patient: {
-      id: 1,
-      userId: "20250409000148-52838-19460614",
-      firstName: "Donald",
-      lastName: "Trump",
-      phone: "0129384756",
-      email: "donaldtrump@gmail.com",
-    },
-    workSchedule: {
-      id: 13,
-      dateAppointment: "16-04-2025",
-      shift: {
-        id: 2,
-        shift: 2,
-        start: "13-00-00",
-        end: "17-00-00",
-      },
-      doctor: {
-        id: 1,
-        firstName: "Thư",
-        lastName: "Lê",
-        specialization: "TÂM LÝ HỌC TÂM THẦN",
-      },
-    },
-    numericalOrder: 1,
-    note: "",
-    createdAt: "16-04-2025-14-20-08",
-    status: "CANCELLED",
-    bankAccount: "19038211111",
-    bankName: "Vietcombank",
-    isRefunded: false,
-  },
-];

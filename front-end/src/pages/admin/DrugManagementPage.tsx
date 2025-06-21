@@ -27,13 +27,13 @@ import {
 import * as XLSX from "xlsx";
 
 const DrugManagementPage: React.FC = () => {
-  // Khai báo state để quản lý dữ liệu và trạng thái UI
-  const [drugs, setDrugs] = useState<Drug[]>([]); // Danh sách thuốc
-  const [isFormOpen, setIsFormOpen] = useState<boolean>(false); // Trạng thái hiển thị form
-  const [formMode, setFormMode] = useState<"add" | "edit">("add"); // Chế độ form: thêm mới/chỉnh sửa
-  const [selectedDrug, setSelectedDrug] = useState<Drug | null>(null); // Thuốc đang được chọn
-  const [loading, setLoading] = useState<boolean>(true); // Trạng thái loading
-  const [error, setError] = useState<string | null>(null); // Lỗi nếu có
+  // Declaração de estados para gerenciar dados e UI
+  const [drugs, setDrugs] = useState<Drug[]>([]); // Lista de medicamentos
+  const [isFormOpen, setIsFormOpen] = useState<boolean>(false); // Estado do formulário
+  const [formMode, setFormMode] = useState<"add" | "edit">("add"); // Modo do formulário: adicionar/editar
+  const [selectedDrug, setSelectedDrug] = useState<Drug | null>(null); // Medicamento selecionado
+  const [loading, setLoading] = useState<boolean>(true); // Estado de carregamento
+  const [error, setError] = useState<string | null>(null); // Erro, se houver
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -43,10 +43,10 @@ const DrugManagementPage: React.FC = () => {
     message: "",
     severity: "info",
   });
-  const [importing, setImporting] = useState<boolean>(false); // Add this state for importing status
+  const [importing, setImporting] = useState<boolean>(false); // Estado de importação
 
   const csvOptions: GridCsvExportOptions = {
-    fileName: "drugs",
+    fileName: "medicamentos",
     delimiter: ",",
     utf8WithBom: true,
   };
@@ -60,27 +60,27 @@ const DrugManagementPage: React.FC = () => {
       if (response && response.data) {
         setDrugs(response.data);
       } else {
-        setError("Không thể tải danh sách thuốc");
+        setError("Não foi possível carregar a lista de medicamentos");
       }
     } catch (error) {
-      console.error("Error fetching drugs:", error);
-      setError("Đã xảy ra lỗi khi tải danh sách thuốc");
+      console.error("Erro ao buscar medicamentos:", error);
+      setError("Ocorreu um erro ao carregar a lista de medicamentos");
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch drugs from API when component mounts
+  // Buscar medicamentos ao montar o componente
   useEffect(() => {
     fetchDrugs();
   }, []);
 
-  // Close snackbar
+  // Fechar snackbar
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  // Show snackbar message
+  // Exibir mensagem no snackbar
   const showMessage = (
     message: string,
     severity: "success" | "error" | "info" | "warning"
@@ -92,75 +92,76 @@ const DrugManagementPage: React.FC = () => {
     });
   };
 
-  // Hàm mở form thêm thuốc mới
+  // Abrir formulário para adicionar novo medicamento
   const handleAddClick = () => {
     setFormMode("add");
     setSelectedDrug(null);
     setIsFormOpen(true);
   };
 
-  // Hàm mở form chỉnh sửa thông tin thuốc
+  // Abrir formulário para editar medicamento
   const handleEditClick = (drug: Drug) => {
     setFormMode("edit");
     setSelectedDrug(drug);
     setIsFormOpen(true);
   };
 
-  // Hàm đóng form
+  // Fechar formulário
   const handleFormClose = () => {
     setIsFormOpen(false);
   };
 
-  // Hàm xử lý khi submit form (áp dụng cho cả thêm mới và chỉnh sửa)
+  // Submeter formulário (adicionar ou editar)
   const handleFormSubmit = async (drugData: Partial<Drug>) => {
     try {
       if (formMode === "add") {
-        // Xử lý thêm mới thuốc qua API
+        // Adicionar novo medicamento via API
         const response = await addDrug(drugData);
         if (response && response.data) {
           setDrugs([...drugs, response.data]);
-          showMessage("Thêm thuốc thành công", "success");
+          showMessage("Medicamento adicionado com sucesso", "success");
         }
       } else {
-        // Xử lý chỉnh sửa thông tin thuốc qua API
+        // Editar medicamento via API
         if (selectedDrug) {
           const response = await updateDrug(
             selectedDrug.id.toString(),
             drugData
           );
           if (response && response.data) {
-            console.log("Fetched drugs:", response.data);
             setDrugs(
               drugs.map((drug) =>
                 drug.id === selectedDrug.id ? response.data : drug
               )
             );
-            showMessage("Cập nhật thuốc thành công", "success");
+            showMessage("Medicamento atualizado com sucesso", "success");
           }
         }
       }
       setIsFormOpen(false);
     } catch (error) {
       console.error(
-        `Error ${formMode === "add" ? "adding" : "updating"} drug:`,
+        `Erro ao ${
+          formMode === "add" ? "adicionar" : "atualizar"
+        } medicamento:`,
         error
       );
       showMessage(
-        `Lỗi khi ${formMode === "add" ? "thêm" : "cập nhật"} thuốc`,
+        `Erro ao ${formMode === "add" ? "adicionar" : "atualizar"} medicamento`,
         "error"
       );
     }
   };
 
-  // Hàm xử lý xóa thuốc (chưa kết nối API)
+  // Excluir medicamento (ainda sem API)
   const handleDeleteClick = (id: number) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa thuốc này?")) {
+    if (window.confirm("Tem certeza que deseja excluir este medicamento?")) {
       setDrugs(drugs.filter((drug) => drug.id !== id));
-      showMessage("Xóa thuốc thành công", "success");
+      showMessage("Medicamento excluído com sucesso", "success");
     }
   };
 
-  // Hàm xử lý import file
+  // Importar arquivo
   const handleImportClick = () => {
     fileInputRef.current?.click();
   };
@@ -177,7 +178,7 @@ const DrugManagementPage: React.FC = () => {
       fileName.endsWith(".xlsx") ||
       fileName.endsWith(".xls")
     ) {
-      setImporting(true); // Set importing status to true
+      setImporting(true);
       reader.onload = async (evt) => {
         try {
           const data = evt.target?.result;
@@ -185,31 +186,38 @@ const DrugManagementPage: React.FC = () => {
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
           const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-          console.log("File to JSON:", json);
+          console.log("Arquivo para JSON:", json);
 
-          // Call the import API
+          // Chamar API de importação
           try {
             const response = await importDrug(json);
             if (response && response.data) {
-              showMessage("Import dữ liệu thuốc thành công", "success");
-              // Refresh drug list after successful import
+              showMessage(
+                "Importação de medicamentos realizada com sucesso",
+                "success"
+              );
               fetchDrugs();
             } else {
-              showMessage("Đã xảy ra lỗi khi import dữ liệu thuốc", "error");
+              showMessage(
+                "Ocorreu um erro ao importar os medicamentos",
+                "error"
+              );
             }
           } catch (apiError) {
-            console.error("Error importing drugs:", apiError);
+            console.error("Erro ao importar medicamentos:", apiError);
             showMessage(
-              "Đã xảy ra lỗi khi gửi dữ liệu thuốc đến server",
+              "Ocorreu um erro ao enviar os medicamentos para o servidor",
               "error"
             );
           } finally {
             setImporting(false);
           }
         } catch (parseError) {
-          console.error("Error parsing file:", parseError);
+          console.error("Erro ao processar arquivo:", parseError);
           showMessage(
-            `Lỗi khi xử lý file ${fileName.endsWith(".csv") ? "CSV" : "Excel"}`,
+            `Erro ao processar arquivo ${
+              fileName.endsWith(".csv") ? "CSV" : "Excel"
+            }`,
             "error"
           );
           setImporting(false);
@@ -217,13 +225,16 @@ const DrugManagementPage: React.FC = () => {
       };
       reader.readAsBinaryString(file);
     } else {
-      showMessage("Chỉ hỗ trợ file .csv, .xlsx, .xls", "warning");
+      showMessage(
+        "Apenas arquivos .csv, .xlsx, .xls são suportados",
+        "warning"
+      );
     }
-    // Reset input để có thể chọn lại cùng 1 file
+    // Resetar input para permitir selecionar o mesmo arquivo novamente
     e.target.value = "";
   };
 
-  // Định nghĩa cấu trúc các cột cho bảng dữ liệu
+  // Definição das colunas da tabela
   const columns: GridColDef[] = [
     {
       field: "id",
@@ -233,25 +244,25 @@ const DrugManagementPage: React.FC = () => {
     },
     {
       field: "drugName",
-      headerName: "Tên thuốc",
+      headerName: "Nome do medicamento",
       width: 300,
       flex: 2,
     },
     {
       field: "drugType",
-      headerName: "Loại thuốc",
+      headerName: "Tipo",
       width: 200,
       flex: 1.5,
     },
     {
       field: "unit",
-      headerName: "Đơn vị",
+      headerName: "Unidade",
       width: 150,
       flex: 1,
     },
     {
       field: "actions",
-      headerName: "Thao tác",
+      headerName: "Ações",
       width: 120,
       flex: 0.7,
       sortable: false,
@@ -261,7 +272,7 @@ const DrugManagementPage: React.FC = () => {
           <IconButton
             size="small"
             color="info"
-            title="Chỉnh sửa"
+            title="Editar"
             onClick={() => handleEditClick(params.row)}
           >
             <Edit fontSize="small" />
@@ -269,7 +280,7 @@ const DrugManagementPage: React.FC = () => {
           <IconButton
             size="small"
             color="error"
-            title="Xóa"
+            title="Excluir"
             onClick={() => handleDeleteClick(params.row.id)}
           >
             <Delete fontSize="small" />
@@ -281,7 +292,7 @@ const DrugManagementPage: React.FC = () => {
 
   return (
     <Box sx={{ height: "100%", width: "100%", padding: 0 }}>
-      {/* Phần header với nút thêm thuốc và import file */}
+      {/* Header com botões de adicionar e importar */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, gap: 2 }}>
         <Button
           variant="contained"
@@ -289,7 +300,7 @@ const DrugManagementPage: React.FC = () => {
           startIcon={<Add />}
           onClick={handleAddClick}
         >
-          Thêm thuốc
+          Adicionar medicamento
         </Button>
         <Button
           variant="contained"
@@ -305,7 +316,7 @@ const DrugManagementPage: React.FC = () => {
           disabled={importing}
           sx={{ fontWeight: 600 }}
         >
-          {importing ? "Đang import..." : "Import file"}
+          {importing ? "Importando..." : "Importar arquivo"}
         </Button>
         <input
           ref={fileInputRef}
@@ -316,7 +327,7 @@ const DrugManagementPage: React.FC = () => {
         />
       </Box>
 
-      {/* Bảng dữ liệu thuốc */}
+      {/* Tabela de medicamentos */}
       <Paper sx={{ width: "100%" }}>
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
@@ -351,7 +362,7 @@ const DrugManagementPage: React.FC = () => {
         )}
       </Paper>
 
-      {/* Form thêm mới/chỉnh sửa thuốc */}
+      {/* Formulário de adicionar/editar medicamento */}
       <DrugForm
         open={isFormOpen}
         onClose={handleFormClose}
@@ -360,7 +371,7 @@ const DrugManagementPage: React.FC = () => {
         mode={formMode}
       />
 
-      {/* Snackbar cho thông báo */}
+      {/* Snackbar para mensagens */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}

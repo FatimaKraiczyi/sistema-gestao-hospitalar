@@ -26,7 +26,7 @@ import {
 } from "../../services/appointment/dashboard_service";
 import { useSelector } from "react-redux";
 
-// Giao diện cho dữ liệu doanh thu của bác sĩ
+// Interface para os dados de receita do médico
 interface DoctorRevenue {
   id: string;
   doctorId: string;
@@ -46,7 +46,7 @@ const DoctorRevenueDetailsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [doctorRevenues, setDoctorRevenues] = useState<DoctorRevenue[]>([]);
 
-  // Get user information from Redux store
+  // Obtém informações do usuário do Redux store
   const user = useSelector((state: any) => state.user.user);
 
   useEffect(() => {
@@ -57,9 +57,9 @@ const DoctorRevenueDetailsPage: React.FC = () => {
         let response;
         console.log("period", period);
 
-        // Gọi API phù hợp dựa trên loại thời gian
+        // Chama a API apropriada de acordo com o tipo de período
         if (periodType === "quarter" && period) {
-          // Bỏ chữ "Q" khỏi chuỗi quý (ví dụ: "Q1" -> "1")
+          // Remove o "Q" da string do trimestre (ex: "Q1" -> "1")
           const quarterNumber = period.replace("Q", "");
           response = await getListDoctorByQuarter(quarterNumber);
         } else if (periodType === "month" && period) {
@@ -68,11 +68,11 @@ const DoctorRevenueDetailsPage: React.FC = () => {
         } else if (periodType === "year" && period) {
           response = await getListDoctorByYear(period);
         } else {
-          throw new Error("Loại thời gian không hợp lệ");
+          throw new Error("Tipo de período inválido");
         }
         console.log("API response:", response);
         if (response?.code === 200 && Array.isArray(response.data)) {
-          // Chuyển đổi dữ liệu từ API sang định dạng phù hợp với giao diện
+          // Converte os dados da API para o formato da interface
           const formattedData: DoctorRevenue[] = response.data.map(
             (item: any) => ({
               id: item.doctor.userId,
@@ -81,7 +81,7 @@ const DoctorRevenueDetailsPage: React.FC = () => {
               specialty:
                 item.doctor.typeDisease?.name ||
                 item.doctor.specialization ||
-                "Không xác định",
+                "Não identificado",
               patientsCount: item.total_patients || 0,
               totalRevenue: item.total_salaries || 0,
             })
@@ -90,14 +90,14 @@ const DoctorRevenueDetailsPage: React.FC = () => {
           console.log("API data transformed:", formattedData);
           setDoctorRevenues(formattedData);
         } else {
-          console.error("Invalid API response format:", response);
-          throw new Error("Dữ liệu không hợp lệ");
+          console.error("Formato de resposta da API inválido:", response);
+          throw new Error("Dados inválidos");
         }
       } catch (err) {
-        console.error("Lỗi khi tải dữ liệu doanh thu bác sĩ:", err);
+        console.error("Erro ao carregar dados de receita do médico:", err);
         setError(
-          `Không thể tải dữ liệu doanh thu bác sĩ: ${
-            err instanceof Error ? err.message : "Lỗi không xác định"
+          `Não foi possível carregar os dados de receita do médico: ${
+            err instanceof Error ? err.message : "Erro desconhecido"
           }`
         );
       } finally {
@@ -108,57 +108,56 @@ const DoctorRevenueDetailsPage: React.FC = () => {
     if (periodType && period) {
       fetchDoctorRevenues();
     } else {
-      setError("Thông tin thời gian không hợp lệ");
+      setError("Informação de período inválida");
       setLoading(false);
     }
   }, [periodType, period]);
 
-  // Định dạng tiền tệ
+  // Formata moeda
   const formatCurrency = (amount: number): string => {
-    // Kiểm tra giá trị hợp lệ trước khi định dạng
     if (typeof amount !== "number" || isNaN(amount)) {
       return "0 ₫";
     }
-    return new Intl.NumberFormat("vi-VN", {
+    return new Intl.NumberFormat("pt-BR", {
       style: "currency",
-      currency: "VND",
+      currency: "BRL",
       maximumFractionDigits: 0,
     }).format(amount);
   };
 
-  // Cấu hình tùy chọn xuất CSV
+  // Configuração de exportação CSV
   const csvOptions: GridCsvExportOptions = {
-    fileName: `doanh-thu-bac-si-${periodType}-${period}-${new Date().getFullYear()}`,
+    fileName: `receita-medico-${periodType}-${period}-${new Date().getFullYear()}`,
     delimiter: ",",
     utf8WithBom: true,
   };
 
-  // Cấu hình cột cho bảng dữ liệu
+  // Configuração das colunas da tabela
   const columns: GridColDef[] = [
     {
       field: "doctorId",
-      headerName: "Mã bác sĩ",
+      headerName: "ID do Médico",
       flex: 1.5,
       minWidth: 180,
       resizable: true,
     },
     {
       field: "doctorName",
-      headerName: "Tên bác sĩ",
+      headerName: "Nome do Médico",
       flex: 2,
       minWidth: 200,
       resizable: true,
     },
     {
       field: "specialty",
-      headerName: "Chuyên khoa",
+      headerName: "Especialidade",
       flex: 1.5,
       minWidth: 150,
       resizable: true,
     },
     {
       field: "patientsCount",
-      headerName: "Số lượng bệnh nhân",
+      headerName: "Quantidade de Pacientes",
       type: "number",
       flex: 1,
       minWidth: 120,
@@ -166,157 +165,141 @@ const DoctorRevenueDetailsPage: React.FC = () => {
     },
     {
       field: "totalRevenue",
-      headerName: "Tổng doanh thu",
+      headerName: "Receita Total",
       type: "number",
       flex: 1.5,
       minWidth: 150,
       resizable: true,
       valueFormatter: (value) => {
-        // Đảm bảo params.value là một số hợp lệ
         const total = typeof value === "number" ? value : 0;
         return formatCurrency(total);
       },
     },
   ];
 
-  // Định dạng tiêu đề thời kỳ
+  // Formata o título do período
   const getPeriodTitle = () => {
     if (periodType === "quarter") {
-      return `QUÝ ${period?.replace("Q", "")}`;
+      return `TRIMESTRE ${period?.replace("Q", "")}`;
     } else if (periodType === "month") {
-      return `THÁNG ${period?.replace("T", "")}`;
+      return `MÊS ${period?.replace("T", "")}`;
     } else if (periodType === "year") {
-      return `NĂM ${period}`;
+      return `ANO ${period}`;
     }
     return "";
   };
 
-  // Xử lý khi nhấn nút quay lại
+  // Ação ao clicar em voltar
   const handleBackClick = () => {
     navigate("/admin/dashboard");
   };
 
-  // Function to handle Excel export with template
+  // Função para exportar Excel com template
   const handleExcelExport = async () => {
     try {
-      console.log("Starting Excel export process");
+      console.log("Iniciando exportação para Excel");
 
-      // Fetch the template file from public folder
-      // console.log("Fetching template file");
+      // Busca o arquivo template da pasta public
       const response = await fetch("/template.xlsx");
       const templateArrayBuffer = await response.arrayBuffer();
-      // console.log("Template file loaded successfully");
 
-      // Load the template workbook with ExcelJS
-      // console.log("Creating workbook from template");
+      // Carrega o template no ExcelJS
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(templateArrayBuffer);
-      // console.log("Workbook created successfully");
 
-      // Get the first worksheet
+      // Pega a primeira planilha
       const worksheet = workbook.getWorksheet(1);
-      // console.log("Worksheet accessed:", worksheet.name);
 
-      // Add report details to the header sections
-      // Thêm chi tiết giai đoạn báo cáo vào ô D2
+      // Adiciona detalhes do relatório no cabeçalho
       worksheet.getCell("D2").value = `${getPeriodTitle()}`;
-      worksheet.getCell("D2").font = { bold: true, size: 16 }; // Đậm và font size 16
+      worksheet.getCell("D2").font = { bold: true, size: 16 };
 
-      // Thêm người lập báo cáo vào ô B3 (lấy từ Redux)
+      // Adiciona o nome do responsável pelo relatório na célula B3 (do Redux)
       const reporterName = user ? `${user.firstName} ${user.lastName}` : "N/A";
       worksheet.getCell("B3").value = reporterName;
-      worksheet.getCell("B3").font = { size: 12 }; // Font size 12
+      worksheet.getCell("B3").font = { size: 12 };
 
-      // Thêm ngày lập báo cáo vào ô B4
+      // Adiciona a data do relatório na célula B4
       const currentDate = new Date();
       const formattedDate = `${currentDate.getDate()}/${
         currentDate.getMonth() + 1
       }/${currentDate.getFullYear()}`;
       worksheet.getCell("B4").value = formattedDate;
-      worksheet.getCell("B4").font = { size: 12 }; // Font size 12
+      worksheet.getCell("B4").font = { size: 12 };
 
-      // // Add data starting from row 6
-      // console.log("Adding data to worksheet");
-      // console.log("length", doctorRevenues.length);
+      // Adiciona os dados a partir da linha 7
       doctorRevenues.forEach((doctor, index) => {
-        // Chỉ insert row từ hàng thứ 2 trở đi
         if (index > 0) {
           worksheet.insertRow(index + 7, [], "i");
         }
 
         const row = worksheet.getRow(index + 7);
 
-        // Thiết lập giá trị cho từng ô trong dòng
-        row.getCell(1).value = index + 1; // STT
-        row.getCell(2).value = doctor.doctorId; // Mã bác sĩ
-        row.getCell(3).value = doctor.doctorName; // Tên bác sĩ
-        row.getCell(4).value = doctor.specialty; // Chuyên khoa
-        row.getCell(5).value = doctor.patientsCount; // Số lượng bệnh nhân
-        row.getCell(6).value = doctor.totalRevenue; // Tổng doanh thu
+        row.getCell(1).value = index + 1; // Nº
+        row.getCell(2).value = doctor.doctorId; // ID do Médico
+        row.getCell(3).value = doctor.doctorName; // Nome do Médico
+        row.getCell(4).value = doctor.specialty; // Especialidade
+        row.getCell(5).value = doctor.patientsCount; // Quantidade de Pacientes
+        row.getCell(6).value = doctor.totalRevenue; // Receita Total
 
-        // Áp dụng các thay đổi cho dòng
         row.commit();
       });
 
-      // Tính tổng doanh thu
+      // Soma total da receita
       const totalRevenue = doctorRevenues.reduce(
         (sum, doctor) => sum + doctor.totalRevenue,
         0
       );
 
-      // Thêm dòng tổng cộng bằng cách insert một row mới
-      const summaryRowIndex = doctorRevenues.length + 6 + 1; // 6 là số dòng tiêu đề
+      // Adiciona linha de total
+      const summaryRowIndex = doctorRevenues.length + 6 + 1;
       worksheet.insertRow(summaryRowIndex, [], "i");
       const summaryRow = worksheet.getRow(summaryRowIndex);
-      summaryRow.getCell(5).value = "Tổng cộng:";
+      summaryRow.getCell(5).value = "Total:";
       summaryRow.getCell(6).value = totalRevenue;
-
-      // Apply bold font to the summary row
-      // summaryRow.font = { bold: true };
       summaryRow.commit();
 
-      // Vị trí bắt đầu của phần chữ ký (thêm khoảng trống 3 dòng sau dòng tổng)
-      const signatureRow = doctorRevenues.length + 6 + 3; // 6 là số dòng tiêu đề
+      // Espaço para assinatura (3 linhas após o total)
+      const signatureRow = doctorRevenues.length + 6 + 3;
 
-      // Thêm ngày tháng năm
+      // Adiciona data
       const dateRow = worksheet.getRow(signatureRow);
-      dateRow.getCell(5).value = `Ngày ... tháng ... năm ...`;
+      dateRow.getCell(5).value = `Dia ... mês ... ano ...`;
       dateRow.getCell(5).alignment = { horizontal: "center" };
-      dateRow.getCell(5).font = { size: 12 }; // Tăng kích thước font
+      dateRow.getCell(5).font = { size: 12 };
       dateRow.commit();
 
-      // Thêm kế toán trưởng
+      // Adiciona contador
       const accountantRow = worksheet.getRow(signatureRow + 1);
-      accountantRow.getCell(5).value = "Kế toán trưởng";
+      accountantRow.getCell(5).value = "Contador";
       accountantRow.getCell(5).alignment = {
         horizontal: "center",
         vertical: "middle",
       };
-      accountantRow.getCell(5).font = { bold: true, size: 14 }; // Tăng kích thước font và giữ đậm
+      accountantRow.getCell(5).font = { bold: true, size: 14 };
       accountantRow.commit();
 
-      // Thêm (ký, ghi rõ họ tên)
+      // Adiciona (assinar, nome completo)
       const signatureInfoRow = worksheet.getRow(signatureRow + 2);
-      signatureInfoRow.getCell(5).value = "(Ký, ghi rõ họ tên)";
+      signatureInfoRow.getCell(5).value = "(Assinar, nome completo)";
       signatureInfoRow.getCell(5).alignment = { horizontal: "center" };
       signatureInfoRow.getCell(5).font = { italic: true };
       signatureInfoRow.commit();
 
-      // Fallback to the buffer approach
       const buffer = await workbook.xlsx.writeBuffer();
 
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
 
-      saveAs(blob, `doanh-thu-bac-si-${periodType}-${period}.xlsx`);
+      saveAs(blob, `receita-medico-${periodType}-${period}.xlsx`);
     } catch (error) {
-      console.error("Error exporting Excel:", error);
-      alert("Có lỗi xảy ra khi xuất file Excel. Vui lòng thử lại sau.");
+      console.error("Erro ao exportar Excel:", error);
+      alert("Ocorreu um erro ao exportar o arquivo Excel. Tente novamente.");
     }
   };
 
-  // Hiển thị trạng thái đang tải
+  // Exibe carregando
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -327,7 +310,7 @@ const DoctorRevenueDetailsPage: React.FC = () => {
     );
   }
 
-  // Hiển thị thông báo lỗi nếu có
+  // Exibe erro
   if (error) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -344,11 +327,10 @@ const DoctorRevenueDetailsPage: React.FC = () => {
           onClick={handleBackClick}
           sx={{ mr: 2 }}
         >
-          Quay lại
+          Voltar
         </Button>
         <Typography variant="h4" fontWeight="bold">
-          Doanh thu theo bác sĩ - {getPeriodTitle()} năm{" "}
-          {new Date().getFullYear()}
+          Receita por Médico - {getPeriodTitle()} ano {new Date().getFullYear()}
         </Typography>
         <Box sx={{ flexGrow: 1 }} />
         <Button
@@ -358,7 +340,7 @@ const DoctorRevenueDetailsPage: React.FC = () => {
           onClick={handleExcelExport}
           sx={{ ml: 2 }}
         >
-          Xuất Excel
+          Exportar Excel
         </Button>
       </Box>
       <Paper sx={{ width: "100%", overflow: "hidden" }}>
@@ -378,7 +360,6 @@ const DoctorRevenueDetailsPage: React.FC = () => {
           checkboxSelection={false}
           disableRowSelectionOnClick
           sx={{ minHeight: 400 }}
-          // Thêm thanh công cụ và tùy chọn xuất dữ liệu
           slots={{ toolbar: GridToolbar }}
           slotProps={{
             toolbar: {
