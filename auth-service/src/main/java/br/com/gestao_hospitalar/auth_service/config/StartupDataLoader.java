@@ -11,25 +11,28 @@ import org.springframework.stereotype.Component;
 @Component
 public class StartupDataLoader implements CommandLineRunner {
 
-    @Autowired private UserRepository userRepository;
-    @Autowired private CustomPasswordEncoder customPasswordEncoder;
+  @Autowired
+  private UserRepository userRepository;
 
-    @Override
-    public void run(String... args) {
-        String cpf = "90769281001";
+  @Autowired
+  private CustomPasswordEncoder customPasswordEncoder;
 
-        if (userRepository.findByCpf(cpf).isEmpty()) {
-            String password = "TADS";
-            String hashedPassword = customPasswordEncoder.encodeWithSHA256(password);
+  @Override
+  public void run(String... args) {
+    String cpf = "90769281001";
 
-            User user = new User();
-						user.setCpf(cpf);
-						user.setEmail("func_pre@hospital.com");
-						user.setPassword(hashedPassword);
-						user.setType(UserType.FUNCIONARIO);
+    if (userRepository.findByCpf(cpf).isEmpty()) {
+      String password = "TADS";
+      String hashedPassword = customPasswordEncoder.encodeWithSHA256(password);
 
-            userRepository.save(user);
-            System.out.println("✅ Usuário padrão inserido com sucesso.");
-        }
+      User user = new User();
+      user.setCpf(cpf);
+      user.setEmail("admin@hospital.com");
+      user.setPassword(hashedPassword);
+      user.setType(UserType.ADMIN);
+
+      userRepository.save(user);
+      System.out.println("✅ Usuário admin inserido com sucesso.");
     }
+  }
 }
