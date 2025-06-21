@@ -43,18 +43,4 @@ public class AuthController {
   ) {
     return ResponseEntity.ok(userService.handleForgotPassword(request));
   }
-
-  @PostMapping("/forgot-email")
-  public ResponseEntity<ApiResponse> forgotEmail(
-    @RequestBody @Valid ForgotEmailRequest request
-  ) {
-    return ResponseEntity.ok(userService.handleForgotEmail(request));
-  }
-
-  @GetMapping("/teste")
-  public ResponseEntity<ApiResponse> healthCheck(HttpServletRequest request) {
-    return ResponseEntity.ok(
-      new ApiResponse("Auth service is up and running!")
-    );
-  }
 }

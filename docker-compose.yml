@@ -131,6 +131,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
+    user: "root"
     container_name: pgadmin
     restart: unless-stopped
     environment:
@@ -144,6 +145,20 @@ services:
       - .env
     networks:
       - hospital-network
+
+  front-end:
+    build: ./front-end
+    container_name: front-end
+    restart: unless-stopped
+    ports:
+      - "88:88"
+    networks:
+      - hospital-network
+    depends_on:
+      - api-gateway
+      - auth-service
+      - paciente-service
+      - consulta-service
 
 volumes:
   auth-data:

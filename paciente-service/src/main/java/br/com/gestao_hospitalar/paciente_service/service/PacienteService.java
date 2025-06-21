@@ -10,8 +10,6 @@ import br.com.gestao_hospitalar.paciente_service.repository.PacienteRepository;
 import br.com.gestao_hospitalar.paciente_service.repository.TransacaoPontosRepository;
 import br.com.gestao_hospitalar.paciente_service.via_cep.ViaCepResponse;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.stripe.Stripe;
-import com.stripe.model.checkout.Session;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -144,87 +142,5 @@ public class PacienteService {
       })
       .collect(Collectors.toList());
   }
-
-  public void confirmarCompraStripeComSessionId(
-    UUID pacienteId,
-    String sessionId
-  ) {
-    try {
-      Stripe.apiKey = stripeSecret;
-
-			PaymentLinkCreateParams params =
-			PaymentLinkCreateParams.builder()
-				.addLineItem(
-					PaymentLinkCreateParams.LineItem.builder()
-						.setPrice("{{PRICE_ID}}")
-						.setQuantity(1L)
-						.build()
-				)
-				.setAfterCompletion(
-					PaymentLinkCreateParams.AfterCompletion.builder()
-						.setType(PaymentLinkCreateParams.AfterCompletion.Type.REDIRECT)
-						.setRedirect(
-							PaymentLinkCreateParams.AfterCompletion.Redirect.builder()
-								.setUrl("https://example.com/after-checkout?session_id={CHECKOUT_SESSION_ID}")
-								.build()
-						)
-						.build()
-				)
-				.build();
-		
-		PaymentLink paymentLink = PaymentLink.create(params);
-  }
-
-  public void processarPagamentoStripe(JSONObject session) {
-    try {
-      // Extrair email e/ou CPF do session
-      String email = session.optString("customer_email", null);
-      // Se você usa custom_fields para CPF, adapte aqui
-      String cpf = null;
-      if (session.has("custom_fields")) {
-        for (Object fieldObj : session.getJSONArray("custom_fields")) {
-          JSONObject field = (JSONObject) fieldObj;
-          if ("cpf".equals(field.optString("key"))) {
-            cpf = field.getJSONObject("numeric").optString("value", null);
-          }
-        }
-      }
-      // Buscar paciente por CPF e/ou email
-      Paciente paciente = null;
-      if (cpf != null) {
-        paciente = pacienteRepository.findByCpf(cpf)
-          .filter(p -> email == null || email.equalsIgnoreCase(p.getEmail()))
-          .orElse(null);
-      } else if (email != null) {
-        paciente = pacienteRepository.findByEmail(email).orElse(null);
-      }
-      if (paciente == null) {
-        throw new ApiException("Paciente não localizado para o pagamento Stripe", HttpStatus.NOT_FOUND);
-      }
-      // Extrair quantidade e valor
-      int quantidade = 1;
-      double valorReais = 0.0;
-      String descricao = "COMPRA DE PONTOS (Stripe)";
-      if (session.has("line_items")) {
-        JSONObject item = session.getJSONArray("line_items").getJSONObject(0);
-        quantidade = item.optInt("quantity", 1);
-        valorReais = item.optDouble("amount_total", 0.0) / 100.0;
-        descricao = item.optString("description", descricao);
-      }
-      // Atualizar pontos
-      paciente.setPontos(paciente.getPontos() + quantidade);
-      pacienteRepository.save(paciente);
-      // Salvar transação
-      TransacaoPontos transacao = new TransacaoPontos();
-      transacao.setPaciente(paciente);
-      transacao.setTipo("ENTRADA");
-      transacao.setDescricao(descricao);
-      transacao.setQuantidade(quantidade);
-      transacao.setValorReais(valorReais);
-      transacao.setData(java.time.LocalDateTime.now());
-      transacaoPontosRepository.save(transacao);
-    } catch (Exception e) {
-      throw new ApiException("Erro ao processar pagamento Stripe: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-  }
+  // Removido Stripe temporariamente
 }
