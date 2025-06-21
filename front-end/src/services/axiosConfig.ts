@@ -4,43 +4,33 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const axiosConfig = axios.create({
   baseURL: API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
-axiosConfig.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-axiosConfig.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  async (error) => {
-    const originalRequest = error.config;
-    if (error?.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      // const refreshToken = await TokenService.getRefreshToken();
-      // if (refreshToken) {
-      // try {
-      //   const response = await axiosConfig.post('/refreshToken', {
-      //     refreshToken,
-      //   });
-      //   const newAccessToken = response?.data?.accessToken;
-      //   setAccessToken(newAccessToken);
-      //   return axiosConfig(originalRequest);
-      // } catch (error) {
-      //   console.error('Error refreshing token:', error);
-      //   return Promise.reject(error);
-      // }
-      // }
+axiosConfig.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return Promise.reject(error?.response?.data);
+    config.headers["Content-Type"] = "application/json";
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor para tratar erros de resposta e passar mensagem exata da API
+axiosConfig.interceptors.response.use(
+  (response) => response, // resposta OK segue normalmente
+  (error) => {
+    // Tenta extrair a mensagem de erro exata da API no campo 'error'
+    if (error.response && error.response.data && error.response.data.error) {
+      return Promise.reject(new Error(error.response.data.error));
+    }
+
+    // Se não existir a mensagem esperada, rejeita com o erro original (sem genéricos)
+    return Promise.reject(error);
   }
 );
 

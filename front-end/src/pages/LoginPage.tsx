@@ -129,7 +129,7 @@ export default function LoginPage() {
         }}
       >
         <Typography variant="h5" align="center" gutterBottom>
-          Bem-vindo
+          Login
         </Typography>
         <Typography variant="body2" align="center" sx={{ mb: 3 }}>
           Ainda não tem uma conta? <Link href="/register">Crie uma conta</Link>

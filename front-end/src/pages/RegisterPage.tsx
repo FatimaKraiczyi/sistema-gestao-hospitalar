@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Grid2 } from "@mui/material";
@@ -33,15 +34,10 @@ export default function RegisterPage() {
     onSubmit: async (values) => {
       try {
         const response = await signUp(values.cpf, values.email);
-        if (response.status === 200 && response.data.code === 200) {
-          toast.success("Conta criada com sucesso!");
-          setTimeout(() => navigate(ROUTING.LOGIN), 2000);
-        } else {
-          toast.error(response.data.message || "Falha ao cadastrar");
-        }
-      } catch (error) {
-        console.error("Erro ao cadastrar:", error);
-        toast.error("Ocorreu um erro durante o cadastro");
+        toast.success(response.data.message);
+        setTimeout(() => navigate(ROUTING.LOGIN), 1000);
+      } catch (error: any) {
+        toast.error(error.message);
       }
     },
   });
@@ -98,7 +94,7 @@ export default function RegisterPage() {
                 size="large"
                 sx={{ mt: 1 }}
               >
-                Cadastrar e enviar senha por e-mail
+                Registrar e enviar senha por e-mail
               </Button>
             </Grid2>
           </Grid2>
