@@ -73,14 +73,14 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
 
   const handleLogout = () => {
     setAnchorEl(null);
-    // Add logout logic here
+    // Adicione a lógica de logout aqui
     dispatch(logOut());
     navigate(ROUTING.LOGIN);
   };
 
   const handleProfile = () => {
     setAnchorEl(null);
-    // Navigate to profile page
+    // Navegar para a página de perfil
     navigate(ROUTING.PROFILE);
   };
 
@@ -98,7 +98,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
         <Toolbar>
           <IconButton
             color="inherit"
-            aria-label="open drawer"
+            aria-label="abrir menu lateral"
             edge="start"
             onClick={handleDrawerToggle}
             sx={{ mr: 2 }}
@@ -111,7 +111,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
           <div>
             <IconButton
               size="large"
-              aria-label="account of current user"
+              aria-label="conta do usuário atual"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleMenu}
@@ -144,10 +144,8 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              {!isAdmin && (
-                <MenuItem onClick={handleProfile}>Trang cá nhân</MenuItem>
-              )}
-              <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
+              {!isAdmin && <MenuItem onClick={handleProfile}>Perfil</MenuItem>}
+              <MenuItem onClick={handleLogout}>Sair</MenuItem>
             </Menu>
           </div>
         </Toolbar>

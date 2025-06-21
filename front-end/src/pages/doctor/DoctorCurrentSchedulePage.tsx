@@ -17,7 +17,7 @@ import {
   Modal,
   Button,
 } from "@mui/material";
-// Import DatePicker từ MUI X
+// Import DatePicker do MUI X
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -27,192 +27,175 @@ import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import CloseIcon from "@mui/icons-material/Close";
-import { ROUTING } from "../../constants/routing"; // Import hằng số ROUTING
-import {
-  format,
-  addDays, // Thêm số ngày vào ngày hiện tại
-  startOfWeek, // Trả về ngày thứ 2 của tuần
-  addWeeks,
-  subWeeks,
-} from "date-fns";
+import { ROUTING } from "../../constants/routing";
+import { format, addDays, startOfWeek, addWeeks, subWeeks } from "date-fns";
 import { vi } from "date-fns/locale";
 import { formatDateToString, parseDateFromString } from "../../utils/dateUtils";
 import { getWorkScheduleBetweenDate } from "../../services/authenticate/workSchedule_service.ts";
 
 /**
- * DoctorCurrentSchedulePage - Trang hiển thị lịch làm việc của bác sĩ
+ * DoctorCurrentSchedulePage - Página que exibe a agenda de trabalho do médico
  *
- * Luồng hiển thị ca khám:
- * 1. Khi trang được tải, hệ thống sẽ hiển thị lịch làm việc của tuần hiện tại (bắt đầu từ thứ 2)
- * 2. Dữ liệu lịch làm việc được lấy từ API getWorkScheduleBetweenDate với userId của bác sĩ
- *    và khoảng thời gian của tuần hiện tại
- * 3. Dữ liệu được chuyển đổi và lưu vào state scheduleMap, là một map ánh xạ từ ngày (string)
- *    đến danh sách lịch làm việc (WorkSchedule[])
- * 4. Bảng lịch hiển thị theo khoảng thời gian (sáng và chiều) cho 7 ngày trong tuần:
- *    - Mỗi ô có thể hiển thị nhiều ca làm việc trong cùng khoảng thời gian (sáng/chiều)
- *    - Các ca được phân loại dựa vào thời gian bắt đầu hoặc ID ca
- * 5. Với mỗi ngày và khoảng thời gian:
- *    - Kiểm tra xem có ca làm việc không (hasShiftsForPeriod)
- *    - Nếu có, hiển thị tất cả ca cho khoảng thời gian đó với số lượng cuộc hẹn và nút thao tác
- *    - Nếu không, hiển thị "Không có ca"
- * 6. Người dùng có thể:
- *    - Di chuyển giữa các tuần bằng nút điều hướng
- *    - Chọn ngày cụ thể từ lịch để chuyển đến tuần chứa ngày đó
- *    - Click vào thẻ ca khám để xem chi tiết cuộc hẹn
- *    - Nhấn nút "Khám" để tiến hành khám bệnh (chỉ cho ngày hiện tại hoặc tương lai)
+ * Fluxo de exibição dos turnos:
+ * 1. Ao carregar a página, o sistema exibe a agenda da semana atual (começando na segunda-feira)
+ * 2. Os dados da agenda são obtidos da API getWorkScheduleBetweenDate com o userId do médico
+ *    e o intervalo da semana atual
+ * 3. Os dados são convertidos e armazenados no estado scheduleMap, que é um mapa de datas (string)
+ *    para listas de WorkSchedule[]
+ * 4. A tabela exibe os turnos por período (manhã e tarde) para os 7 dias da semana:
+ *    - Cada célula pode exibir vários turnos no mesmo período (manhã/tarde)
+ *    - Os turnos são classificados por horário de início ou ID do turno
+ * 5. Para cada dia e período:
+ *    - Verifica se há turnos (hasShiftsForPeriod)
+ *    - Se houver, exibe todos os turnos daquele período com quantidade de consultas e botão de ação
+ *    - Se não houver, exibe "Sem turno"
+ * 6. O usuário pode:
+ *    - Navegar entre as semanas pelos botões
+ *    - Selecionar um dia específico no calendário para ir à semana correspondente
+ *    - Clicar no card do turno para ver detalhes das consultas
+ *    - Clicar em "Atender" para iniciar o atendimento (apenas para hoje ou datas futuras)
  *
- * Lưu ý: Trạng thái ca làm việc được xác định dựa trên:
- * - Sự tồn tại của lịch làm việc cho ngày và khoảng thời gian đó
- * - Ngày đã qua hay chưa (isPastDate)
- * - Số lượng cuộc hẹn đã đặt và tổng số chỗ
+ * Observação: O status do turno é determinado por:
+ * - Existência de turno para o dia e período
+ * - Se a data já passou (isPastDate)
+ * - Quantidade de consultas agendadas e total de vagas
  */
 
-// Giao diện Shift - phù hợp với mô hình cơ sở dữ liệu
+// Interface Shift - compatível com o modelo do banco de dados
 interface Shift {
   id: number;
   shift: number;
-  start: string; // LocalTime biểu diễn dưới dạng chuỗi (HH:mm)
-  end: string; // LocalTime biểu diễn dưới dạng chuỗi (HH:mm)
+  start: string; // LocalTime como string (HH:mm)
+  end: string; // LocalTime como string (HH:mm)
   status: boolean;
-  createdAt?: string; // Thêm theo mô hình
-  updatedAt?: string; // Thêm theo mô hình
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-// Giao diện Doctor - đơn giản hóa từ API
+// Interface Doctor - simplificada da API
 interface Doctor {
   id: number;
-  // Các thông tin khác của bác sĩ nếu cần
+  // Outros dados do médico, se necessário
 }
 
-// Giao diện WorkSchedule - phù hợp với mô hình cơ sở dữ liệu
+// Interface WorkSchedule - compatível com o modelo do banco de dados
 interface WorkSchedule {
   id: number;
   doctor: Doctor;
   shift: Shift;
   maxSlots: number;
-  dateAppointment: string; // LocalDate dạng chuỗi (yyyy-MM-dd)
+  dateAppointment: string; // LocalDate como string (yyyy-MM-dd)
   createdAt?: string;
   updatedAt?: string;
   status: boolean;
-  // Thông tin cuộc hẹn
-  totalBook?: number; // Số lượng cuộc hẹn hiện tại
+  // Informações de agendamento
+  totalBook?: number; // Quantidade de consultas agendadas
 }
 
-// Ánh xạ chuỗi ngày (dd-MM-yyyy) đến mảng lịch làm việc - cấu trúc hiệu quả hơn
+// Mapeamento de string de data (dd-MM-yyyy) para array de WorkSchedule
 type ScheduleMap = Record<string, WorkSchedule[]>;
 
-// Kiểm tra xem một ngày đã qua hay chưa (dùng để kiểm soát nút "Khám")
+// Verifica se uma data já passou (para controlar o botão "Atender")
 const isPastDate = (dateString: string): boolean => {
-  // Chuyển đổi chuỗi ngày thành đối tượng Date
   const date = parseDateFromString(dateString);
-  // So sánh với ngày hiện tại (loại bỏ giờ, phút, giây)
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây, mili giây về 0
+  today.setHours(0, 0, 0, 0);
   return date < today;
 };
 
-// Kiểm tra xem ngày hiện tại có trùng với ngày của ca làm việc không
+// Verifica se a data é exatamente hoje
 const isExactDate = (dateString: string): boolean => {
-  // Chuyển đổi chuỗi ngày thành đối tượng Date
   const date = parseDateFromString(dateString);
-  // Lấy ngày hiện tại (loại bỏ giờ, phút, giây)
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   date.setHours(0, 0, 0, 0);
-  // So sánh ngày hiện tại với ngày ca làm việc
   return date.getTime() === today.getTime();
 };
 
-// Kiểm tra xem thời gian hiện tại có nằm trong khung giờ của ca làm việc không
+// Verifica se o horário atual está dentro do turno
 const isWithinShiftHours = (shift: Shift): boolean => {
-  // Lấy thời gian hiện tại
   const now = new Date();
   const currentDate = new Date();
 
-  // Tạo đối tượng Date cho thời gian bắt đầu và kết thúc ca làm việc
   const startTime = new Date(currentDate);
   const endTime = new Date(currentDate);
 
-  // Đặt giờ và phút cho thời gian bắt đầu
   const [startHour, startMinute] = shift.start.split(":").map(Number);
   startTime.setHours(startHour, startMinute, 0);
 
-  // Đặt giờ và phút cho thời gian kết thúc
   const [endHour, endMinute] = shift.end.split(":").map(Number);
   endTime.setHours(endHour, endMinute, 0);
 
-  // Kiểm tra xem thời gian hiện tại có nằm trong khoảng thời gian ca làm việc không
   return now >= startTime && now <= endTime;
 };
 
-// Định nghĩa các ngày trong tuần với nhãn
+// Dias da semana com rótulo em PT-BR
 const DAYS_OF_WEEK = [
-  { key: "MONDAY", label: "Thứ 2" },
-  { key: "TUESDAY", label: "Thứ 3" },
-  { key: "WEDNESDAY", label: "Thứ 4" },
-  { key: "THURSDAY", label: "Thứ 5" },
-  { key: "FRIDAY", label: "Thứ 6" },
-  { key: "SATURDAY", label: "Thứ 7" },
-  { key: "SUNDAY", label: "Chủ nhật" },
+  { key: "MONDAY", label: "Segunda" },
+  { key: "TUESDAY", label: "Terça" },
+  { key: "WEDNESDAY", label: "Quarta" },
+  { key: "THURSDAY", label: "Quinta" },
+  { key: "FRIDAY", label: "Sexta" },
+  { key: "SATURDAY", label: "Sábado" },
+  { key: "SUNDAY", label: "Domingo" },
 ];
 
-// Enum để định nghĩa các khoảng thời gian trong ngày
+// Enum para períodos do dia
 enum TimePeriod {
-  MORNING = "morning", // Buổi sáng
-  AFTERNOON = "afternoon", // Buổi chiều
+  MORNING = "morning", // Manhã
+  AFTERNOON = "afternoon", // Tarde
 }
 
 const DoctorCurrentSchedulePage: React.FC = () => {
   const navigate = useNavigate();
-  // Lưu trữ ngày hiện tại
   const [today] = useState(new Date());
 
-  // State lưu ngày bắt đầu của tuần hiện tại (mặc định là thứ 2)
+  // Estado para o início da semana atual (segunda-feira)
   const [currentWeekStart, setCurrentWeekStart] = useState(
     startOfWeek(today, { weekStartsOn: 1 })
   );
 
-  // Thay thế DateSchedule[] bằng cách ánh xạ hiệu quả hơn
+  // Mapeamento de agenda
   const [scheduleMap, setScheduleMap] = useState<ScheduleMap>({});
 
-  // State cho modal lịch
+  // Estado do modal do calendário
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
-  // Lấy thông tin người dùng
+  // Usuário logado
   const user = JSON.parse((localStorage.getItem("user") as string) || "{}");
-  // Tạo mảng các ngày trong tuần hiện tại
+
+  // Dias da semana atual
   const getDaysInWeek = () => {
     const days = [];
     for (let i = 0; i < 7; i++) {
       const date = addDays(currentWeekStart, i);
       days.push({
-        date, // Đối tượng Date gốc
-        formattedDate: formatDateToString(date), // Chuỗi ngày theo định dạng dd-MM-yyyy
-        displayDate: format(date, "dd/MM"), // Chuỗi hiển thị ngắn gọn với ngày tháng
+        date,
+        formattedDate: formatDateToString(date),
+        displayDate: format(date, "dd/MM"),
       });
     }
     return days;
   };
 
-  // Mảng các ngày trong tuần hiện tại
   const weekDays = getDaysInWeek();
 
-  // Xử lý chuyển đến tuần trước
+  // Navegar para semana anterior
   const handlePrevWeek = () => {
     setCurrentWeekStart(subWeeks(currentWeekStart, 1));
   };
 
-  // Xử lý chuyển đến tuần sau
+  // Navegar para próxima semana
   const handleNextWeek = () => {
     setCurrentWeekStart(addWeeks(currentWeekStart, 1));
   };
 
-  // Xử lý quay về tuần hiện tại
+  // Voltar para semana atual
   const handleGoToCurrentWeek = () => {
     setCurrentWeekStart(startOfWeek(today, { weekStartsOn: 1 }));
   };
 
-  // Định dạng hiển thị khoảng thời gian của tuần hiện tại
+  // Formatar intervalo da semana
   const formatWeekRange = () => {
     const weekEnd = addDays(currentWeekStart, 6);
     return `${format(currentWeekStart, "dd/MM/yyyy")} - ${format(
@@ -221,65 +204,50 @@ const DoctorCurrentSchedulePage: React.FC = () => {
     )}`;
   };
 
-  // Kiểm tra xem có đang ở tuần hiện tại không
+  // Verifica se está na semana atual
   const isCurrentWeek = () => {
     const actualWeekStart = startOfWeek(today, { weekStartsOn: 1 }).getTime();
     return currentWeekStart.getTime() === actualWeekStart;
   };
 
-  // Fetch data function to reuse
+  // Buscar dados da agenda
   const fetchScheduleData = async () => {
     if (!user?.userId) return;
 
     try {
-      // Tính ngày bắt đầu và kết thúc của tuần hiện tại
       const startDate = format(currentWeekStart, "dd-MM-yyyy");
       const endDate = format(addDays(currentWeekStart, 6), "dd-MM-yyyy");
-      console.log("Ngày bắt đầu:", startDate);
-      console.log("Ngày kết thúc:", endDate);
-      // Gọi API với khoảng thời gian của tuần
       const response = await getWorkScheduleBetweenDate(
         user.userId,
         startDate,
         endDate
       );
       const result = response.data.data || [];
-      console.log("Lịch làm việc:", result);
 
-      // Tạo object để lưu trữ lịch theo ngày - cấu trúc đơn giản hơn
       const newScheduleMap: ScheduleMap = {};
 
-      // Xử lý dữ liệu trả về từ API
       result.forEach((i: any) => {
         const item = i.workSchedule;
-        // Kiểm tra dữ liệu hợp lệ
         if (!item.dateAppointment) {
-          console.error("Thiếu ngày hẹn trong mục lịch làm việc:", item);
-          return; // Bỏ qua mục này nếu thiếu ngày hẹn
+          console.error("Faltando data de agendamento:", item);
+          return;
         }
 
-        // Chuyển đổi định dạng ngày từ API (yyyy-MM-dd) sang định dạng UI (dd-MM-yyyy)
         const dateFromAPI = item.dateAppointment;
-
-        // Xử lý thông tin ca làm việc từ API
         const shiftData = item.shift;
 
-        // Kiểm tra dữ liệu ca làm việc tồn tại
         if (!shiftData) {
-          console.error("Thiếu thông tin ca làm việc:", item);
-          return; // Bỏ qua mục này nếu thiếu thông tin ca
+          console.error("Faltando informações do turno:", item);
+          return;
         }
 
-        // Chuyển đổi định dạng thời gian nếu cần
         const formatTimeString = (timeStr: string) => {
-          // Nếu định dạng là "hh-mm-ss", chuyển thành "hh:mm"
           if (timeStr.includes("-")) {
             return timeStr.split("-").slice(0, 2).join(":");
           }
-          return timeStr; // Giữ nguyên nếu đã đúng định dạng
+          return timeStr;
         };
 
-        // Tạo đối tượng Shift (đảm bảo đúng theo cấu trúc mô hình)
         const shift: Shift = {
           id: shiftData.id,
           shift: shiftData.shift,
@@ -288,10 +256,8 @@ const DoctorCurrentSchedulePage: React.FC = () => {
           status: shiftData.status,
         };
 
-        // Tính toán số chỗ trống còn lại (mô phỏng, thực tế sẽ từ API)
         const totalBook = i?.detail?.information?.total_book ?? 0;
 
-        // Tạo đối tượng WorkSchedule phù hợp với mô hình và UI
         const workSchedule: WorkSchedule = {
           id: item.id,
           doctor: item.doctor,
@@ -302,59 +268,46 @@ const DoctorCurrentSchedulePage: React.FC = () => {
           totalBook: totalBook,
         };
 
-        // Thêm vào map theo ngày - đơn giản và hiệu quả hơn
         if (!newScheduleMap[dateFromAPI]) {
           newScheduleMap[dateFromAPI] = [];
         }
         newScheduleMap[dateFromAPI].push(workSchedule);
       });
 
-      // Sort theo thời gian ca làm việc bằng cách trực tiếp parse giờ và phút
       Object.keys(newScheduleMap).forEach((date) => {
         newScheduleMap[date].sort((a, b) => {
-          // Parse thời gian từ format "HH:mm"
           const [hoursA, minutesA] = a.shift.start.split(":").map(Number);
           const [hoursB, minutesB] = b.shift.start.split(":").map(Number);
 
-          // So sánh giờ trước
           if (hoursA !== hoursB) {
             return hoursA - hoursB;
           }
-          // Nếu giờ bằng nhau, so sánh phút
           return minutesA - minutesB;
         });
       });
       setScheduleMap(newScheduleMap);
     } catch (error) {
-      console.error("Lỗi khi lấy lịch làm việc:", error);
+      console.error("Erro ao buscar agenda:", error);
     }
   };
 
-  // Gọi API để lấy lịch làm việc ban đầu và khi tuần thay đổi
   useEffect(() => {
     fetchScheduleData();
   }, [currentWeekStart, user?.userId]);
 
-  // Tìm tất cả các lịch làm việc cho một ngày cụ thể - truy cập nhanh O(1)
+  // Busca todos os turnos de um dia específico
   const getSchedulesForDate = (date: string): WorkSchedule[] => {
     return scheduleMap[date] || [];
   };
 
-  // Xác định một ca làm việc thuộc về buổi sáng hay chiều
-  // Hỗ trợ cả cách phân loại theo ID ca và theo giờ bắt đầu
+  // Determina se o turno é manhã ou tarde
   const getShiftPeriod = (shift: Shift): TimePeriod => {
-    // Cách 1: Dựa vào ID ca (1: sáng, 2: chiều)
-    // if (shift.shift === 1) return TimePeriod.MORNING;
-    // if (shift.shift === 2) return TimePeriod.AFTERNOON;
-
-    // Cách 2: Dựa vào thời gian (nếu thêm ca mới không theo quy tắc ID)
-    // Phân tích giờ từ chuỗi thời gian (VD: "08:00")
     const startHour = parseInt(shift.start.split(":")[0]);
     if (startHour < 12) return TimePeriod.MORNING;
     return TimePeriod.AFTERNOON;
   };
 
-  // Lấy tất cả ca làm việc cho một khoảng thời gian nhất định (sáng/chiều)
+  // Busca todos os turnos de um período (manhã/tarde)
   const getShiftsForPeriod = (
     date: string,
     period: TimePeriod
@@ -365,33 +318,28 @@ const DoctorCurrentSchedulePage: React.FC = () => {
     );
   };
 
-  // Xử lý chuyển đến phòng khám trực tuyến
+  // Iniciar atendimento online
   const handleStartExamination = (shiftSchedule: WorkSchedule) => {
     if (!shiftSchedule || !shiftSchedule.id) {
-      alert(
-        "Không thể mở phòng khám do thiếu thông tin lịch làm việc. Vui lòng thử lại."
-      );
+      alert("Não foi possível abrir a sala de atendimento. Tente novamente.");
       return;
     }
 
-    // Kiểm tra xem ngày hiện tại có đúng là ngày của ca làm việc không
     if (!isExactDate(shiftSchedule.dateAppointment)) {
-      alert("Chỉ có thể vào phòng khám đúng ngày diễn ra ca khám");
+      alert("Só é possível entrar na sala no dia do turno.");
       return;
     }
 
-    // Kiểm tra xem thời gian hiện tại có nằm trong khung giờ của ca làm việc không
     if (!isWithinShiftHours(shiftSchedule.shift)) {
       alert(
-        "Chỉ có thể vào phòng khám trong khung giờ làm việc từ " +
+        "Só é possível entrar na sala durante o turno: " +
           shiftSchedule.shift.start +
-          " đến " +
+          " até " +
           shiftSchedule.shift.end
       );
       return;
     }
 
-    // Tạo URL phòng khám và mở tab mới
     const examRoomPath = ROUTING.EXAMINATION_ROOM.replace(
       ":scheduleId",
       shiftSchedule.id.toString()
@@ -399,12 +347,10 @@ const DoctorCurrentSchedulePage: React.FC = () => {
     window.open(examRoomPath, "_blank");
   };
 
-  // Hiển thị trạng thái các ca làm việc cho một khoảng thời gian (sáng/chiều)
-  // Hỗ trợ hiển thị nhiều ca trong cùng một khoảng thời gian
+  // Exibe status dos turnos de um período (manhã/tarde)
   const renderPeriodStatus = (date: string, period: TimePeriod) => {
     const shifts = getShiftsForPeriod(date, period);
 
-    // Nếu không có ca nào trong khoảng thời gian này
     if (shifts.length === 0) {
       return (
         <Box
@@ -418,7 +364,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
           }}
         >
           <Chip
-            label="Không có ca"
+            label="Sem turno"
             size="small"
             variant="outlined"
             sx={{
@@ -434,7 +380,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
       );
     }
 
-    // Hiển thị tất cả ca trong khoảng thời gian
     return (
       <Box
         sx={{
@@ -445,23 +390,18 @@ const DoctorCurrentSchedulePage: React.FC = () => {
         }}
       >
         {shifts.map((shiftSchedule, index) => {
-          // Lấy thông tin thời gian ca làm việc
           const shiftTime = {
             start: shiftSchedule.shift.start,
             end: shiftSchedule.shift.end,
           };
 
-          // Kiểm tra xem ngày đã qua chưa
           const isDateInPast = isPastDate(date);
 
-          // Xử lý click vào card để xem chi tiết
           const handleCardClick = (event: React.MouseEvent) => {
-            // Chỉ xử lý khi click vào card, không xử lý khi click vào nút khám
             if ((event.target as HTMLElement).closest("button")) {
               return;
             }
 
-            // Điều hướng đến trang chi tiết ca khám
             if (shiftSchedule) {
               navigate(
                 `${ROUTING.DOCTOR}/${ROUTING.SCHEDULE}/${shiftSchedule.id}`
@@ -493,7 +433,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                 },
               }}
             >
-              {/* Thời gian ca làm việc với style nổi bật hơn */}
+              {/* Horário do turno */}
               <Typography
                 variant="subtitle2"
                 sx={{
@@ -509,13 +449,13 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                 {shiftTime.start} - {shiftTime.end}
               </Typography>
 
-              {/* Chip hiển thị số cuộc hẹn - thiết kế mới */}
+              {/* Chip de consultas */}
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                 <Typography
                   variant="caption"
                   sx={{ fontWeight: "medium", color: "text.secondary" }}
                 >
-                  Cuộc hẹn:
+                  Consultas:
                 </Typography>
                 <Chip
                   label={`${shiftSchedule.totalBook}/${shiftSchedule.maxSlots}`}
@@ -529,7 +469,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                 />
               </Box>
 
-              {/* Chỉ giữ lại nút Khám với thiết kế cải tiến */}
+              {/* Botão Atender */}
               <Button
                 variant="contained"
                 size="small"
@@ -540,7 +480,9 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                   handleStartExamination(shiftSchedule);
                 }}
                 disabled={isDateInPast}
-                title={isDateInPast ? "Không thể khám cho ngày đã qua" : ""}
+                title={
+                  isDateInPast ? "Não é possível atender datas passadas" : ""
+                }
                 sx={{
                   borderRadius: 2,
                   fontSize: "0.8rem",
@@ -553,7 +495,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                   }),
                 }}
               >
-                {isDateInPast ? "Đã qua" : "Khám"}
+                {isDateInPast ? "Passado" : "Atender"}
               </Button>
             </Box>
           );
@@ -562,20 +504,19 @@ const DoctorCurrentSchedulePage: React.FC = () => {
     );
   };
 
-  // Mở modal lịch
+  // Abrir modal do calendário
   const handleOpenCalendar = () => {
     setCalendarOpen(true);
   };
 
-  // Đóng modal lịch
+  // Fechar modal do calendário
   const handleCloseCalendar = () => {
     setCalendarOpen(false);
   };
 
-  // Xử lý khi chọn ngày từ lịch
+  // Selecionar data no calendário
   const handleDateSelect = (date: Date) => {
     setCurrentDate(date);
-    // Lấy tuần chứa ngày đã chọn (từ thứ 2)
     const weekStart = startOfWeek(date, { weekStartsOn: 1 });
     setCurrentWeekStart(weekStart);
     setCalendarOpen(false);
@@ -583,7 +524,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
 
   return (
     <Box sx={{ p: 2 }}>
-      {/* Tiêu đề trang */}
+      {/* Título da página */}
       <Typography
         variant="h5"
         component="h1"
@@ -591,18 +532,18 @@ const DoctorCurrentSchedulePage: React.FC = () => {
         sx={{ display: "flex", alignItems: "center", mb: 2 }}
       >
         <CalendarMonthIcon sx={{ mr: 1, fontSize: 20 }} />
-        Lịch Làm Việc Hiện Tại
+        Agenda Atual do Médico
       </Typography>
 
-      {/* Thông báo thông tin - chỉ xem */}
+      {/* Alerta informativo */}
       <Box sx={{ mb: 2 }}>
         <Alert severity="info" sx={{ py: 0.5 }}>
-          Đây là lịch làm việc của bác sĩ. Bạn chỉ có thể xem, không thể chỉnh
-          sửa trực tiếp.
+          Esta é a agenda do médico. Você só pode visualizar, não pode editar
+          diretamente.
         </Alert>
       </Box>
 
-      {/* Điều hướng theo tuần */}
+      {/* Navegação por semana */}
       <Paper sx={{ mb: 3, p: 2 }}>
         <Stack
           direction="row"
@@ -610,7 +551,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
           spacing={1}
           justifyContent="center"
         >
-          <IconButton onClick={handlePrevWeek} aria-label="Tuần trước">
+          <IconButton onClick={handlePrevWeek} aria-label="Semana anterior">
             <NavigateBeforeIcon />
           </IconButton>
 
@@ -619,7 +560,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
               {formatWeekRange()}
               {isCurrentWeek() && (
                 <Typography variant="caption" display="block" color="primary">
-                  Tuần hiện tại
+                  Semana atual
                 </Typography>
               )}
             </Typography>
@@ -631,7 +572,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                 onClick={handleGoToCurrentWeek}
                 disabled={isCurrentWeek()}
               >
-                Tuần hiện tại
+                Semana atual
               </Button>
 
               <Button
@@ -640,18 +581,18 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                 size="small"
                 onClick={handleOpenCalendar}
               >
-                Chọn ngày
+                Escolher data
               </Button>
             </Stack>
           </Stack>
 
-          <IconButton onClick={handleNextWeek} aria-label="Tuần sau">
+          <IconButton onClick={handleNextWeek} aria-label="Próxima semana">
             <NavigateNextIcon />
           </IconButton>
         </Stack>
       </Paper>
 
-      {/* Modal lịch */}
+      {/* Modal do calendário */}
       <Modal
         open={calendarOpen}
         onClose={handleCloseCalendar}
@@ -679,7 +620,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
             sx={{ mb: 1 }}
           >
             <Typography variant="h6" component="h2">
-              Chọn ngày
+              Escolher data
             </Typography>
             <IconButton onClick={handleCloseCalendar} size="small">
               <CloseIcon fontSize="small" />
@@ -701,19 +642,19 @@ const DoctorCurrentSchedulePage: React.FC = () => {
           </LocalizationProvider>
 
           <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
-            <Button onClick={handleCloseCalendar}>Đóng</Button>
+            <Button onClick={handleCloseCalendar}>Fechar</Button>
           </Box>
         </Paper>
       </Modal>
 
-      {/* Bảng lịch làm việc theo tuần */}
+      {/* Tabela da agenda semanal */}
       <Paper sx={{ mb: 3, overflow: "auto" }}>
         <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold", width: "100px" }}>
-                  Ca làm việc
+                  Turno
                 </TableCell>
 
                 {weekDays.map((day, index) => (
@@ -733,7 +674,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
 
             <TableBody>
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold" }}>Sáng</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Manhã</TableCell>
 
                 {weekDays.map((day) => (
                   <TableCell
@@ -747,7 +688,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
               </TableRow>
 
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold" }}>Chiều</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Tarde</TableCell>
 
                 {weekDays.map((day) => (
                   <TableCell

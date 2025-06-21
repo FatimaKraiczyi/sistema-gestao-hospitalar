@@ -11,11 +11,6 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
   borderColor: theme.palette.divider,
 }));
 
-const NavButton = styled(Button)(({ theme }) => ({
-  color: theme.palette.text.primary,
-  marginLeft: theme.spacing(2),
-}));
-
 export default function Navbar() {
   const navigate = useNavigate();
   const handleNavigate = (route: string) => {
