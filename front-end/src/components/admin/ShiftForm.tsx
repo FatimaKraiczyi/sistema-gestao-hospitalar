@@ -19,21 +19,21 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { formatTimeFromTimeString } from "../../utils/dateUtils";
 
-// Interface định nghĩa các props cho component ShiftForm
-// Cho phép sử dụng chung một form cho cả thêm mới và chỉnh sửa
+// Interface que define as props para o componente ShiftForm
+// Permite usar o mesmo formulário para adicionar e editar
 interface ShiftFormProps {
-  open: boolean; // Trạng thái hiển thị của modal
-  onClose: () => void; // Hàm xử lý khi đóng modal
-  onSubmit: (shift: Partial<Shift>) => void; // Hàm xử lý khi submit form
-  shift?: Shift | null; // Thông tin ca làm việc (khi chỉnh sửa)
-  mode: "add" | "edit"; // Chế độ form: thêm mới hoặc chỉnh sửa
+  open: boolean; // Estado de exibição do modal
+  onClose: () => void; // Função para fechar o modal
+  onSubmit: (shift: Partial<Shift>) => void; // Função para submit do formulário
+  shift?: Shift | null; // Dados do turno (ao editar)
+  mode: "add" | "edit"; // Modo do formulário: adicionar ou editar
 }
 
-// Simplified schema validation for shift number only
+// Esquema de validação simplificado apenas para o número do turno
 const validationSchema = Yup.object({
   shift: Yup.number()
-    .required("Số ca làm việc là bắt buộc")
-    .min(1, "Số ca làm việc phải lớn hơn 0"),
+    .required("O número do turno é obrigatório")
+    .min(1, "O número do turno deve ser maior que 0"),
 });
 
 const ShiftForm: React.FC<ShiftFormProps> = ({
@@ -43,28 +43,28 @@ const ShiftForm: React.FC<ShiftFormProps> = ({
   shift,
   mode,
 }) => {
-  // State for time validation error
+  // Estado para erro de validação de horário
   const [timeError, setTimeError] = useState<string | null>(null);
 
-  // Sử dụng formik để quản lý form
+  // Uso do formik para gerenciar o formulário
   const formik = useFormik({
     initialValues: {
       shift: 0,
       start: "",
       end: "",
       status: true,
-      // Thêm các trường thời gian để quản lý giá trị Date của time picker
+      // Campos para gerenciar o valor Date do time picker
       startTime: null as Date | null,
       endTime: null as Date | null,
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
-      // Validate times before submitting
+      // Valida os horários antes de enviar
       if (!validateTimes(values.startTime, values.endTime)) {
-        return; // Don't submit if validation fails
+        return; // Não envia se a validação falhar
       }
 
-      // Submit with the string values
+      // Envia com os valores em string
       onSubmit({
         shift: values.shift,
         start: values.start,
@@ -74,29 +74,28 @@ const ShiftForm: React.FC<ShiftFormProps> = ({
     },
   });
 
-  // Custom time validation function
+  // Função de validação personalizada para horários
   const validateTimes = (
     startTime: Date | null,
     endTime: Date | null
   ): boolean => {
-    // Clear previous error
     setTimeError(null);
 
-    // If either time is not set, don't validate yet
+    // Se algum horário não estiver definido, não valida ainda
     if (!startTime || !endTime) {
       return true;
     }
 
-    // Check if end time is after start time
+    // Verifica se o horário de término é após o de início
     if (endTime <= startTime) {
-      setTimeError("Giờ kết thúc phải sau giờ bắt đầu");
+      setTimeError("O horário de término deve ser após o horário de início");
       return false;
     }
 
     return true;
   };
 
-  // Effect để cập nhật giá trị form khi chuyển sang chế độ chỉnh sửa
+  // Efeito para atualizar os valores do formulário ao editar
   useEffect(() => {
     if (shift && mode === "edit") {
       const startTime = parseTimeString(shift.start);
@@ -111,7 +110,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({
         endTime: endTime,
       });
 
-      // Validate times after setting values
+      // Valida horários após definir valores
       validateTimes(startTime, endTime);
     } else if (mode === "add") {
       formik.resetForm();
@@ -127,7 +126,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({
     }
   }, [shift, mode, open]);
 
-  // Helper to parse time string to Date object
+  // Função auxiliar para converter string de horário em Date
   const parseTimeString = (timeStr: string): Date | null => {
     if (!timeStr) return null;
 
@@ -146,31 +145,31 @@ const ShiftForm: React.FC<ShiftFormProps> = ({
 
       return today;
     } catch (e) {
-      console.error("Error parsing time string:", timeStr, e);
+      console.error("Erro ao converter string de horário:", timeStr, e);
       return null;
     }
   };
 
-  // Handle time picker changes
+  // Manipula mudanças no horário de início
   const handleStartTimeChange = (newValue: Date | null) => {
     formik.setFieldValue("startTime", newValue);
-    // Đồng bộ start vs startTime
+    // Sincroniza start com startTime
     if (newValue) {
-      // Convert Date object to string format "HH:mm"
       const timeString = `${String(newValue.getHours()).padStart(
         2,
         "0"
       )}:${String(newValue.getMinutes()).padStart(2, "0")}`;
       formik.setFieldValue("start", timeString);
 
-      // Validate times whenever start time changes
+      // Valida horários sempre que o início muda
       validateTimes(newValue, formik.values.endTime);
     }
   };
 
+  // Manipula mudanças no horário de término
   const handleEndTimeChange = (newValue: Date | null) => {
     formik.setFieldValue("endTime", newValue);
-    // Đồng bộ endTime và end
+    // Sincroniza endTime e end
     if (newValue) {
       const timeString = `${String(newValue.getHours()).padStart(
         2,
@@ -178,22 +177,22 @@ const ShiftForm: React.FC<ShiftFormProps> = ({
       )}:${String(newValue.getMinutes()).padStart(2, "0")}`;
       formik.setFieldValue("end", timeString);
 
-      // Validate times whenever end time changes
+      // Valida horários sempre que o término muda
       validateTimes(formik.values.startTime, newValue);
     }
   };
 
-  // Xử lý đóng modal và reset form
+  // Fecha o modal e reseta o formulário
   const handleClose = () => {
     formik.resetForm();
     setTimeError(null);
     onClose();
   };
 
-  // Xác định tiêu đề và nút bấm
+  // Define título e texto do botão
   const title =
-    mode === "add" ? "Thêm ca làm việc mới" : "Chỉnh sửa thông tin ca làm việc";
-  const buttonText = mode === "add" ? "Thêm ca làm việc" : "Lưu thay đổi";
+    mode === "add" ? "Adicionar novo turno" : "Editar informações do turno";
+  const buttonText = mode === "add" ? "Adicionar turno" : "Salvar alterações";
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
@@ -204,7 +203,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({
             <Grid item xs={12} sm={6}>
               <TextField
                 name="shift"
-                label="Số ca làm việc"
+                label="Número do turno"
                 type="number"
                 value={formik.values.shift}
                 onChange={formik.handleChange}
@@ -225,13 +224,13 @@ const ShiftForm: React.FC<ShiftFormProps> = ({
                     onChange={formik.handleChange}
                   />
                 }
-                label="Hoạt động"
+                label="Ativo"
               />
             </Grid>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <Grid item xs={12} sm={6}>
                 <TimePicker
-                  label="Giờ bắt đầu"
+                  label="Horário de início"
                   value={formik.values.startTime}
                   onChange={handleStartTimeChange}
                   slotProps={{
@@ -244,7 +243,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TimePicker
-                  label="Giờ kết thúc"
+                  label="Horário de término"
                   value={formik.values.endTime}
                   onChange={handleEndTimeChange}
                   slotProps={{
@@ -264,7 +263,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="error">
-            Hủy
+            Cancelar
           </Button>
           <Button
             type="submit"

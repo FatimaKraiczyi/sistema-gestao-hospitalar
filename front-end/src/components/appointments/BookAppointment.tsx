@@ -19,7 +19,7 @@ import { createAppointment } from "../../services/appointment/booking_service";
 
 interface BookAppointmentProps {
   onClose: () => void;
-  patientId?: string; // Current patient ID
+  patientId?: string; // ID do paciente atual
 }
 
 const BookAppointment: React.FC<BookAppointmentProps> = ({
@@ -38,11 +38,11 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
   const [paymentCompleted, setPaymentCompleted] = useState<boolean>(false);
 
   const steps = [
-    "Chọn dịch vụ",
-    "Chọn bác sĩ",
-    "Chọn ngày giờ",
-    "Thanh toán",
-    "Xác nhận",
+    "Escolher serviço",
+    "Escolher médico",
+    "Escolher data e hora",
+    "Pagamento",
+    "Confirmação",
   ];
 
   const handleNext = () => {
@@ -84,8 +84,8 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
 
       setActiveStep(4);
     } catch (err) {
-      console.error("Failed to process payment:", err);
-      setError("Thanh toán thất bại. Vui lòng thử lại.");
+      console.error("Falha ao processar o pagamento:", err);
+      setError("Pagamento falhou. Por favor, tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -93,7 +93,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
 
   const handleConfirm = async () => {
     if (!selectedDate || !selectedTime || !selectedDoctor || !patientId) {
-      setError("Thông tin đặt lịch còn thiếu. Vui lòng kiểm tra lại.");
+      setError("Informações da consulta incompletas. Por favor, verifique.");
       return;
     }
 
@@ -109,7 +109,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
     setWorkSchedule(null);
     setNote("");
     onClose();
-    // redirect to appointment list page or show success message
+    // redirecionar para a lista de consultas ou mostrar mensagem de sucesso
   };
 
   const handleNoteChange = (value: string) => {
@@ -119,7 +119,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
   return (
     <Box sx={{ width: "100%" }}>
       <Typography variant="h6" gutterBottom>
-        Đặt lịch khám bệnh
+        Agendar consulta
       </Typography>
 
       <Stepper activeStep={activeStep} sx={{ mb: 4 }} alternativeLabel>
@@ -150,37 +150,37 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
       )}
 
       {/* {activeStep === 3 && (
-        <Box>
-          <DoctorDetails doctor={selectedDoctor} />
-          <Box sx={{ mt: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Chi tiết lịch hẹn
-            </Typography>
-            <Typography variant="body1">
-              Ngày: {selectedDate ? selectedDate.toLocaleDateString() : ""}
-            </Typography>
-            <Typography variant="body1">
-              Thời gian:{" "}
-              {selectedTime
-                ? `${selectedTime.start} - ${selectedTime.end}`
-                : ""}
-            </Typography>
-            <Typography variant="body1">
-              Dịch vụ: {selectedService.name}
-            </Typography>
-          </Box>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handlePaymentComplete}
-              disabled={loading}
-            >
-              {loading ? "Đang xử lý..." : "Tiến hành thanh toán"}
-            </Button>
-          </Box>
-        </Box>
-      )} */}
+				<Box>
+					<DoctorDetails doctor={selectedDoctor} />
+					<Box sx={{ mt: 3 }}>
+						<Typography variant="h6" gutterBottom>
+							Detalhes da consulta
+						</Typography>
+						<Typography variant="body1">
+							Data: {selectedDate ? selectedDate.toLocaleDateString() : ""}
+						</Typography>
+						<Typography variant="body1">
+							Horário:{" "}
+							{selectedTime
+								? `${selectedTime.start} - ${selectedTime.end}`
+								: ""}
+						</Typography>
+						<Typography variant="body1">
+							Serviço: {selectedService.name}
+						</Typography>
+					</Box>
+					<Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+						<Button
+							variant="contained"
+							color="primary"
+							onClick={handlePaymentComplete}
+							disabled={loading}
+						>
+							{loading ? "Processando..." : "Realizar pagamento"}
+						</Button>
+					</Box>
+				</Box>
+			)} */}
 
       {activeStep === 3 && (
         <PaymentCheckout
@@ -206,7 +206,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
       {activeStep === 0 && (
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={onClose} sx={{ mr: 1 }} disabled={loading}>
-            Hủy
+            Cancelar
           </Button>
         </Box>
       )}
@@ -214,10 +214,10 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
       {activeStep !== 0 && activeStep !== 4 && activeStep !== steps.length && (
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
           <Button onClick={handleBack} disabled={activeStep === 0 || loading}>
-            Quay lại
+            Voltar
           </Button>
           <Button onClick={onClose} sx={{ mr: 1 }} disabled={loading}>
-            Hủy
+            Cancelar
           </Button>
         </Box>
       )}

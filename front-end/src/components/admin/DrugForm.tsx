@@ -12,26 +12,26 @@ import { Drug } from "../../types/medical";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
-// Interface định nghĩa các props cho component DrugForm
-// Cho phép sử dụng chung một form cho cả thêm mới và chỉnh sửa
+// Interface que define as props para o componente DrugForm
+// Permite usar o mesmo formulário para adicionar e editar
 interface DrugFormProps {
-  open: boolean; // Trạng thái hiển thị của modal
-  onClose: () => void; // Hàm xử lý khi đóng modal
-  onSubmit: (drug: Partial<Drug>) => void; // Hàm xử lý khi submit form
-  drug?: Drug | null; // Thông tin thuốc (khi chỉnh sửa)
-  mode: "add" | "edit"; // Chế độ form: thêm mới hoặc chỉnh sửa
+  open: boolean; // Estado de exibição do modal
+  onClose: () => void; // Função chamada ao fechar o modal
+  onSubmit: (drug: Partial<Drug>) => void; // Função chamada ao submeter o formulário
+  drug?: Drug | null; // Informações do medicamento (ao editar)
+  mode: "add" | "edit"; // Modo do formulário: adicionar ou editar
 }
 
-// Schema validation sử dụng Yup
-// Định nghĩa các quy tắc kiểm tra dữ liệu nhập vào
+// Schema de validação usando Yup
+// Define as regras de validação dos dados inseridos
 const validationSchema = Yup.object({
   drugName: Yup.string()
-    .required("Tên thuốc là bắt buộc")
-    .min(2, "Tên thuốc phải có ít nhất 2 ký tự"),
-  drugType: Yup.string().required("Loại thuốc là bắt buộc"),
+    .required("Nome do medicamento é obrigatório")
+    .min(2, "O nome do medicamento deve ter pelo menos 2 caracteres"),
+  drugType: Yup.string().required("Tipo do medicamento é obrigatório"),
   unit: Yup.string()
-    .required("Đơn vị là bắt buộc")
-    .min(1, "Đơn vị không được để trống"),
+    .required("Unidade é obrigatória")
+    .min(1, "Unidade não pode estar vazia"),
 });
 
 const DrugForm: React.FC<DrugFormProps> = ({
@@ -41,7 +41,7 @@ const DrugForm: React.FC<DrugFormProps> = ({
   drug,
   mode,
 }) => {
-  // Sử dụng formik để quản lý form và validation
+  // Usa formik para gerenciar o formulário e validação
   const formik = useFormik({
     initialValues: {
       drugName: "",
@@ -54,8 +54,7 @@ const DrugForm: React.FC<DrugFormProps> = ({
     },
   });
 
-  // Effect để cập nhật giá trị form khi chuyển sang chế độ chỉnh sửa
-  // Hoặc reset form khi chuyển sang chế độ thêm mới
+  // Atualiza os valores do formulário ao editar ou reseta ao adicionar
   useEffect(() => {
     if (drug && mode === "edit") {
       formik.setValues({
@@ -68,15 +67,19 @@ const DrugForm: React.FC<DrugFormProps> = ({
     }
   }, [drug, mode]);
 
-  // Xử lý đóng modal và reset form
+  // Fecha o modal e reseta o formulário
   const handleClose = () => {
     formik.resetForm();
     onClose();
   };
 
-  // Xác định tiêu đề và nút bấm dựa trên chế độ form
-  const title = mode === "add" ? "Thêm thuốc mới" : "Chỉnh sửa thông tin thuốc";
-  const buttonText = mode === "add" ? "Thêm thuốc" : "Lưu thay đổi";
+  // Define título e texto do botão conforme o modo
+  const title =
+    mode === "add"
+      ? "Adicionar novo medicamento"
+      : "Editar informações do medicamento";
+  const buttonText =
+    mode === "add" ? "Adicionar medicamento" : "Salvar alterações";
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
@@ -87,7 +90,7 @@ const DrugForm: React.FC<DrugFormProps> = ({
             <Grid item xs={12}>
               <TextField
                 name="drugName"
-                label="Tên thuốc"
+                label="Nome do medicamento"
                 value={formik.values.drugName}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -102,7 +105,7 @@ const DrugForm: React.FC<DrugFormProps> = ({
             <Grid item xs={12}>
               <TextField
                 name="drugType"
-                label="Loại thuốc"
+                label="Tipo do medicamento"
                 value={formik.values.drugType}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -116,7 +119,7 @@ const DrugForm: React.FC<DrugFormProps> = ({
             <Grid item xs={12}>
               <TextField
                 name="unit"
-                label="Đơn vị"
+                label="Unidade"
                 value={formik.values.unit}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -130,7 +133,7 @@ const DrugForm: React.FC<DrugFormProps> = ({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="error">
-            Hủy
+            Cancelar
           </Button>
           <Button
             type="submit"

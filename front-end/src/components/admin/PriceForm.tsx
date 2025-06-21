@@ -24,11 +24,11 @@ interface PriceFormProps {
 
 const validationSchema = Yup.object({
   priceType: Yup.string()
-    .required("Loại giá là bắt buộc")
-    .min(2, "Loại giá phải có ít nhất 2 ký tự"),
+    .required("Tipo de preço é obrigatório")
+    .min(2, "Tipo de preço deve ter pelo menos 2 caracteres"),
   price: Yup.number()
-    .required("Giá tiền là bắt buộc")
-    .min(0, "Giá tiền không được âm"),
+    .required("Preço é obrigatório")
+    .min(0, "Preço não pode ser negativo"),
 });
 
 const PriceForm: React.FC<PriceFormProps> = ({
@@ -39,7 +39,7 @@ const PriceForm: React.FC<PriceFormProps> = ({
   mode,
   loading = false,
 }) => {
-  // Sử dụng formik để quản lý trạng thái và xác thực form
+  // Usa o formik para gerenciar o estado e validação do formulário
   const formik = useFormik({
     initialValues: {
       priceType: "",
@@ -51,7 +51,7 @@ const PriceForm: React.FC<PriceFormProps> = ({
     },
   });
 
-  // Cập nhật giá trị form khi price hoặc mode thay đổi
+  // Atualiza os valores do formulário quando price ou mode mudam
   useEffect(() => {
     if (price && mode === "edit") {
       formik.setValues({
@@ -63,15 +63,16 @@ const PriceForm: React.FC<PriceFormProps> = ({
     }
   }, [price, mode]);
 
-  // Xử lý đóng dialog và reset form
+  // Lida com o fechamento do dialog e reseta o formulário
   const handleClose = () => {
     formik.resetForm();
     onClose();
   };
 
-  // Xác định tiêu đề và text của nút dựa vào mode
-  const title = mode === "add" ? "Thêm giá mới" : "Chỉnh sửa thông tin giá";
-  const buttonText = mode === "add" ? "Thêm giá" : "Lưu thay đổi";
+  // Define o título e texto do botão baseado no modo
+  const title =
+    mode === "add" ? "Adicionar novo preço" : "Editar informações do preço";
+  const buttonText = mode === "add" ? "Adicionar preço" : "Salvar alterações";
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
@@ -80,7 +81,7 @@ const PriceForm: React.FC<PriceFormProps> = ({
         <DialogContent>
           <TextField
             name="priceType"
-            label="Loại giá"
+            label="Tipo de preço"
             value={formik.values.priceType}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -92,7 +93,7 @@ const PriceForm: React.FC<PriceFormProps> = ({
           />
           <TextField
             name="price"
-            label="Giá tiền"
+            label="Preço"
             type="number"
             value={formik.values.price}
             onChange={formik.handleChange}
@@ -104,14 +105,14 @@ const PriceForm: React.FC<PriceFormProps> = ({
             margin="normal"
             InputProps={{
               startAdornment: (
-                <InputAdornment position="start">VND</InputAdornment>
+                <InputAdornment position="start">BRL</InputAdornment>
               ),
             }}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} disabled={loading}>
-            Hủy
+            Cancelar
           </Button>
           <Button
             type="submit"

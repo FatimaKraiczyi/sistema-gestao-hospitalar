@@ -15,41 +15,41 @@ import { DoctorExperienceSection } from "../doctor/DoctorExperienceSection";
 import { DoctorCertificatesSection } from "../doctor/DoctorCertificatesSection";
 
 /**
- * Props cho component DoctorDetails
- * @param doctor - Thông tin bác sĩ cần hiển thị chi tiết
+ * Propriedades para o componente DoctorDetails
+ * @param doctor - Informações do médico a serem exibidas em detalhes
  */
 interface DoctorDetailsProps {
   doctor: any;
 }
 
 /**
- * Component hiển thị thông tin chi tiết về bác sĩ
- * Bao gồm thông tin cá nhân, học vấn, kinh nghiệm và chứng chỉ
+ * Componente que exibe informações detalhadas sobre o médico
+ * Inclui informações pessoais, formação, experiência e certificados
  */
 const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
-  // State lưu trạng thái loading
+  // Estado para controlar o carregamento
   const [loading, setLoading] = useState(true);
-  // State lưu thông tin chi tiết bác sĩ
+  // Estado para armazenar detalhes do médico
   const [doctorDetails, setDoctorDetails] = useState<any>(null);
-  // State lưu thông báo lỗi nếu có
+  // Estado para armazenar mensagens de erro, se houver
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * Gọi API để lấy thông tin chi tiết về bác sĩ khi component mount
+   * Chama a API para buscar detalhes do médico ao montar o componente
    */
   useEffect(() => {
     const fetchDoctorDetails = async () => {
       try {
         setLoading(true);
         setError(null);
-        console.log("Fetching doctor details for:", doctor);
+        console.log("Buscando detalhes do médico para:", doctor);
         const response = await getDoctorInfo(doctor.userId);
-        console.log("Doctor details response:", response.data.data);
+        console.log("Resposta dos detalhes do médico:", response.data.data);
         setDoctorDetails(response.data.data || doctor);
       } catch (err) {
-        console.error("Failed to fetch doctor details:", err);
+        console.error("Falha ao buscar detalhes do médico:", err);
         setError(
-          "Failed to load doctor details. Using basic information instead."
+          "Falha ao carregar detalhes do médico. Usando informações básicas."
         );
         setDoctorDetails(doctor);
       } finally {
@@ -60,7 +60,7 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
     fetchDoctorDetails();
   }, [doctor]);
 
-  // Hiển thị loading spinner khi đang tải dữ liệu
+  // Exibe spinner de carregamento enquanto os dados estão sendo carregados
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
@@ -69,7 +69,7 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
     );
   }
 
-  // Trích xuất dữ liệu từ doctorDetails
+  // Extrai dados de doctorDetails
   const details = doctorDetails || doctor;
   const infoBasic = details.doctor || {};
   const education = details.educations || [];
@@ -78,17 +78,17 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
 
   return (
     <Box>
-      {/* Hiển thị thông báo lỗi nếu có */}
+      {/* Exibe mensagem de erro, se houver */}
       {error && (
         <Typography color="error" sx={{ mb: 2 }}>
           {error}
         </Typography>
       )}
 
-      {/* Thông tin cơ bản của bác sĩ */}
+      {/* Informações básicas do médico */}
       <Paper sx={{ p: 2, mb: 3 }}>
         <Grid container spacing={2}>
-          {/* Ảnh đại diện của bác sĩ */}
+          {/* Foto do médico */}
           <Grid item xs={12} sm={3}>
             <CardMedia
               component="img"
@@ -99,15 +99,15 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
                 margin: "0 auto",
               }}
               image={
-                infoBasic.avatar || "https://picsum.photos/120/160?random=1" // Ảnh mặc định nếu không có avatar
+                infoBasic.avatar || "https://picsum.photos/120/160?random=1" // Imagem padrão se não houver avatar
               }
-              alt={infoBasic.lastName || "Doctor"}
+              alt={infoBasic.lastName || "Médico"}
             />
           </Grid>
-          {/* Thông tin cơ bản về bác sĩ */}
+          {/* Informações básicas sobre o médico */}
           <Grid item xs={12} sm={9}>
             <Typography variant="h5" component="div">
-              {infoBasic.firstName + " " + infoBasic.lastName || "Doctor"}
+              {infoBasic.firstName + " " + infoBasic.lastName || "Médico"}
             </Typography>
             <Chip
               label={infoBasic.specialization}
@@ -117,14 +117,14 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
             <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
               <Rating value={details.rating || 0} precision={0.1} readOnly />
               <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                ({details.reviews || 0} đánh giá)
+                ({details.reviews || 0} avaliações)
               </Typography>
             </Box>
           </Grid>
         </Grid>
       </Paper>
 
-      {/* Using specialized doctor components for education, experience, and certificates */}
+      {/* Usando componentes especializados para formação, experiência e certificados */}
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <DoctorEducationSection education={education} />
@@ -133,7 +133,7 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
         <Grid item xs={12} md={6}>
           <DoctorExperienceSection
             experiences={experience}
-            specialization={infoBasic.specialization || "Không xác định"}
+            specialization={infoBasic.specialization || "Não especificado"}
           />
         </Grid>
 

@@ -17,7 +17,6 @@ import EventIcon from "@mui/icons-material/Event";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PersonIcon from "@mui/icons-material/Person";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import { format } from "date-fns";
 
 /**
  * Props para o componente ConfirmAppointment
@@ -29,9 +28,9 @@ import { format } from "date-fns";
  */
 interface ConfirmAppointmentProps {
   date: Date;
-  time: string;
+  time: { start: string; end: string };
   doctor: any;
-  specialty?: any; // Giờ đại diện cho dịch vụ
+  specialty?: any;
   onDone: () => void;
 }
 
@@ -43,7 +42,7 @@ const ConfirmAppointment: React.FC<ConfirmAppointmentProps> = ({
   date,
   time,
   doctor,
-  specialty, // Giờ đại diện cho dịch vụ
+  specialty,
   onDone,
 }) => {
   return (
@@ -53,17 +52,18 @@ const ConfirmAppointment: React.FC<ConfirmAppointmentProps> = ({
 
       {/* Mensagem de agendamento bem-sucedido */}
       <Typography variant="h5" gutterBottom>
-        {t("patient.appointments.booking_successful")}
+        Agendamento realizado com sucesso!
       </Typography>
 
       <Typography variant="body1" color="text.secondary" paragraph>
-        {t("patient.appointments.booking_confirmation_message")}
+        Sua consulta foi agendada. Você receberá um lembrete próximo ao horário
+        marcado.
       </Typography>
 
       {/* Caixa com detalhes do agendamento */}
       <Paper sx={{ maxWidth: 600, mx: "auto", mt: 4, p: 3 }}>
         <Typography variant="h6" gutterBottom>
-          {t("patient.appointments.appointment_details")}
+          Detalhes do agendamento
         </Typography>
         <Divider sx={{ mb: 2 }} />
 
@@ -77,8 +77,8 @@ const ConfirmAppointment: React.FC<ConfirmAppointmentProps> = ({
               </Avatar>
             </ListItemAvatar>
             <ListItemText
-              primary={t("patient.appointments.date")}
-              secondary={date.toLocaleDateString()}
+              primary="Data"
+              secondary={date.toLocaleDateString("pt-BR")}
             />
           </ListItem>
 
@@ -90,7 +90,7 @@ const ConfirmAppointment: React.FC<ConfirmAppointmentProps> = ({
               </Avatar>
             </ListItemAvatar>
             <ListItemText
-              primary={t("patient.appointments.time")}
+              primary="Horário"
               secondary={time.start + " - " + time.end}
             />
           </ListItem>
@@ -103,12 +103,12 @@ const ConfirmAppointment: React.FC<ConfirmAppointmentProps> = ({
               </Avatar>
             </ListItemAvatar>
             <ListItemText
-              primary={t("patient.appointments.doctor")}
+              primary="Médico"
               secondary={`${doctor.firstName} ${doctor.lastName}`}
             />
           </ListItem>
 
-          {/* Thông tin dịch vụ (hiển thị nếu có) */}
+          {/* Informações do serviço (se houver) */}
           {specialty && (
             <ListItem>
               <ListItemAvatar>
@@ -116,16 +116,13 @@ const ConfirmAppointment: React.FC<ConfirmAppointmentProps> = ({
                   <LocalHospitalIcon />
                 </Avatar>
               </ListItemAvatar>
-              <ListItemText
-                primary={t("patient.appointments.service")}
-                secondary={specialty.name}
-              />
+              <ListItemText primary="Serviço" secondary={specialty.name} />
             </ListItem>
           )}
         </List>
       </Paper>
 
-      {/* Nút quay lại trang lịch hẹn */}
+      {/* Botão para voltar à página de agendamentos */}
       <Box sx={{ mt: 4 }}>
         <Button
           variant="contained"
@@ -133,7 +130,7 @@ const ConfirmAppointment: React.FC<ConfirmAppointmentProps> = ({
           onClick={onDone}
           size="large"
         >
-          {t("patient.appointments.back_to_appointments")}
+          Voltar para meus agendamentos
         </Button>
       </Box>
     </Box>

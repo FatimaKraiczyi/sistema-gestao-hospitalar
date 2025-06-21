@@ -23,13 +23,13 @@ import MedicationIcon from "@mui/icons-material/Medication";
 import { getAllDoctorByTypeDiseaseName } from "../../services/authenticate/typeDisease_service.ts";
 
 /**
- * Props para o componente DoctorList
+ * Propriedades para o componente DoctorList
  * @param specialty - Serviço/especialidade selecionado
  * @param onSelect - Função callback quando o usuário seleciona um médico
  * @param onBack - Função callback quando o usuário volta para o passo anterior
  */
 interface DoctorListProps {
-  specialty: any; // Now represents a service
+  specialty: any; // Agora representa um serviço
   onSelect: (doctor: any) => void;
   // onBack: () => void;
 }
@@ -37,13 +37,13 @@ interface DoctorListProps {
 // Dados de exemplo para a lista de médicos por especialidade
 const mockDoctorsBySpecialty = {
   "1": [
-    // Cardiology
+    // Cardiologia
     {
       id: "101",
       userId: "d101",
       firstName: "John",
       lastName: "Smith",
-      specialization: "Cardiology",
+      specialization: "Cardiologia",
       experience: 12,
       rating: 4.8,
       reviews: 124,
@@ -55,7 +55,7 @@ const mockDoctorsBySpecialty = {
       userId: "d102",
       firstName: "Sarah",
       lastName: "Johnson",
-      specialization: "Cardiology",
+      specialization: "Cardiologia",
       experience: 9,
       rating: 4.6,
       reviews: 98,
@@ -64,13 +64,13 @@ const mockDoctorsBySpecialty = {
     },
   ],
   "2": [
-    // Dermatology
+    // Dermatologia
     {
       id: "201",
       userId: "d201",
       firstName: "Michael",
       lastName: "Brown",
-      specialization: "Dermatology",
+      specialization: "Dermatologia",
       experience: 15,
       rating: 4.9,
       reviews: 152,
@@ -79,13 +79,13 @@ const mockDoctorsBySpecialty = {
     },
   ],
   "3": [
-    // Neurology
+    // Neurologia
     {
       id: "301",
       userId: "d301",
       firstName: "Jessica",
       lastName: "Williams",
-      specialization: "Neurology",
+      specialization: "Neurologia",
       experience: 11,
       rating: 4.7,
       reviews: 134,
@@ -97,7 +97,7 @@ const mockDoctorsBySpecialty = {
       userId: "d302",
       firstName: "David",
       lastName: "Miller",
-      specialization: "Neurology",
+      specialization: "Neurologia",
       experience: 8,
       rating: 4.5,
       reviews: 89,
@@ -106,13 +106,13 @@ const mockDoctorsBySpecialty = {
     },
   ],
   "4": [
-    // Orthopedics
+    // Ortopedia
     {
       id: "401",
       userId: "d401",
       firstName: "Robert",
       lastName: "Davis",
-      specialization: "Orthopedics",
+      specialization: "Ortopedia",
       experience: 14,
       rating: 4.8,
       reviews: 142,
@@ -121,13 +121,13 @@ const mockDoctorsBySpecialty = {
     },
   ],
   "5": [
-    // Pediatrics
+    // Pediatria
     {
       id: "501",
       userId: "d501",
       firstName: "Jennifer",
       lastName: "Taylor",
-      specialization: "Pediatrics",
+      specialization: "Pediatria",
       experience: 10,
       rating: 4.9,
       reviews: 168,
@@ -139,7 +139,7 @@ const mockDoctorsBySpecialty = {
       userId: "d502",
       firstName: "William",
       lastName: "Anderson",
-      specialization: "Pediatrics",
+      specialization: "Pediatria",
       experience: 7,
       rating: 4.6,
       reviews: 92,
@@ -148,13 +148,13 @@ const mockDoctorsBySpecialty = {
     },
   ],
   "6": [
-    // Psychiatry
+    // Psiquiatria
     {
       id: "601",
       userId: "d601",
       firstName: "Karen",
       lastName: "Martinez",
-      specialization: "Psychiatry",
+      specialization: "Psiquiatria",
       experience: 13,
       rating: 4.7,
       reviews: 115,
@@ -165,29 +165,29 @@ const mockDoctorsBySpecialty = {
 };
 
 /**
- * Component hiển thị danh sách bác sĩ theo chuyên khoa được chọn
- * Cho phép người dùng chọn bác sĩ để đặt lịch khám
- * Hỗ trợ phân trang để hiển thị danh sách dài
+ * Componente que exibe a lista de médicos de acordo com a especialidade selecionada
+ * Permite ao usuário escolher um médico para agendar uma consulta
+ * Suporta paginação para listas longas
  */
 const DoctorList: React.FC<DoctorListProps> = ({
-  specialty, // Now represents a service
+  specialty, // Agora representa um serviço
   onSelect,
   // onBack,
 }) => {
-  // State lưu trạng thái đang tải dữ liệu
+  // Estado para controlar o carregamento dos dados
   const [loading, setLoading] = useState(true);
-  // State lưu danh sách bác sĩ
+  // Estado para armazenar a lista de médicos
   const [doctors, setDoctors] = useState<any[]>([]);
-  // State lưu thông báo lỗi nếu có
+  // Estado para armazenar mensagens de erro
   const [error, setError] = useState<string | null>(null);
 
-  // State cho phân trang
+  // Estado para paginação
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(4);
 
   /**
-   * Gọi API để lấy danh sách bác sĩ theo chuyên khoa khi component mount
-   * hoặc khi chuyên khoa được chọn thay đổi
+   * Chama a API para buscar a lista de médicos pelo serviço quando o componente monta
+   * ou quando o serviço selecionado muda
    */
   useEffect(() => {
     const fetchDoctorsByService = async () => {
@@ -195,7 +195,7 @@ const DoctorList: React.FC<DoctorListProps> = ({
         setLoading(true);
         setError(null);
 
-        // Gọi API lấy danh sách bác sĩ theo tên loại bệnh/dịch vụ
+        // Chama a API para buscar médicos pelo nome do tipo de doença/serviço
         const result = await getAllDoctorByTypeDiseaseName(specialty.name)
           .then((response) => response.data.data)
           .catch((error) => {
@@ -203,11 +203,11 @@ const DoctorList: React.FC<DoctorListProps> = ({
             return null;
           });
 
-        // Cập nhật state với dữ liệu nhận được từ API
+        // Atualiza o estado com os dados recebidos da API
         setDoctors(result);
       } catch (err) {
-        console.error("Failed to fetch doctors by service:", err);
-        setError("Failed to load available doctors. Please try again.");
+        console.error("Falha ao buscar médicos pelo serviço:", err);
+        setError("Falha ao carregar médicos disponíveis. Tente novamente.");
         setDoctors([]);
       } finally {
         setLoading(false);
@@ -215,14 +215,14 @@ const DoctorList: React.FC<DoctorListProps> = ({
     };
 
     fetchDoctorsByService();
-    // Reset về trang đầu tiên khi chuyên khoa thay đổi
+    // Volta para a primeira página quando o serviço muda
     setPage(0);
   }, [specialty]);
 
   /**
-   * Xử lý khi người dùng chuyển trang
-   * @param event - Sự kiện click
-   * @param newPage - Số trang mới
+   * Manipula a troca de página
+   * @param event - Evento de clique
+   * @param newPage - Novo número da página
    */
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement> | null,
@@ -232,8 +232,8 @@ const DoctorList: React.FC<DoctorListProps> = ({
   };
 
   /**
-   * Xử lý khi người dùng thay đổi số lượng bác sĩ hiển thị trên mỗi trang
-   * @param event - Sự kiện thay đổi
+   * Manipula a alteração da quantidade de médicos por página
+   * @param event - Evento de alteração
    */
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -242,24 +242,24 @@ const DoctorList: React.FC<DoctorListProps> = ({
     setPage(0);
   };
 
-  // Tính toán chỉ số bắt đầu và kết thúc cho phân trang
+  // Calcula os índices de início e fim para a paginação
   const startIndex = page * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedDoctors = doctors.slice(startIndex, endIndex);
 
   return (
     <Box>
-      {/* Tiêu đề trang */}
+      {/* Título da página */}
       <Typography variant="h6" gutterBottom>
-        {t("patient.appointments.available_doctors")}
+        {"Médicos disponíveis"}
       </Typography>
 
-      {/* Tên dịch vụ/chuyên khoa đã chọn */}
+      {/* Nome do serviço/especialidade selecionado */}
       <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
         {specialty.name}
       </Typography>
 
-      {/* Hiển thị trạng thái loading, lỗi, hoặc danh sách bác sĩ */}
+      {/* Exibe estado de carregamento, erro ou lista de médicos */}
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
           <CircularProgress />
@@ -284,18 +284,18 @@ const DoctorList: React.FC<DoctorListProps> = ({
                 sx={{ fontSize: 60, color: "text.secondary", mb: 2 }}
               />
               <Typography variant="h6" color="text.secondary">
-                {t("patient.appointments.no_doctors_available")}
+                {"Nenhum médico disponível"}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                {t("patient.appointments.try_different_service")}
+                {"Tente outro serviço ou especialidade."}
               </Typography>
               {/* <Button variant="outlined" onClick={onBack} sx={{ mt: 2 }}>
-                {t("patient.appointments.select_different_service")}
-              </Button> */}
+								{"Selecionar outro serviço"}
+							</Button> */}
             </Paper>
           ) : (
             <>
-              {/* Danh sách bác sĩ */}
+              {/* Lista de médicos */}
               <Grid container spacing={3}>
                 {paginatedDoctors.map((doctor, index) => (
                   <Grid
@@ -313,13 +313,13 @@ const DoctorList: React.FC<DoctorListProps> = ({
                             "https://picsum.photos/120/120?random=1"
                           }
                           alt={
-                            doctor.firstName + " " + doctor.lastName || "Doctor"
+                            doctor.firstName + " " + doctor.lastName || "Médico"
                           }
                         />
                         <Box sx={{ ml: 2, flex: 1 }}>
                           <Typography component="div" variant="h6">
                             {doctor.firstName + " " + doctor.lastName ||
-                              "Unknown Doctor"}
+                              "Médico desconhecido"}
                           </Typography>
                           {doctor.specialization && (
                             <Chip
@@ -344,7 +344,7 @@ const DoctorList: React.FC<DoctorListProps> = ({
                           onClick={() => onSelect(doctor)}
                           variant="contained"
                         >
-                          {t("patient.appointments.select")}
+                          {"Selecionar"}
                         </Button>
                       </Box>
                     </Card>
@@ -352,7 +352,7 @@ const DoctorList: React.FC<DoctorListProps> = ({
                 ))}
               </Grid>
 
-              {/* Điều khiển phân trang */}
+              {/* Controle de paginação */}
               <Box
                 sx={{ display: "flex", justifyContent: "center", mt: 3, mb: 2 }}
               >
@@ -370,10 +370,10 @@ const DoctorList: React.FC<DoctorListProps> = ({
         </>
       )}
 
-      {/* Nút quay lại */}
+      {/* Botão de voltar */}
       {/* <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
-        <Button onClick={onBack}>{t("common.back")}</Button>
-      </Box> */}
+				<Button onClick={onBack}>{"Voltar"}</Button>
+			</Box> */}
     </Box>
   );
 };

@@ -31,7 +31,7 @@ interface DoctorFormProps {
   onSubmit: (data: Partial<Doctor>) => void;
   doctor: Doctor | null;
   mode: "add" | "edit";
-  isSubmitting?: boolean; // New prop for submission loading state
+  isSubmitting?: boolean;
 }
 
 const DoctorForm: React.FC<DoctorFormProps> = ({
@@ -40,34 +40,28 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
   onSubmit,
   doctor,
   mode,
-  isSubmitting = false, // Default to false
+  isSubmitting = false,
 }) => {
-  // State for diseases fetched from API
   const [diseases, setDiseases] = useState<Disease[]>([]);
   const [loadingDiseases, setLoadingDiseases] = useState<boolean>(false);
   const [errorDiseases, setErrorDiseases] = useState<string | null>(null);
 
-  // State for date validation error
   const [dobError, setDobError] = useState<string | null>(null);
 
-  // Create validation schema with Yup for text fields only
   const validationSchema = Yup.object({
     firstName: Yup.string()
-      .required("Tên là bắt buộc")
-      .min(2, "Tên phải có ít nhất 2 ký tự"),
+      .required("Nome é obrigatório")
+      .min(2, "Nome deve ter pelo menos 2 caracteres"),
     lastName: Yup.string()
-      .required("Họ là bắt buộc")
-      .min(2, "Họ phải có ít nhất 2 ký tự"),
-    specialization: Yup.string().required("Chuyên khoa không được để trống"),
+      .required("Sobrenome é obrigatório")
+      .min(2, "Sobrenome deve ter pelo menos 2 caracteres"),
+    specialization: Yup.string().required("Especialidade é obrigatória"),
     phone: Yup.string()
-      .required("Số điện thoại không được để trống")
-      .matches(/^[0-9]{10,11}$/, "Số điện thoại không hợp lệ"),
-    email: Yup.string()
-      .required("Email không được để trống")
-      .email("Email không hợp lệ"),
+      .required("Telefone é obrigatório")
+      .matches(/^[0-9]{10,11}$/, "Telefone inválido"),
+    email: Yup.string().required("Email é obrigatório").email("Email inválido"),
   });
 
-  // Fetch diseases when the form opens
   useEffect(() => {
     if (open) {
       const fetchDiseases = async () => {
@@ -78,11 +72,11 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
           if (response && response.data) {
             setDiseases(response.data);
           } else {
-            setErrorDiseases("Không thể tải danh sách loại bệnh");
+            setErrorDiseases("Não foi possível carregar a lista de doenças");
           }
         } catch (error) {
-          console.error("Error fetching diseases:", error);
-          setErrorDiseases("Đã xảy ra lỗi khi tải danh sách loại bệnh");
+          console.error("Erro ao buscar doenças:", error);
+          setErrorDiseases("Ocorreu um erro ao carregar a lista de doenças");
         } finally {
           setLoadingDiseases(false);
         }
@@ -92,20 +86,15 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
     }
   }, [open]);
 
-  // Validate date of birth separately
   const validateDob = (date: Date | null): boolean => {
     if (!date) {
-      setDobError("Ngày sinh không được để trống");
+      setDobError("Data de nascimento é obrigatória");
       return false;
     }
-
-    // Additional validation if needed - can check age limits, etc.
-
     setDobError(null);
     return true;
   };
 
-  // Prevent closing the dialog while submitting
   const handleClose = () => {
     if (!isSubmitting) {
       onClose();
@@ -121,7 +110,9 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
       disableEscapeKeyDown={isSubmitting}
     >
       <DialogTitle>
-        {mode === "add" ? "Thêm bác sĩ mới" : "Chỉnh sửa thông tin bác sĩ"}
+        {mode === "add"
+          ? "Adicionar novo médico"
+          : "Editar informações do médico"}
       </DialogTitle>
 
       <Formik
@@ -138,7 +129,6 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
         }}
         validationSchema={validationSchema}
         onSubmit={(values, actions) => {
-          // Converter sex e status para boolean antes de enviar
           const submitValues: Partial<Doctor> = {
             ...values,
             sex: values.sex === "male",
@@ -158,7 +148,6 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
           setFieldValue,
           isSubmitting: formikSubmitting,
         }) => {
-          // Use either the external submitting state or Formik's internal one
           const isCurrentlySubmitting = isSubmitting || formikSubmitting;
 
           return (
@@ -166,7 +155,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
               <DialogContent>
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="h6" gutterBottom>
-                    Thông tin cơ bản
+                    Informações básicas
                   </Typography>
 
                   <Grid container spacing={2}>
@@ -174,7 +163,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
                       <Field
                         as={TextField}
                         name="firstName"
-                        label="Họ"
+                        label="Nome"
                         value={values.firstName}
                         onChange={handleChange}
                         onBlur={handleBlur}
@@ -188,7 +177,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
                       <Field
                         as={TextField}
                         name="lastName"
-                        label="Tên"
+                        label="Sobrenome"
                         value={values.lastName}
                         onChange={handleChange}
                         onBlur={handleBlur}
@@ -200,17 +189,17 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
 
                     <Grid item xs={12} md={6}>
                       <FormControl fullWidth>
-                        <InputLabel>Giới tính</InputLabel>
+                        <InputLabel>Sexo</InputLabel>
                         <Select
                           name="sex"
                           value={values.sex}
-                          label="Giới tính"
+                          label="Sexo"
                           onChange={(e) => {
                             setFieldValue("sex", e.target.value);
                           }}
                         >
-                          <MenuItem value="male">Nam</MenuItem>
-                          <MenuItem value="female">Nữ</MenuItem>
+                          <MenuItem value="male">Masculino</MenuItem>
+                          <MenuItem value="female">Feminino</MenuItem>
                         </Select>
                       </FormControl>
                     </Grid>
@@ -221,7 +210,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
                         adapterLocale={vi}
                       >
                         <DatePicker
-                          label="Ngày sinh"
+                          label="Data de nascimento"
                           value={values.dob ? new Date(values.dob) : null}
                           onChange={(date) => {
                             if (date) {
@@ -247,7 +236,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
                       <Field
                         as={TextField}
                         name="phone"
-                        label="Số điện thoại"
+                        label="Telefone"
                         value={values.phone}
                         onChange={handleChange}
                         onBlur={handleBlur}
@@ -276,7 +265,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
                       <Field
                         as={TextField}
                         name="specialization"
-                        label="Chuyên khoa"
+                        label="Especialidade"
                         value={values.specialization}
                         onChange={handleChange}
                         onBlur={handleBlur}
@@ -293,17 +282,17 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
 
                     <Grid item xs={12} md={6}>
                       <FormControl fullWidth>
-                        <InputLabel>Trạng thái</InputLabel>
+                        <InputLabel>Status</InputLabel>
                         <Select
                           name="status"
                           value={values.status}
-                          label="Trạng thái"
+                          label="Status"
                           onChange={(e) => {
                             setFieldValue("status", e.target.value);
                           }}
                         >
-                          <MenuItem value="active">Đang hoạt động</MenuItem>
-                          <MenuItem value="inactive">Không hoạt động</MenuItem>
+                          <MenuItem value="active">Ativo</MenuItem>
+                          <MenuItem value="inactive">Inativo</MenuItem>
                         </Select>
                       </FormControl>
                     </Grid>
@@ -311,7 +300,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
                     <Grid item xs={12}>
                       <FormControl fullWidth disabled={loadingDiseases}>
                         <InputLabel id="disease-select-label">
-                          Loại bệnh có thể khám
+                          Tipos de doenças que pode atender
                         </InputLabel>
                         {loadingDiseases ? (
                           <Box
@@ -324,7 +313,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
                           >
                             <CircularProgress size={20} sx={{ mr: 1 }} />
                             <Typography variant="body2" color="textSecondary">
-                              Đang tải danh sách loại bệnh...
+                              Carregando lista de doenças...
                             </Typography>
                           </Box>
                         ) : errorDiseases ? (
@@ -347,7 +336,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
                               );
                               setFieldValue("typeDisease", selectedDisease);
                             }}
-                            label="Loại bệnh có thể khám"
+                            label="Tipos de doenças que pode atender"
                           >
                             {diseases.map((disease) => (
                               <MenuItem key={disease.id} value={disease.id}>
@@ -364,7 +353,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
 
               <DialogActions>
                 <Button onClick={handleClose} disabled={isCurrentlySubmitting}>
-                  Hủy
+                  Cancelar
                 </Button>
                 <Button
                   type="submit"
@@ -378,10 +367,10 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
                   }
                 >
                   {isCurrentlySubmitting
-                    ? "Đang xử lý..."
+                    ? "Processando..."
                     : mode === "add"
-                    ? "Thêm"
-                    : "Lưu thay đổi"}
+                    ? "Adicionar"
+                    : "Salvar alterações"}
                 </Button>
               </DialogActions>
             </Form>

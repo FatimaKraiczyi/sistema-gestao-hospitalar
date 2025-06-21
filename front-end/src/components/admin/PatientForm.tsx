@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect } from "react";
 import {
   Dialog,
   DialogActions,
@@ -11,105 +11,107 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  FormHelperText
-} from '@mui/material'
-import { User } from '../../types/user'
-import { useFormik } from 'formik'
-import * as Yup from 'yup'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
-import { vi } from 'date-fns/locale'
+  FormHelperText,
+} from "@mui/material";
+import { User } from "../../types/user";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { ptBR } from "date-fns/locale";
 
-// Interface định nghĩa các props cho component PatientForm
-// Cho phép sử dụng chung một form cho cả thêm mới và chỉnh sửa
+// Interface que define as props do componente PatientForm
+// Permite usar o mesmo formulário para adicionar e editar
 interface PatientFormProps {
-  open: boolean // Trạng thái hiển thị của modal
-  onClose: () => void // Hàm xử lý khi đóng modal
-  onSubmit: (patient: Partial<User>) => void // Hàm xử lý khi submit form
-  patient?: User | null // Thông tin bệnh nhân (khi chỉnh sửa)
-  mode: 'add' | 'edit' // Chế độ form: thêm mới hoặc chỉnh sửa
+  open: boolean; // Estado de exibição do modal
+  onClose: () => void; // Função para fechar o modal
+  onSubmit: (patient: Partial<User>) => void; // Função ao submeter o formulário
+  patient?: User | null; // Dados do paciente (ao editar)
+  mode: "add" | "edit"; // Modo do formulário: adicionar ou editar
 }
 
-// Schema validation sử dụng Yup
-// Định nghĩa các quy tắc kiểm tra dữ liệu nhập vào
+// Schema de validação usando Yup
+// Define as regras de validação dos dados
 const validationSchema = Yup.object({
   firstName: Yup.string()
-    .required('Tên là bắt buộc')
-    .min(2, 'Tên phải có ít nhất 2 ký tự'),
+    .required("Nome é obrigatório")
+    .min(2, "Nome deve ter pelo menos 2 caracteres"),
   lastName: Yup.string()
-    .required('Họ là bắt buộc')
-    .min(2, 'Họ phải có ít nhất 2 ký tự'),
-  sex: Yup.string().oneOf(['male', 'female']).required('Giới tính là bắt buộc'),
+    .required("Sobrenome é obrigatório")
+    .min(2, "Sobrenome deve ter pelo menos 2 caracteres"),
+  sex: Yup.string().oneOf(["male", "female"]).required("Sexo é obrigatório"),
   dob: Yup.date()
-    .required('Ngày sinh là bắt buộc')
-    .max(new Date(), 'Ngày sinh không thể là ngày trong tương lai'),
+    .required("Data de nascimento é obrigatória")
+    .max(new Date(), "Data de nascimento não pode ser futura"),
   phone: Yup.string()
-    .required('Số điện thoại là bắt buộc')
-    .matches(/^[0-9]{10,11}$/, 'Số điện thoại phải có 10-11 chữ số'),
-  email: Yup.string().required('Email là bắt buộc').email('Email không hợp lệ'),
+    .required("Telefone é obrigatório")
+    .matches(/^[0-9]{10,11}$/, "Telefone deve ter 10 ou 11 dígitos"),
+  email: Yup.string().required("Email é obrigatório").email("Email inválido"),
   status: Yup.string()
-    .oneOf(['active', 'inactive'])
-    .required('Trạng thái là bắt buộc')
-})
+    .oneOf(["active", "inactive"])
+    .required("Status é obrigatório"),
+});
 
 const PatientForm: React.FC<PatientFormProps> = ({
   open,
   onClose,
   onSubmit,
   patient,
-  mode
+  mode,
 }) => {
-  // Sử dụng formik để quản lý form và validation
+  // Usa formik para gerenciar o formulário e validação
   const formik = useFormik({
     initialValues: {
-      firstName: '',
-      lastName: '',
-      sex: 'male',
-      dob: new Date().toISOString().split('T')[0],
-      phone: '',
-      email: '',
-      status: 'active'
+      firstName: "",
+      lastName: "",
+      sex: "male",
+      dob: new Date().toISOString().split("T")[0],
+      phone: "",
+      email: "",
+      status: "active",
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
       const submitValues = {
         ...values,
-        sex: values.sex === 'male',
-        status: values.status === 'active'
-      }
-      onSubmit(submitValues)
-    }
-  })
+        sex: values.sex === "male",
+        status: values.status === "active",
+      };
+      onSubmit(submitValues);
+    },
+  });
 
-  // Effect để cập nhật giá trị form khi chuyển sang chế độ chỉnh sửa
-  // Hoặc reset form khi chuyển sang chế độ thêm mới
+  // Atualiza valores do formulário ao editar ou reseta ao adicionar
   useEffect(() => {
-    if (patient && mode === 'edit') {
+    if (patient && mode === "edit") {
       formik.setValues({
         firstName: patient.firstName,
         lastName: patient.lastName,
-        sex: patient.sex === false ? 'female' : 'male',
+        sex: patient.sex === false ? "female" : "male",
         dob: patient.dob,
         phone: patient.phone,
         email: patient.email,
-        status: patient.status === false ? 'inactive' : 'active'
-      })
-    } else if (mode === 'add') {
-      formik.resetForm()
+        status: patient.status === false ? "inactive" : "active",
+      });
+    } else if (mode === "add") {
+      formik.resetForm();
     }
-  }, [patient, mode])
+  }, [patient, mode]);
 
-  // Xử lý đóng modal và reset form
+  // Fecha o modal e reseta o formulário
   const handleClose = () => {
-    formik.resetForm()
-    onClose()
-  }
+    formik.resetForm();
+    onClose();
+  };
 
-  // Xác định tiêu đề và nút bấm dựa trên chế độ form
+  // Define título e texto do botão conforme o modo
   const title =
-    mode === 'add' ? 'Thêm bệnh nhân mới' : 'Chỉnh sửa thông tin bệnh nhân'
-  const buttonText = mode === 'add' ? 'Thêm bệnh nhân' : 'Lưu thay đổi'
+    mode === "add"
+      ? "Adicionar novo paciente"
+      : "Editar informações do paciente";
+  const buttonText =
+    mode === "add" ? "Adicionar paciente" : "Salvar alterações";
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
@@ -117,11 +119,11 @@ const PatientForm: React.FC<PatientFormProps> = ({
       <form onSubmit={formik.handleSubmit}>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
-            {/* Form nhập thông tin bệnh nhân */}
+            {/* Formulário de informações do paciente */}
             <Grid item xs={12} md={6}>
               <TextField
                 name="firstName"
-                label="Họ"
+                label="Nome"
                 value={formik.values.firstName}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -136,7 +138,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
             <Grid item xs={12} md={6}>
               <TextField
                 name="lastName"
-                label="Tên"
+                label="Sobrenome"
                 value={formik.values.lastName}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -153,16 +155,16 @@ const PatientForm: React.FC<PatientFormProps> = ({
                 fullWidth
                 error={formik.touched.sex && Boolean(formik.errors.sex)}
               >
-                <InputLabel>Giới tính</InputLabel>
+                <InputLabel>Sexo</InputLabel>
                 <Select
                   name="sex"
                   value={formik.values.sex}
-                  label="Giới tính"
+                  label="Sexo"
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 >
-                  <MenuItem value="male">Nam</MenuItem>
-                  <MenuItem value="female">Nữ</MenuItem>
+                  <MenuItem value="male">Masculino</MenuItem>
+                  <MenuItem value="female">Feminino</MenuItem>
                 </Select>
                 {formik.touched.sex && formik.errors.sex && (
                   <FormHelperText>{formik.errors.sex as string}</FormHelperText>
@@ -172,15 +174,15 @@ const PatientForm: React.FC<PatientFormProps> = ({
             <Grid item xs={12} md={6}>
               <LocalizationProvider
                 dateAdapter={AdapterDateFns}
-                adapterLocale={vi}
+                adapterLocale={ptBR}
               >
                 <DatePicker
-                  label="Ngày sinh"
+                  label="Data de nascimento"
                   value={new Date(formik.values.dob)}
                   onChange={(newValue) => {
                     if (newValue) {
-                      const dateStr = newValue.toISOString().split('T')[0]
-                      formik.setFieldValue('dob', dateStr)
+                      const dateStr = newValue.toISOString().split("T")[0];
+                      formik.setFieldValue("dob", dateStr);
                     }
                   }}
                   slotProps={{
@@ -189,8 +191,8 @@ const PatientForm: React.FC<PatientFormProps> = ({
                       error: formik.touched.dob && Boolean(formik.errors.dob),
                       helperText:
                         formik.touched.dob && (formik.errors.dob as string),
-                      onBlur: () => formik.setFieldTouched('dob', true)
-                    }
+                      onBlur: () => formik.setFieldTouched("dob", true),
+                    },
                   }}
                 />
               </LocalizationProvider>
@@ -198,7 +200,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
             <Grid item xs={12} md={6}>
               <TextField
                 name="phone"
-                label="Số điện thoại"
+                label="Telefone"
                 value={formik.values.phone}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -227,16 +229,16 @@ const PatientForm: React.FC<PatientFormProps> = ({
                 fullWidth
                 error={formik.touched.status && Boolean(formik.errors.status)}
               >
-                <InputLabel>Trạng thái</InputLabel>
+                <InputLabel>Status</InputLabel>
                 <Select
                   name="status"
                   value={formik.values.status}
-                  label="Trạng thái"
+                  label="Status"
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 >
-                  <MenuItem value="active">Đang hoạt động</MenuItem>
-                  <MenuItem value="inactive">Không hoạt động</MenuItem>
+                  <MenuItem value="active">Ativo</MenuItem>
+                  <MenuItem value="inactive">Inativo</MenuItem>
                 </Select>
                 {formik.touched.status && formik.errors.status && (
                   <FormHelperText>
@@ -249,7 +251,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="error">
-            Hủy
+            Cancelar
           </Button>
           <Button
             type="submit"
@@ -262,7 +264,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
         </DialogActions>
       </form>
     </Dialog>
-  )
-}
+  );
+};
 
-export default PatientForm
+export default PatientForm;
