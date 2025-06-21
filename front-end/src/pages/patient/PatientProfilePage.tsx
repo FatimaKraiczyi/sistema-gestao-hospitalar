@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// Importação das bibliotecas React e componentes UI
 import React, { useState, useEffect } from "react";
 import { Container, Grid, Box, IconButton, Alert } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
@@ -18,72 +16,53 @@ import {
 } from "../../services/authenticate/user_service";
 import { useSelector } from "react-redux";
 import { ROUTING } from "../../constants/routing";
-
-// Tipagem para endereço do paciente
-export interface Address {
-  logradouro: string;
-  numero: string;
-  complemento?: string;
-  bairro: string;
-  cidade: string;
-  estado: string;
-  cep: string;
-}
+import { RootState } from "../../stores/store";
 
 // Tipagem para os dados do paciente
 export interface PatientData {
   id?: string;
   cpf?: string;
   email?: string;
-  nome?: string;
+  nome: string;
   sobrenome?: string;
-  telefone?: string;
-  address: Address;
+  telefone: string;
+  logradouro?: string;
+  numero: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  cep: string;
   pontos?: number;
-  avatar?: string;
 }
 
 // Componente da página de perfil do paciente
 const PatientProfilePage: React.FC = () => {
   // Busca o usuário logado do Redux
-  const user = useSelector((state: any) => state.user.user);
-  const id = user?.id;
-
+  const userData = useSelector((state: RootState) => state.user.user);
   // Declaração dos states necessários
   const [patientData, setPatientData] = useState<PatientData | null>(null); // Armazena informações do paciente
-  const [loading, setLoading] = useState(true); // Estado de carregamento
-  const [error, setError] = useState<string | null>(null); // Armazena mensagem de erro, se houver
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Estado de exibição do modal de edição
 
   const navigate = useNavigate(); // Hook de navegação
 
   useEffect(() => {
-    if (!id) return; // só busca se tiver id
-
     const fetchPatientData = async () => {
-      setLoading(true);
-      try {
-        const response = await getPatientInfo(id);
-        if (response.data?.code === 200) {
-          setPatientData(response.data.data);
-          const d = response.data.data;
-          if (!d.nome || !d.telefone || !d.address?.cep || !d.address?.numero) {
-            setIsEditModalOpen(true);
-          }
-        } else {
-          setError("Falha ao obter dados do paciente");
-        }
-      } catch {
-        setError(
-          "Erro ao carregar dados do paciente. Tente novamente mais tarde."
-        );
-      } finally {
-        setLoading(false);
+      if (!userData || !userData.id) {
+        // Primeiro acesso, sem id → abre o modal
+        setIsEditModalOpen(true);
+        return;
+      }
+
+      const response = await getPatientInfo(userData.id);
+      if (response.data?.code === 200) {
+        const data = response.data.data;
+        setPatientData(data);
       }
     };
 
     fetchPatientData();
-  }, [id]);
+  }, [userData]);
 
   // Funções de controle dos modais - não chamam API
   // Abre modal de edição
@@ -98,60 +77,46 @@ const PatientProfilePage: React.FC = () => {
 
   // Atualiza o state local e garante atualização do Redux
   const handleSaveProfile = async (updatedData: Partial<PatientData>) => {
-    // Atualiza o state local para exibição imediata
     const updatedPatientData = {
-      ...patientData!,
+      ...patientData,
       ...updatedData,
     };
+
     setPatientData(updatedPatientData);
 
-    // Chamada para completar cadastro no backend se for o primeiro cadastro
-    if (
-      !patientData?.nome ||
-      !patientData?.telefone ||
-      !patientData?.address?.cep ||
-      !patientData?.address?.numero
-    ) {
-      try {
-        const nome = `${updatedData.nome || ""} ${
-          updatedData.sobrenome || ""
-        }`.trim();
-        const telefone = updatedPatientData.telefone || "";
-        const cep = updatedPatientData.address?.cep || "";
-        const numero = updatedPatientData.address?.numero || "";
-        const complemento = updatedPatientData.address?.complemento || "";
+    try {
+      const nome = `${updatedData.nome || ""} ${
+        updatedData.sobrenome || ""
+      }`.trim();
+      const telefone = updatedPatientData.telefone || "";
+      const cep = updatedPatientData.cep || "";
+      const numero = updatedPatientData.numero || "";
+      const complemento = updatedPatientData.complemento || "";
 
-        // Envia para o backend
-        await completeInfo(
-          id,
-          patientData?.cpf || "",
-          patientData?.email || updatedPatientData.email || "",
-          {
-            nome,
-            telefone,
-            cep,
-            numero,
-            complemento,
-          }
-        );
-      } catch {
-        // Trate o erro se necessário
-      }
+      await completeInfo(
+        userData?.id || "",
+        userData?.cpf || "",
+        userData?.email || updatedPatientData.email || "",
+        { nome, telefone, cep, numero, complemento }
+      );
+    } catch (err) {
+      console.error("Erro ao completar cadastro:", err);
     }
   };
 
   // Exibe estado de carregamento
-  if (loading) {
+  if (!userData) {
     return <div>Carregando...</div>;
   }
 
+  /* 
   // Exibe mensagem de erro, se houver
   if (error) {
     return <Alert severity="error">{error}</Alert>;
-  }
+  } */
 
   // Exibe mensagem caso não haja dados
-  if (!patientData) {
+  if (!userData) {
     return <Alert severity="info">Sem dados disponíveis</Alert>;
   }
 
@@ -163,11 +128,10 @@ const PatientProfilePage: React.FC = () => {
         <Grid item xs={12}>
           <Box sx={{ position: "relative" }}>
             <PersonalInfoSection
-              firstName={patientData.nome?.split(" ")[0] || "Não informado"}
-              lastName={patientData.nome?.split(" ").slice(1).join(" ") || ""}
-              email={patientData.email || "Não informado"}
-              phone={patientData.telefone || "Não informado"}
-              address={patientData.address as unknown as Address}
+              firstName={userData.nome?.split(" ")[0] || "Não informado"}
+              lastName={userData.nome?.split(" ").slice(1).join(" ") || ""}
+              email={userData.email || "Não informado"}
+              phone={userData.telefone || "Não informado"}
             />
 
             {/* Botão para editar informações */}
@@ -225,11 +189,17 @@ const PatientProfilePage: React.FC = () => {
         onClose={handleCloseEditModal}
         onSave={handleSaveProfile}
         userData={{
-          firstName: patientData.nome?.split(" ")[0] || "",
-          lastName: patientData.nome?.split(" ").slice(1).join(" ") || "",
-          email: patientData.email || "",
-          phone: patientData.telefone || "",
-          address: patientData.address as unknown as Address,
+          nome: userData.nome?.split(" ")[0] || "",
+          sobrenome: userData.nome?.split(" ").slice(1).join(" ") || "",
+          email: userData.email || "",
+          telefone: userData.telefone || "",
+          cep: userData.cep || "",
+          numero: userData.numero || "",
+          complemento: userData.complemento || "",
+          bairro: userData.bairro || "",
+          cidade: userData.cidade || "",
+          estado: userData.estado || "",
+          logradouro: userData.logradouro || "",
         }}
       />
     </Container>

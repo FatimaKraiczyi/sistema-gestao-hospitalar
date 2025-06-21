@@ -27,7 +27,6 @@ import {
 } from "../../services/admin/patients_service";
 import { updateInfo } from "../../services/authenticate/user_service";
 import * as XLSX from "xlsx";
-import { Address } from "../../types/address";
 
 const PatientManagementPage: React.FC = () => {
   // Khai báo state để quản lý dữ liệu và trạng thái UI

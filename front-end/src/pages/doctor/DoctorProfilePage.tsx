@@ -11,7 +11,6 @@ import { DoctorExperienceSection } from "../../components/doctor/DoctorExperienc
 import { DoctorEducationSection } from "../../components/doctor/DoctorEducationSection";
 import { DoctorCertificatesSection } from "../../components/doctor/DoctorCertificatesSection";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
-import AvatarUploadModal from "../../components/profile/AvatarUploadModal";
 // Import types và services
 import { Doctor } from "../../types/doctor";
 import { Diploma } from "../../types";
@@ -329,16 +328,6 @@ const DoctorProfilePage: React.FC = () => {
           sex: doctorData.doctor?.sex,
           address: doctorData.doctor?.address || null,
         }}
-      />
-
-      {/* Modal tải lên avatar */}
-      <AvatarUploadModal
-        open={isAvatarModalOpen}
-        currentAvatar={doctorData.doctor?.avatar || "/default-avatar.png"}
-        onClose={handleCloseAvatarModal}
-        onSave={handleSaveAvatar}
-        isLoading={avatarLoading}
-        error={avatarError}
       />
     </Container>
   );

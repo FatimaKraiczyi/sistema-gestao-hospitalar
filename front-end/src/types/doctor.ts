@@ -1,4 +1,3 @@
-import { Address } from "./address";
 import { User } from "./user";
 import { Diploma } from "./enums";
 import { Disease } from "./typeDisease";
@@ -9,7 +8,6 @@ export interface DoctorExperience {
   specialization: string;
   startDate: string;
   endDate?: string;
-  compAddress: Address;
   description: string;
 }
 
@@ -18,7 +16,6 @@ export interface DoctorCertificate {
   doctorId: number; // Reference to Doctor
   certName: string;
   issueDate: string;
-  address?: Address; // Optional based on the relationship
 }
 
 export interface DoctorEducation {

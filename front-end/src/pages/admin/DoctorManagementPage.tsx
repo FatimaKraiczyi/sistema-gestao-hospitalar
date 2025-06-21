@@ -29,7 +29,6 @@ import {
 } from "../../services/admin/doctor_service";
 import { format } from "date-fns";
 import * as XLSX from "xlsx";
-import { Address } from "../../types/address";
 import {
   DoctorCertificate,
   DoctorEducation,

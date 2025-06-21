@@ -3,14 +3,23 @@ import { Paper, Box, Typography, Grid, Divider } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
-import { Address } from "../../types";
+
+interface Address {
+  logradouro: string;
+  numero: string;
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  cep: string;
+}
 
 interface PersonalInfoSectionProps {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-  address: Address;
+  address?: Address;
 }
 
 export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
@@ -20,11 +29,13 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   phone,
   address,
 }) => {
-  // Format the address into a readable string
-  const addressString =
-    address != null
-      ? `${address.numero} ${address.logradouro}, ${address.complemento}, ${address.bairro}, ${address.cidade}, ${address.estado}, ${address.cep}`
-      : "Sem dados disponíveis";
+  const addressString = address
+    ? `${address.logradouro}, Nº ${address.numero}${
+        address.complemento ? `, ${address.complemento}` : ""
+      }, ${address.bairro}, ${address.cidade} - ${address.estado}, CEP: ${
+        address.cep
+      }`
+    : "Sem endereço disponível";
 
   return (
     <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
@@ -38,21 +49,9 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
 
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
-          <Box
-            sx={{ display: "flex", alignItems: "center", mb: 1, width: "100%" }}
-          >
-            <EmailIcon color="primary" sx={{ mr: 1, flexShrink: 0 }} />
-            <Typography
-              variant="body1"
-              noWrap
-              sx={{
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                maxWidth: "calc(100% - 30px)",
-              }}
-            >
-              {email}
-            </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <EmailIcon color="primary" sx={{ mr: 1 }} />
+            <Typography variant="body1">{email}</Typography>
           </Box>
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -63,7 +62,7 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
         </Grid>
         <Grid item xs={12}>
           <Box sx={{ display: "flex", alignItems: "flex-start", mb: 1 }}>
-            <LocationOnIcon color="primary" sx={{ mr: 1, mt: 0.3 }} />
+            <LocationOnIcon color="primary" sx={{ mr: 1, mt: 0.5 }} />
             <Typography variant="body1">{addressString}</Typography>
           </Box>
         </Grid>
