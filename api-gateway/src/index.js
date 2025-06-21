@@ -12,6 +12,8 @@ const PORT = process.env.PORT || 3333;
 const AUTH_MS_URL = process.env.AUTH_MS_URL || "http://auth-service:8081";
 const PACIENTE_MS_URL =
   process.env.PACIENTE_MS_URL || "http://paciente-service:8082";
+const CONSULTA_MS_URL =
+  process.env.CONSULTA_MS_URL || "http://consulta-service:8083";
 
 app.use(
   cors({
@@ -79,6 +81,47 @@ app.use(
         }
         // Se não for erro, não fazemos nada aqui
         // A resposta padrão será passada normalmente pelo proxy
+      });
+    },
+  })
+);
+
+// Proxy para Consulta Service (com autenticação e autorização para múltiplas roles)
+app.use(
+  "/api/consulta",
+  authenticateToken,
+  authorizeRoles("ADMIN", "FUNCIONARIO", "PACIENTE"),
+  createProxyMiddleware({
+    target: CONSULTA_MS_URL,
+    changeOrigin: true,
+    onProxyReq: (proxyReq, req) => {
+      proxyReq.setHeader("Authorization", req.headers["authorization"]);
+      proxyReq.setHeader("x-user-id", req.user.id);
+      proxyReq.setHeader("x-user-cpf", req.user.cpf);
+      proxyReq.setHeader("x-user-email", req.user.email);
+      proxyReq.setHeader("x-user-type", req.user.type);
+    },
+    onError: (err, req, res) => {
+      if (res.headersSent) return;
+      res.status(502).json({
+        message: "Erro ao comunicar com o serviço de consulta",
+        detail: err.message,
+      });
+    },
+    onProxyRes: (proxyRes, req, res) => {
+      let body = Buffer.from("");
+      proxyRes.on("data", (data) => {
+        body = Buffer.concat([body, data]);
+      });
+      proxyRes.on("end", () => {
+        if (proxyRes.statusCode >= 400) {
+          res.status(proxyRes.statusCode);
+          try {
+            res.json(JSON.parse(body.toString()));
+          } catch {
+            res.send(body.toString());
+          }
+        }
       });
     },
   })

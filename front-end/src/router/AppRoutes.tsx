@@ -24,7 +24,6 @@ import PatientDashboard from "../pages/patient/PatientDashboard";
 import AppointmentPage from "../pages/patient/AppointmentPage";
 import DoctorSchedulePage from "../pages/doctor/DoctorSchedulePage";
 import DoctorCurrentSchedulePage from "../pages/doctor/DoctorCurrentSchedulePage";
-import ExaminationRoomPage from "../pages/ExaminationRoomPage";
 import WaitingRoomPage from "../pages/patient/WatingRoomPage";
 import PatientManagementPage from "../pages/admin/PatientManagementPage";
 import PatientMedicalRecord from "../pages/patient/PatientMedicalRecord";
@@ -78,10 +77,6 @@ export const AppRoutes = () => {
           <Route
             path={ROUTING.FORGET_PASSWORD}
             element={<ForgetPasswordPage />}
-          />
-          <Route
-            path={ROUTING.EXAMINATION_ROOM}
-            element={<ExaminationRoomPage />}
           />
 
           {/* Admin routes - with role protection */}
