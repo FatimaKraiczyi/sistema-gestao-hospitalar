@@ -33,6 +33,7 @@
 		"file-saver": "^2.0.5",
 		"formik": "^2.4.6",
 		"jquery": "^3.7.1",
+		"jwt-decode": "^4.0.0",
 		"leaflet": "^1.9.4",
 		"mime": "^4.0.7",
 		"react": "^18.3.1",
@@ -67,11 +68,11 @@
 		"eslint-plugin-react-hooks": "^5.1.0",
 		"eslint-plugin-react-refresh": "^0.4.19",
 		"globals": "^15.14.0",
-		"sass-embedded": "^1.83.4",
-		"typescript-eslint": "^8.23.0",
 		"react-dev-inspector": "^1.9.0",
+		"sass-embedded": "^1.83.4",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.8.3",
+		"typescript-eslint": "^8.23.0",
 		"vite-tsconfig-paths": "^5.1.4"
 	}
 }

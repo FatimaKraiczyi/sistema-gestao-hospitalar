@@ -1,35 +1,18 @@
 import axiosConfig from "../axiosConfig";
 
-const prefix = "/authenticate/api/v1/authenticate";
+const prefix = "/auth";
+
+/** Login do usuário */
 export const login = async (email: string, password: string) => {
-  const response = await axiosConfig.post(prefix + "/login", null, {
-    params: {
-      email: email,
-      password: password,
-    },
-  });
-  return response;
+  return axiosConfig.post(`${prefix}/login`, { email, password });
 };
 
-export const getUserById = async (id: string | undefined) => {
-  if (!id) {
-    throw new Error("User ID is required");
-  }
-  const response = await axiosConfig.get(`${prefix}/users/${id}`);
-  return response;
+/** Cadastro do usuário (com type fixo ou opcional) */
+export const signUp = async (cpf: string, email: string, type = "PACIENTE") => {
+  return axiosConfig.post(`${prefix}/register`, { cpf, email, type });
 };
 
-export const signUp = async (cpf: string, email: string) => {
-  const response = await axiosConfig.post(prefix + "/register", {
-    cpf,
-    email,
-  });
-  return response;
-};
-
+/** Esqueci minha senha */
 export const resetPassword = async (email: string) => {
-  const response = await axiosConfig.post(prefix + "/reset_password", null, {
-    params: { email },
-  });
-  return response;
+  return axiosConfig.post(`${prefix}/forgot-password`, { email });
 };

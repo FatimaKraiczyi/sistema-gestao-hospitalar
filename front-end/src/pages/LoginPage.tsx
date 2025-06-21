@@ -20,11 +20,18 @@ import { login } from "../services/authenticate/auth_service";
 import { setUser } from "../stores/slices/user.slice";
 import { toast } from "react-toastify";
 import { ROUTING } from "../constants/routing";
+import { jwtDecode } from "jwt-decode";
+interface DecodedToken {
+  email: string;
+  cpf: string;
+  type: string;
+  sub: string;
+}
 
 const validationSchema = Yup.object({
   email: Yup.string().email("E-mail inválido").required("E-mail é obrigatório"),
   password: Yup.string()
-    .min(8, "A senha deve ter pelo menos 8 caracteres")
+    .min(4, "A senha tem pelo menos 4 caracteres")
     .max(20, "A senha não pode ter mais de 20 caracteres")
     .required("Senha é obrigatória"),
 });
@@ -47,20 +54,29 @@ export default function LoginPage() {
         setIsLoading(true);
         const response = await login(values.email, values.password);
 
-        if (response.status === 200 && response.data.code === 200) {
-          const userData = response.data.data;
+        if (response.status === 200 && response.data.token) {
+          const token = response.data.token;
+
+          // Decodifica o token
+          const decoded: DecodedToken = jwtDecode(token);
+          const userData = {
+            email: decoded.email,
+            cpf: decoded.cpf,
+            id: decoded.sub,
+            type: decoded.type,
+          };
           if (userData) {
-            dispatch(setUser(userData.user));
+            dispatch(setUser(userData));
             // Salva as informações do usuário no localStorage
             toast.success("Login realizado com sucesso!");
 
-            localStorage.setItem("user", JSON.stringify(userData.user));
-            localStorage.setItem("role", userData.role);
+            localStorage.setItem("user", JSON.stringify(userData));
+            localStorage.setItem("role", userData.type);
             // console.log("userData", userData);
-            if (userData.role === "doctor") {
-              setTimeout(() => navigate(ROUTING.DOCTOR), 1500); // Redireciona após exibir a mensagem
-            } else if (userData.role === "patient") {
-              setTimeout(() => navigate(ROUTING.PATIENT), 1500); // Redireciona após exibir a mensagem
+            if (userData.type === "FUNCIONARIO") {
+              setTimeout(() => navigate(ROUTING.DOCTOR), 1500);
+            } else if (userData.type === "PACIENTE") {
+              setTimeout(() => navigate(ROUTING.PATIENT), 1500);
             } else {
               setTimeout(() => navigate(ROUTING.ADMIN), 1500);
             }

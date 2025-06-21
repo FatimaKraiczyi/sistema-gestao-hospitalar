@@ -46,7 +46,6 @@ export default function Hero() {
             <Box
               component="img"
               src="/doctor3.png"
-              alt="Médico"
               sx={{
                 width: "100%",
                 maxWidth: 500,
