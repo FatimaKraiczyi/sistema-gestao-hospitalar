@@ -13,49 +13,47 @@ import { EditProfileModal } from "../../components/profile/EditProfileModal";
 import AvatarUploadModal from "../../components/profile/AvatarUploadModal";
 // Importação de serviços e hooks do Redux
 import {
+  completeInfo,
   getPatientInfo,
   updatePatientAvatar,
 } from "../../services/authenticate/user_service";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../../stores/slices/user.slice";
 import { ROUTING } from "../../constants/routing";
-import { completarCadastroPaciente } from "../../services/paciente/cadastro_service";
-import axios from "axios";
 
 // Tipagem para endereço do paciente
 export interface Address {
-  street?: string;
-  number?: string;
-  complement?: string;
-  neighborhood?: string;
-  city?: string;
-  state?: string;
-  cep?: string;
-  // Adicione outros campos conforme necessário
+  logradouro: string;
+  numero: string;
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  cep: string;
 }
 
 // Tipagem para os dados do paciente
 export interface PatientData {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phone?: string;
-  dob?: string;
-  sex?: string | null;
-  address?: Address | null;
-  avatar?: string;
-  userId?: string;
+  id?: string;
   cpf?: string;
+  email?: string;
+  nome?: string;
+  sobrenome?: string;
+  telefone?: string;
+  address: Address;
+  pontos?: number;
+  avatar?: string;
 }
 
 // Tipagem para o usuário do Redux
 interface UserRedux {
-  userId: string;
-  firstName?: string;
-  lastName?: string;
+  id: string;
+  nome?: string;
+  sobrenome?: string;
   email?: string;
-  phone?: string;
+  telefone?: string;
   avatar?: string;
+  pontos?: number;
   // Adicione outros campos conforme necessário
 }
 
@@ -79,18 +77,13 @@ const PatientProfilePage: React.FC = () => {
       setLoading(true);
       try {
         // Chama API para obter informações do paciente pelo userId
-        const response = await getPatientInfo(user.userId);
+        const response = await getPatientInfo(user.id);
 
         if (response.data && response.data.code === 200) {
           setPatientData(response.data.data);
           // Se o paciente não tiver nome, telefone, cep, numero, complemento, redireciona para edição obrigatória
           const d = response.data.data;
-          if (
-            !d.firstName ||
-            !d.phone ||
-            !d.address?.cep ||
-            !d.address?.number
-          ) {
+          if (!d.nome || !d.telefone || !d.address?.cep || !d.address?.numero) {
             setIsEditModalOpen(true);
           }
         } else {
@@ -107,7 +100,7 @@ const PatientProfilePage: React.FC = () => {
     };
 
     fetchPatientData();
-  }, [user.userId]);
+  }, [user.id]);
 
   // Funções de controle dos modais - não chamam API
   // Abre modal de edição
@@ -136,50 +129,28 @@ const PatientProfilePage: React.FC = () => {
     const updatedPatientData = {
       ...patientData!,
       ...updatedData,
-      address: updatedData.address || patientData?.address || null,
     };
     setPatientData(updatedPatientData);
 
     // Chamada para completar cadastro no backend se for o primeiro cadastro
     if (
-      !patientData?.firstName ||
-      !patientData?.phone ||
+      !patientData?.nome ||
+      !patientData?.telefone ||
       !patientData?.address?.cep ||
-      !patientData?.address?.number
+      !patientData?.address?.numero
     ) {
       try {
-        // Concatena nome completo
-        const nome = `${updatedPatientData.firstName || ""} ${
-          updatedPatientData.lastName || ""
+        const nome = `${updatedData.nome || ""} ${
+          updatedData.sobrenome || ""
         }`.trim();
-        const telefone = updatedPatientData.phone || "";
+        const telefone = updatedPatientData.telefone || "";
         const cep = updatedPatientData.address?.cep || "";
-        const numero = updatedPatientData.address?.number || "";
-        const complemento = updatedPatientData.address?.complement || "";
-
-        // Busca dados do endereço pelo CEP
-        let enderecoViaCep = {};
-        if (cep.length === 8) {
-          try {
-            const res = await axios.get(
-              `https://viacep.com.br/ws/${cep}/json/`
-            );
-            if (res.data && !res.data.erro) {
-              enderecoViaCep = {
-                street: res.data.logradouro,
-                neighborhood: res.data.bairro,
-                city: res.data.localidade,
-                state: res.data.uf,
-              };
-            }
-          } catch (err) {
-            // erro ao buscar via cep
-          }
-        }
+        const numero = updatedPatientData.address?.numero || "";
+        const complemento = updatedPatientData.address?.complemento || "";
 
         // Envia para o backend
-        await completarCadastroPaciente(
-          user.userId,
+        await completeInfo(
+          user.id,
           patientData?.cpf || "",
           patientData?.email || updatedPatientData.email || "",
           {
@@ -187,11 +158,10 @@ const PatientProfilePage: React.FC = () => {
             telefone,
             cep,
             numero,
-            complemento: complemento || undefined,
-            ...enderecoViaCep,
+            complemento,
           }
         );
-      } catch (e) {
+      } catch {
         // Trate o erro se necessário
       }
     }
@@ -203,7 +173,7 @@ const PatientProfilePage: React.FC = () => {
       setAvatarLoading(true);
       setAvatarError(null);
       // Chama API para atualizar avatar
-      const response = await updatePatientAvatar(user.userId, {
+      const response = await updatePatientAvatar(user.id, {
         uri: newAvatar,
       });
       if (response?.data?.code === 200) {
@@ -253,18 +223,15 @@ const PatientProfilePage: React.FC = () => {
         <Grid item xs={12}>
           <Box sx={{ position: "relative" }}>
             <PersonalInfoSection
-              firstName={patientData.firstName || "Não informado"}
-              lastName={patientData.lastName || "Não informado"}
+              firstName={patientData.nome?.split(" ")[0] || "Não informado"}
+              lastName={patientData.nome?.split(" ").slice(1).join(" ") || ""}
               email={patientData.email || "Não informado"}
-              phone={patientData.phone || "Não informado"}
-              dob={patientData.dob || "Não informado"}
-              sex={
-                typeof patientData.sex === "boolean" ? patientData.sex : false
-              }
+              phone={patientData.telefone || "Não informado"}
               address={patientData.address as unknown as Address}
               avatar={patientData.avatar || "/default-avatar.png"}
               onEditAvatar={handleOpenAvatarModal}
             />
+
             {/* Botão para editar informações */}
             <IconButton
               color="primary"
@@ -320,12 +287,10 @@ const PatientProfilePage: React.FC = () => {
         onClose={handleCloseEditModal}
         onSave={handleSaveProfile}
         userData={{
-          firstName: patientData.firstName || "",
-          lastName: patientData.lastName || "",
+          firstName: patientData.nome?.split(" ")[0] || "",
+          lastName: patientData.nome?.split(" ").slice(1).join(" ") || "",
           email: patientData.email || "",
-          phone: patientData.phone || "",
-          dob: patientData.dob || "",
-          sex: typeof patientData.sex === "boolean" ? patientData.sex : false,
+          phone: patientData.telefone || "",
           address: patientData.address as unknown as Address,
         }}
       />

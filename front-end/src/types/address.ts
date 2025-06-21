@@ -1,9 +1,9 @@
 export interface Address {
-  id: number;
-  number: string;
-  street: string;
-  ward: string;
-  district: string;
-  city: string;
-  country: string;
+  logradouro: string;
+  numero: string;
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  cep: string;
 }

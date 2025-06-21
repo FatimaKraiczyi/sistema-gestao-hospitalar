@@ -1,4 +1,4 @@
-// Importar as bibliotecas e componentes necessários
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import {
   Dialog,
@@ -8,15 +8,10 @@ import {
   TextField,
   Button,
   Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Box,
   CircularProgress,
   Snackbar,
   Alert,
-  FormHelperText,
 } from "@mui/material";
 import { Address } from "../../types";
 import { updateInfo } from "../../services/authenticate/user_service";
@@ -24,7 +19,6 @@ import { useDispatch } from "react-redux";
 import { setUser } from "../../stores/slices/user.slice";
 import { Formik, Form, Field, FormikHelpers } from "formik";
 import * as Yup from "yup";
-import { format, parse, isValid } from "date-fns";
 
 // Definir o tipo de dados das props do componente
 interface EditProfileModalProps {
@@ -36,8 +30,6 @@ interface EditProfileModalProps {
     lastName: string;
     email: string;
     phone: string;
-    dob: string;
-    sex: boolean | string;
     address: Address | null;
   }; // Dados atuais do usuário
 }
@@ -59,52 +51,12 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
     severity: "success" as "success" | "error",
   });
 
-  // Converte a data do formato DD-MM-YYYY para YYYY-MM-DD para o input date
-  const formatDateForInput = (dateStr: string) => {
-    if (!dateStr) return "";
-
-    // Tenta analisar a data no formato DD-MM-YYYY
-    let date = parse(dateStr, "dd-MM-yyyy", new Date());
-
-    // Se a data for válida, converte para o formato YYYY-MM-DD
-    if (isValid(date)) {
-      return format(date, "yyyy-MM-dd");
-    }
-
-    // Verifica se a data já está no formato YYYY-MM-DD
-    date = parse(dateStr, "yyyy-MM-dd", new Date());
-    if (isValid(date)) {
-      return dateStr;
-    }
-
-    // Retorna a string original se não conseguir analisar
-    return dateStr;
-  };
-
-  // Converte a data do formato YYYY-MM-DD para DD-MM-YYYY para a API
-  const formatDateForApi = (dateStr: string) => {
-    if (!dateStr) return "";
-
-    // Tenta analisar a data no formato YYYY-MM-DD
-    const date = parse(dateStr, "yyyy-MM-dd", new Date());
-
-    // Se a data for válida, converte para o formato DD-MM-YYYY
-    if (isValid(date)) {
-      return format(date, "dd-MM-yyyy");
-    }
-
-    // Retorna a string original se não conseguir analisar
-    return dateStr;
-  };
-
   // Valores iniciais do formulário
   const initialValues = {
     firstName: userData.firstName || "",
     lastName: userData.lastName || "",
     email: userData.email || "",
     phone: userData.phone || "",
-    dob: formatDateForInput(userData.dob) || "",
-    sex: userData.sex !== undefined ? userData.sex : true,
     address: userData.address || null,
   };
 
@@ -122,7 +74,6 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
     phone: Yup.string()
       .required("Trường này là bắt buộc")
       .matches(/^\d{10,11}$/, "Số điện thoại không hợp lệ"),
-    dob: Yup.string().required("Trường này là bắt buộc"),
     // Xác thực địa chỉ đã được loại bỏ theo yêu cầu
   });
 
@@ -141,8 +92,6 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
       // Định dạng dữ liệu cho API
       const apiData = {
         ...values,
-        password: user.password,
-        dob: formatDateForApi(values.dob),
       };
 
       if (!userId) {
@@ -225,7 +174,6 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             handleChange,
             handleBlur,
             isSubmitting,
-            setFieldValue,
           }) => (
             <Form>
               <DialogContent>
@@ -291,47 +239,6 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       margin="normal"
                     />
                   </Grid>
-                  {/* Trường chọn ngày sinh */}
-                  <Grid item xs={12} md={6}>
-                    <Field
-                      as={TextField}
-                      fullWidth
-                      label="Ngày sinh"
-                      name="dob"
-                      value={values.dob}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={touched.dob && Boolean(errors.dob)}
-                      helperText={touched.dob && errors.dob}
-                      margin="normal"
-                      type="date"
-                      InputLabelProps={{ shrink: true }}
-                    />
-                  </Grid>
-                  {/* Trường chọn giới tính */}
-                  <Grid item xs={12} md={6}>
-                    <FormControl
-                      fullWidth
-                      margin="normal"
-                      error={touched.sex && Boolean(errors.sex)}
-                    >
-                      <InputLabel>Giới tính</InputLabel>
-                      <Field
-                        as={Select}
-                        name="sex"
-                        value={values.sex}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        label="Giới tính"
-                      >
-                        <MenuItem value={false}>Nam</MenuItem>
-                        <MenuItem value={true}>Nữ</MenuItem>
-                      </Field>
-                      {touched.sex && errors.sex && (
-                        <FormHelperText>{errors.sex}</FormHelperText>
-                      )}
-                    </FormControl>
-                  </Grid>
 
                   {/* Phần nhập địa chỉ */}
                   <Grid item xs={12}>
@@ -345,25 +252,13 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       fullWidth
                       label="Số nhà"
                       name="address.number"
-                      value={values.address?.number || ""}
+                      value={values.address?.cep || ""}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       margin="normal"
                     />
                   </Grid>
-                  {/* Trường nhập tên đường */}
-                  <Grid item xs={12} md={6}>
-                    <Field
-                      as={TextField}
-                      fullWidth
-                      label="Đường"
-                      name="address.street"
-                      value={values.address?.street || ""}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      margin="normal"
-                    />
-                  </Grid>
+
                   {/* Trường nhập phường/xã */}
                   <Grid item xs={12} md={6}>
                     <Field
@@ -371,7 +266,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       fullWidth
                       label="Phường/Xã"
                       name="address.ward"
-                      value={values.address?.ward || ""}
+                      value={values.address?.numero || ""}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       margin="normal"
@@ -384,20 +279,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       fullWidth
                       label="Quận/Huyện"
                       name="address.district"
-                      value={values.address?.district || ""}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      margin="normal"
-                    />
-                  </Grid>
-                  {/* Trường nhập thành phố */}
-                  <Grid item xs={12} md={12}>
-                    <Field
-                      as={TextField}
-                      fullWidth
-                      label="Thành phố"
-                      name="address.city"
-                      value={values.address?.city || ""}
+                      value={values.address?.complemento || ""}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       margin="normal"

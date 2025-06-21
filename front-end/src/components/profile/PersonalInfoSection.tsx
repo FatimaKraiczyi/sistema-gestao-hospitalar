@@ -3,8 +3,6 @@ import { Paper, Box, Typography, Grid, Divider } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
-import CakeIcon from "@mui/icons-material/Cake";
-import WcIcon from "@mui/icons-material/Wc";
 import EditableAvatar from "./EditableAvatar";
 import { Address } from "../../types";
 
@@ -13,8 +11,6 @@ interface PersonalInfoSectionProps {
   lastName: string;
   email: string;
   phone: string;
-  dob: string;
-  sex: boolean;
   address: Address;
   avatar: string;
   onEditAvatar?: () => void;
@@ -26,8 +22,6 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   lastName,
   email,
   phone,
-  dob,
-  sex,
   address,
   avatar,
   onEditAvatar,
@@ -36,7 +30,7 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   // Format the address into a readable string
   const addressString =
     address != null
-      ? `${address.number} ${address.street}, ${address.ward}, ${address.district}, ${address.city}, ${address.country}`
+      ? `${address.numero} ${address.logradouro}, ${address.complemento}, ${address.bairro}, ${address.cidade}, ${address.estado}, ${address.cep}`
       : "Sem dados disponíveis";
 
   return (
@@ -94,20 +88,6 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
             <PhoneIcon color="primary" sx={{ mr: 1 }} />
             <Typography variant="body1">{phone}</Typography>
-          </Box>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-            <CakeIcon color="primary" sx={{ mr: 1 }} />
-            <Typography variant="body1">{dob}</Typography>
-          </Box>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-            <WcIcon color="primary" sx={{ mr: 1 }} />
-            <Typography variant="body1">
-              {typeof sex !== "undefined" ? (sex ? "Nữ" : "Nam") : ""}
-            </Typography>
           </Box>
         </Grid>
         <Grid item xs={12}>

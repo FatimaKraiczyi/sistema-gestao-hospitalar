@@ -23,6 +23,14 @@ public class PacienteController {
   @Autowired
   private PacienteService pacienteService;
 
+  @GetMapping("/usuario")
+  public ResponseEntity<PacienteResponseDTO> buscarPacientePorId(
+    @RequestParam UUID id
+  ) {
+    PacienteResponseDTO paciente = pacienteService.buscarPaciente(id);
+    return ResponseEntity.ok(paciente);
+  }
+
   @PostMapping("/completar")
   public ResponseEntity<PacienteResponseDTO> completarCadastro(
     @RequestHeader Map<String, String> headers,

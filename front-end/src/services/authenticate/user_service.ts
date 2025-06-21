@@ -1,18 +1,39 @@
 import axiosConfig from "../axiosConfig";
 
 const prefix = "/paciente";
-export const getPatientInfo = async (userId: string) => {
-  const response = await axiosConfig.get(`${prefix}/patient`, {
+
+export interface PacienteRequest {
+  nome: string;
+  telefone: string;
+  cep: string;
+  numero: string;
+  complemento?: string;
+}
+
+export const getPatientInfo = async (id: string) => {
+  const response = await axiosConfig.get(`${prefix}/usuario`, {
     params: {
-      userId: userId,
+      id: id,
     },
   });
   return response;
 };
 
 /** Cadastro do usuário (com type fixo ou opcional) */
-export const completeInfo = async (cpf: string, email: string) => {
-  return axiosConfig.post(`${prefix}/completar`, { cpf, email });
+export const completeInfo = async (
+  id: string,
+  cpf: string,
+  email: string,
+  data: PacienteRequest
+) => {
+  const response = await axiosConfig.post(`${prefix}/completar`, data, {
+    headers: {
+      "X-User-Id": id,
+      "X-User-Cpf": cpf,
+      "X-User-Email": email,
+    },
+  });
+  return response;
 };
 
 export const getDoctorInfo = async (userId: string) => {
@@ -24,17 +45,8 @@ export const getDoctorInfo = async (userId: string) => {
   return response;
 };
 
-// Corrige tipagem do parâmetro data em updateInfo
-export interface PatientUpdateInfo {
-  // Adapte os campos conforme o backend espera
-  name?: string;
-  email?: string;
-  phone?: string;
-  // ...outros campos...
-}
-
-export const updateInfo = async (userId: string, data: PatientUpdateInfo) => {
-  const response = await axiosConfig.put(`${prefix}/patient/${userId}`, data);
+export const updateInfo = async (id: string, data: PacienteRequest) => {
+  const response = await axiosConfig.put(`${prefix}/patient/${id}`, data);
   return response.data;
 };
 

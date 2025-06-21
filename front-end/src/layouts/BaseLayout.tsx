@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { ReactNode, useState } from "react";
 import {
   Box,
@@ -56,8 +57,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state: any) => state.user);
-  const role = useSelector((state: any) => state.user?.type);
-  const isAdmin = role === "admin";
+  const isAdmin = user?.type === "admin";
 
   const handleDrawerToggle = () => {
     setOpen(!open);
@@ -106,7 +106,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {user ? `${user.firstName} ${user.lastName}` : ""}
+            {user ? `${user.nome} ` : ""}
           </Typography>
           <div>
             <IconButton
