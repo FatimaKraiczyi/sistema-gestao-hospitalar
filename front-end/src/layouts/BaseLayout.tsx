@@ -19,6 +19,7 @@ import { useNavigate } from "react-router";
 import { ROUTING } from "../constants/routing";
 import { useDispatch, useSelector } from "react-redux";
 import { logOut } from "../stores/slices/user.slice";
+import { RootState } from "../stores/store";
 
 const drawerWidth = 240;
 
@@ -56,8 +57,8 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const user = useSelector((state: any) => state.user.user);
-  const isAdmin = user?.type === "admin";
+  const userData = useSelector((state: RootState) => state.user.user);
+  const isAdmin = userData?.type === "ADMIN";
 
   const handleDrawerToggle = () => {
     setOpen(!open);
@@ -106,7 +107,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {user ? `${user.nome} ` : ""}
+            {userData ? `${userData.nome} ` : ""}
           </Typography>
           <div>
             <IconButton
@@ -117,11 +118,11 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
               onClick={handleMenu}
               color="inherit"
             >
-              {user?.avatar ? (
+              {userData?.avatar ? (
                 <Avatar
                   sx={{ bgcolor: "secondary.main" }}
-                  src={user.avatar}
-                  alt={`${user?.name ?? ""}`}
+                  src={userData.avatar}
+                  alt={`${userData?.name ?? ""}`}
                 />
               ) : (
                 <Avatar sx={{ bgcolor: "secondary.main" }}>

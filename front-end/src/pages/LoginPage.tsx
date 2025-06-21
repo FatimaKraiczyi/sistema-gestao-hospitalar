@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { use, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Grid2 } from "@mui/material";
@@ -76,7 +76,7 @@ export default function LoginPage() {
           setTimeout(() => navigate(ROUTING.PACIENTE), 1000);
         } else if (userData.type === "FUNCIONARIO") {
           setTimeout(() => navigate(ROUTING.FUNCIONARIO), 1000);
-        } else {
+        } else if (userData.type === "ADMIN") {
           setTimeout(() => navigate(ROUTING.ADMIN), 1000);
         }
       } catch (error: any) {
