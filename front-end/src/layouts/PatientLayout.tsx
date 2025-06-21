@@ -19,14 +19,14 @@ export default function PatientLayout() {
 
   const titleMap: Record<string, string> = {
     dashboard: "Dashboard",
-    appointments: "My Appointments",
-    "find-doctor": "Find Doctor",
-    "medical-records": "Hồ sơ bệnh án của tôi",
+    appointments: "Meus Agendamentos",
+    "find-doctor": "Encontrar Médico",
+    "medical-records": "Meus Prontuários",
   };
 
   const handleNavigation = (path: string) => {
     navigate(path);
-    setCurrentTitle(titleMap[path] || "Patient Dashboard");
+    setCurrentTitle(titleMap[path] || "Dashboard do Paciente");
   };
 
   const sidebarContent = (
@@ -36,13 +36,13 @@ export default function PatientLayout() {
           <ListItemIcon>
             <DashboardIcon />
           </ListItemIcon>
-          <ListItemText primary="Thống kê" />
+          <ListItemText primary="Estatísticas" />
         </ListItemButton>
         <ListItemButton onClick={() => handleNavigation(ROUTING.APPOINTMENTS)}>
           <ListItemIcon>
             <EventNoteIcon />
           </ListItemIcon>
-          <ListItemText primary="Lịch hẹn" />
+          <ListItemText primary="Agendamentos" />
         </ListItemButton>
       </List>
       <Divider />
@@ -53,7 +53,7 @@ export default function PatientLayout() {
           <ListItemIcon>
             <DescriptionIcon />
           </ListItemIcon>
-          <ListItemText primary="Hồ sơ bệnh án" />
+          <ListItemText primary="Prontuários" />
         </ListItemButton>
       </List>
     </>

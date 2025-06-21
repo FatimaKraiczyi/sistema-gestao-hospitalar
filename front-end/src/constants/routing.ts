@@ -10,8 +10,8 @@ export const ROUTING = {
 
   // Role root paths
   ADMIN: "/admin",
-  DOCTOR: "/doctor",
-  PATIENT: "/patient",
+  FUNCIONARIO: "/doctor",
+  PACIENTE: "/patient",
 
   // Admin routes (nested under /admin)
   DASHBOARD: "dashboard",

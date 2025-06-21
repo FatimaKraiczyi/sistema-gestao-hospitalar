@@ -1,6 +1,6 @@
 import axiosConfig from "../axiosConfig";
 
-const prefix = "/authenticate/api/v1/user";
+const prefix = "/paciente";
 export const getPatientInfo = async (userId: string) => {
   const response = await axiosConfig.get(`${prefix}/patient`, {
     params: {
@@ -8,6 +8,11 @@ export const getPatientInfo = async (userId: string) => {
     },
   });
   return response;
+};
+
+/** Cadastro do usuário (com type fixo ou opcional) */
+export const completeInfo = async (cpf: string, email: string) => {
+  return axiosConfig.post(`${prefix}/completar`, { cpf, email });
 };
 
 export const getDoctorInfo = async (userId: string) => {

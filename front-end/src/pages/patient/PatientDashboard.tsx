@@ -82,7 +82,7 @@ interface DashboardResponse {
 
 const PatientDashboard: React.FC = () => {
   // Lấy thông tin người dùng từ Redux store
-  const user = useSelector((state: any) => state.user.user);
+  const user = useSelector((state: any) => state.user);
 
   // State để theo dõi chế độ xem thời gian (tháng hoặc năm)
   const [timeView, setTimeView] = useState<"month" | "year">("month");

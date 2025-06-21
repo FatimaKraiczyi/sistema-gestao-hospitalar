@@ -53,7 +53,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
   // State điều khiển hiển thị modal hồ sơ bệnh án
   const [isMedicalRecordOpen, setIsMedicalRecordOpen] =
     useState<boolean>(false);
-  const user = useSelector((state: any) => state.user.user);
+  const user = useSelector((state: any) => state.user);
   const navigate = useNavigate();
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [cancellationSuccess, setCancellationSuccess] = useState(false);

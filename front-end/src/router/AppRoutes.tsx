@@ -45,8 +45,8 @@ const ProtectedRoute = ({
   children: ReactNode;
   allowedRoles: string[];
 }) => {
-  const role = localStorage.getItem("role");
-  const isAuthenticated = localStorage.getItem("user");
+  const role = localStorage.getItem("type");
+  const isAuthenticated = localStorage.getItem("token");
 
   if (!isAuthenticated) {
     return <Navigate to={ROUTING.HOME} replace />;
@@ -113,9 +113,9 @@ export const AppRoutes = () => {
 
           {/* Doctor routes - with role protection */}
           <Route
-            path={ROUTING.DOCTOR}
+            path={ROUTING.FUNCIONARIO}
             element={
-              <ProtectedRoute allowedRoles={["doctor"]}>
+              <ProtectedRoute allowedRoles={["FUNCIONARIO"]}>
                 <DoctorLayout />
               </ProtectedRoute>
             }
@@ -142,9 +142,9 @@ export const AppRoutes = () => {
 
           {/* Patient routes - with role protection */}
           <Route
-            path={ROUTING.PATIENT}
+            path={ROUTING.PACIENTE}
             element={
-              <ProtectedRoute allowedRoles={["patient"]}>
+              <ProtectedRoute allowedRoles={["PACIENTE"]}>
                 <PatientLayout />
               </ProtectedRoute>
             }

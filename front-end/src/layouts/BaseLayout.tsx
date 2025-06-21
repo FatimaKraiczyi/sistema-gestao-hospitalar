@@ -55,8 +55,8 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const user = useSelector((state: any) => state.user.user);
-  const role = localStorage.getItem("role");
+  const user = useSelector((state: any) => state.user);
+  const role = useSelector((state: any) => state.user?.type);
   const isAdmin = role === "admin";
 
   const handleDrawerToggle = () => {
@@ -121,7 +121,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
                 <Avatar
                   sx={{ bgcolor: "secondary.main" }}
                   src={user.avatar}
-                  alt={`${user.firstName} ${user.lastName}`}
+                  alt={`${user?.name ?? ""}`}
                 />
               ) : (
                 <Avatar sx={{ bgcolor: "secondary.main" }}>

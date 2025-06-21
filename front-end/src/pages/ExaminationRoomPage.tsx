@@ -108,7 +108,7 @@ export default function ExaminationRoomPage() {
 
   // Cập nhật: xác định vai trò người dùng từ tham số role
   const [isPatient, setIsPatient] = useState(
-    searchParams.get("role") === "patient"
+    searchParams.get("type") === "patient"
   );
 
   // State cho hàng đợi bệnh nhân

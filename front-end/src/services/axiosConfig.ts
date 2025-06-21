@@ -11,9 +11,12 @@ const axiosConfig = axios.create({
 
 axiosConfig.interceptors.request.use(
   async (config) => {
-    // Promise.resolve(getAccessToken()).then((accessToken) => {
-    //   config.headers.Authorization = `Bearer ${accessToken}`;
-    // });
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
     return config;
   },
   (error) => {

@@ -10,15 +10,14 @@ function HomePage() {
 
   useEffect(() => {
     // Kiểm tra xem người dùng đã đăng nhập chưa
-    const user = localStorage.getItem("user");
-    const role = localStorage.getItem("role");
+    const type = localStorage.getItem("type");
 
-    if (user && role) {
+    if (type) {
       // Người dùng đã đăng nhập, chuyển hướng dựa trên vai trò
-      if (role === "doctor") {
-        navigate(ROUTING.DOCTOR);
-      } else if (role === "patient") {
-        navigate(ROUTING.PATIENT);
+      if (type === "FUNCIONARIO") {
+        navigate(ROUTING.FUNCIONARIO);
+      } else if (type === "PACIENTE") {
+        navigate(ROUTING.PACIENTE);
       } else {
         navigate(ROUTING.ADMIN);
       }

@@ -69,9 +69,7 @@ const PatientProfilePage: React.FC = () => {
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false); // Estado de exibição do modal de upload de avatar
   const [avatarLoading, setAvatarLoading] = useState(false); // Estado de carregamento ao atualizar avatar
   const [avatarError, setAvatarError] = useState<string | null>(null); // Erro ao atualizar avatar
-  const user = useSelector(
-    (state: { user: { user: UserRedux } }) => state.user.user
-  ); // Obtém informações do usuário do Redux
+  const user = useSelector((state: { user: UserRedux }) => state.user); // Obtém informações do usuário do Redux
   const dispatch = useDispatch(); // Hook para disparar actions do Redux
   const navigate = useNavigate(); // Hook de navegação
 

@@ -54,11 +54,13 @@ export default function LoginPage() {
         setIsLoading(true);
         const response = await login(values.email, values.password);
 
-        if (response.status === 200 && response.data.token) {
+        if (response.status === 200) {
           const token = response.data.token;
+          localStorage.setItem("token", token);
 
           // Decodifica o token
           const decoded: DecodedToken = jwtDecode(token);
+          console.log("Token decodificado:", decoded);
           const userData = {
             email: decoded.email,
             cpf: decoded.cpf,
@@ -70,13 +72,12 @@ export default function LoginPage() {
             // Salva as informações do usuário no localStorage
             toast.success("Login realizado com sucesso!");
 
-            localStorage.setItem("user", JSON.stringify(userData));
-            localStorage.setItem("role", userData.type);
+            localStorage.setItem("type", userData.type);
             // console.log("userData", userData);
             if (userData.type === "FUNCIONARIO") {
-              setTimeout(() => navigate(ROUTING.DOCTOR), 1500);
+              setTimeout(() => navigate(ROUTING.FUNCIONARIO), 1500);
             } else if (userData.type === "PACIENTE") {
-              setTimeout(() => navigate(ROUTING.PATIENT), 1500);
+              setTimeout(() => navigate(ROUTING.PACIENTE), 1500);
             } else {
               setTimeout(() => navigate(ROUTING.ADMIN), 1500);
             }
