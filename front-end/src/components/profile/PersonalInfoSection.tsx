@@ -3,7 +3,6 @@ import { Paper, Box, Typography, Grid, Divider } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
-import EditableAvatar from "./EditableAvatar";
 import { Address } from "../../types";
 
 interface PersonalInfoSectionProps {
@@ -12,9 +11,6 @@ interface PersonalInfoSectionProps {
   email: string;
   phone: string;
   address: Address;
-  avatar: string;
-  onEditAvatar?: () => void;
-  hideEditButton?: boolean;
 }
 
 export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
@@ -23,9 +19,6 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   email,
   phone,
   address,
-  avatar,
-  onEditAvatar,
-  hideEditButton = false,
 }) => {
   // Format the address into a readable string
   const addressString =
@@ -36,28 +29,6 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   return (
     <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
       <Box sx={{ textAlign: "center", mb: 3 }}>
-        {onEditAvatar && !hideEditButton ? (
-          <EditableAvatar
-            src={avatar}
-            alt={`${firstName} ${lastName}`}
-            size={120}
-            onEditAvatar={onEditAvatar}
-          />
-        ) : (
-          <Box
-            component="img"
-            src={avatar}
-            alt={`${firstName} ${lastName}`}
-            sx={{
-              width: 120,
-              height: 120,
-              borderRadius: "50%",
-              objectFit: "cover",
-              border: "3px solid #fff",
-              boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-            }}
-          />
-        )}
         <Typography variant="h5" sx={{ mt: 2 }}>
           {firstName} {lastName}
         </Typography>

@@ -21,11 +21,13 @@ import { setUser } from "../stores/slices/user.slice";
 import { toast } from "react-toastify";
 import { ROUTING } from "../constants/routing";
 import { jwtDecode } from "jwt-decode";
+import { getPatientInfo } from "../services/authenticate/user_service";
+
 interface DecodedToken {
   email: string;
   cpf: string;
   type: string;
-  sub: string;
+  sub: string; // id
 }
 
 const validationSchema = Yup.object({
@@ -58,41 +60,57 @@ export default function LoginPage() {
           const token = response.data.token;
           localStorage.setItem("token", token);
 
-          // Decodifica o token
           const decoded: DecodedToken = jwtDecode(token);
-          console.log("Token decodificado:", decoded);
           const userData = {
             email: decoded.email,
             cpf: decoded.cpf,
             id: decoded.sub,
             type: decoded.type,
           };
-          if (userData) {
-            dispatch(setUser(userData));
-            // Salva as informações do usuário no localStorage
-            toast.success("Login realizado com sucesso!");
 
-            localStorage.setItem("type", userData.type);
-            // console.log("userData", userData);
-            if (userData.type === "FUNCIONARIO") {
-              setTimeout(() => navigate(ROUTING.FUNCIONARIO), 1500);
-            } else if (userData.type === "PACIENTE") {
-              setTimeout(() => navigate(ROUTING.PACIENTE), 1500);
-            } else {
-              setTimeout(() => navigate(ROUTING.ADMIN), 1500);
+          dispatch(setUser(userData));
+          localStorage.setItem("type", userData.type);
+
+          toast.success("Login realizado com sucesso!");
+
+          // Verifica tipo de usuário
+          if (userData.type === "PACIENTE") {
+            try {
+              const patientResponse = await getPatientInfo(userData.id);
+
+              if (patientResponse?.data?.code === 200) {
+                // Paciente já existe → vai para layout principal
+                dispatch(
+                  setUser({
+                    ...userData,
+                    ...patientResponse.data.data, // nome, telefone, etc
+                  })
+                );
+                setTimeout(() => navigate(ROUTING.PACIENTE), 1000);
+              } else {
+                // Fallback
+                setTimeout(() => navigate(ROUTING.PROFILE), 1000);
+              }
+            } catch {
+              if (response?.data.code === 404) {
+                // Paciente não encontrado → precisa completar cadastro
+                setTimeout(() => navigate(ROUTING.PROFILE), 1000);
+              } else {
+                console.error("Erro ao buscar paciente:");
+                toast.error("Erro ao verificar informações do paciente.");
+              }
             }
+          } else if (userData.type === "FUNCIONARIO") {
+            setTimeout(() => navigate(ROUTING.FUNCIONARIO), 1000);
           } else {
-            toast.error(
-              response.data.message ||
-                "Falha no login. Por favor, verifique suas credenciais."
-            );
+            setTimeout(() => navigate(ROUTING.ADMIN), 1000);
           }
         } else {
-          toast.error("Falha no login. Por favor, verifique suas credenciais.");
+          toast.error("Falha no login. Verifique suas credenciais.");
         }
       } catch (error) {
         console.error("Erro ao fazer login:", error);
-        toast.error("Falha no login. Por favor, tente novamente mais tarde.");
+        toast.error("Erro ao fazer login. Tente novamente mais tarde.");
       } finally {
         setIsLoading(false);
       }

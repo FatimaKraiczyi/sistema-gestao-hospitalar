@@ -56,7 +56,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const user = useSelector((state: any) => state.user);
+  const user = useSelector((state: any) => state.user.user);
   const isAdmin = user?.type === "admin";
 
   const handleDrawerToggle = () => {

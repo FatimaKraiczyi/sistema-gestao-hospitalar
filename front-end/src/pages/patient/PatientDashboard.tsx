@@ -81,17 +81,16 @@ interface DashboardResponse {
 }
 
 const PatientDashboard: React.FC = () => {
-  // Lấy thông tin người dùng từ Redux store
+  // Obtém informações do usuário do Redux store
   const user = useSelector((state: any) => state.user);
 
-  // State để theo dõi chế độ xem thời gian (tháng hoặc năm)
+  // Estado para controlar a visualização de tempo (mês ou ano)
   const [timeView, setTimeView] = useState<"month" | "year">("month");
 
-  // Tách state thành các phần riêng biệt để dễ quản lý - giống Doctor Dashboard
+  // Estados separados para facilitar o gerenciamento
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Tách các trạng thái dữ liệu riêng biệt thay vì lưu trong một đối tượng patientData duy nhất
   const [appointmentStats, setAppointmentStats] = useState({
     total: 0,
     completed: 0,
@@ -127,9 +126,9 @@ const PatientDashboard: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Helper function to format time from API format
+  // Função auxiliar para formatar hora do formato da API
   const formatTimeFromApiFormat = (timeString: string): string => {
-    // Format from "07-00-00" to "07:00"
+    // Formata de "07-00-00" para "07:00"
     const parts = timeString.split("-");
     if (parts.length >= 2) {
       return `${parts[0]}:${parts[1]}`;
@@ -137,12 +136,11 @@ const PatientDashboard: React.FC = () => {
     return timeString;
   };
 
-  // Lấy dữ liệu thống kê của bệnh nhân
+  // Busca dados do dashboard do paciente
   useEffect(() => {
     const fetchPatientData = async () => {
-      // Kiểm tra ID người dùng tồn tại
       if (!user?.userId) {
-        setError("Không tìm thấy thông tin người dùng");
+        setError("Não foi possível encontrar informações do usuário");
         setLoading(false);
         return;
       }
@@ -151,12 +149,9 @@ const PatientDashboard: React.FC = () => {
         setLoading(true);
         setAppointmentsLoading(true);
 
-        console.log("Fetching patient dashboard data for userId:", user.userId);
         const response = await getPatientDashboard(user.userId);
         const dashboardData: DashboardResponse = response.data;
-        console.log("Dashboard data:", dashboardData);
 
-        // Update appointment stats
         setAppointmentStats({
           total: dashboardData.appointmentStats.total,
           completed: dashboardData.appointmentStats.complete,
@@ -164,7 +159,6 @@ const PatientDashboard: React.FC = () => {
           cancelled: dashboardData.appointmentStats.cancelled,
         });
 
-        // Update monthly appointments chart data
         setMonthlyAppointments({
           jan: dashboardData.charts.monthly.jan,
           feb: dashboardData.charts.monthly.feb,
@@ -180,13 +174,10 @@ const PatientDashboard: React.FC = () => {
           dec: dashboardData.charts.monthly.dec,
         });
 
-        // Update yearly appointments chart data
         setYearlyAppointments(dashboardData.charts.yearly);
 
         const today = format(new Date(), "dd-MM-yyyy");
-        // Format today's appointments from the API response
         const formattedAppointments: Appointment[] = dashboardData.appointments
-          // lọc ngày hiện tại
           .filter((appt) => appt.work_schedule.dateAppointment === today)
           .map((appt) => ({
             id: appt.book_appointment.id,
@@ -195,7 +186,7 @@ const PatientDashboard: React.FC = () => {
             startTime: formatTimeFromApiFormat(appt.work_schedule.shift.start),
             endTime: formatTimeFromApiFormat(appt.work_schedule.shift.end),
             status: appt.book_appointment.status as any,
-            doctorName: `Bác sĩ ${appt.work_schedule.doctor.lastName} ${appt.work_schedule.doctor.firstName}`,
+            doctorName: `Dr. ${appt.work_schedule.doctor.lastName} ${appt.work_schedule.doctor.firstName}`,
             specialization: appt.work_schedule.doctor.specialization,
             reason:
               appt.book_appointment.note ||
@@ -203,14 +194,14 @@ const PatientDashboard: React.FC = () => {
             doctorId: appt.work_schedule.doctor.id,
             numericalOrder: appt.book_appointment.numericalOrder,
           }));
-        console.log("Formatted appointments:", formattedAppointments);
         setTodayAppointments(formattedAppointments);
         setError(null);
         setAppointmentsError(null);
       } catch (err) {
-        console.error("Error fetching patient dashboard data:", err);
-        setError("Không thể tải dữ liệu bệnh nhân");
-        setAppointmentsError("Không thể tải dữ liệu lịch hẹn");
+        setError("Não foi possível carregar os dados do paciente");
+        setAppointmentsError(
+          "Não foi possível carregar os dados das consultas"
+        );
       } finally {
         setLoading(false);
         setAppointmentsLoading(false);
@@ -220,7 +211,6 @@ const PatientDashboard: React.FC = () => {
     fetchPatientData();
   }, [user]);
 
-  // Hiển thị trạng thái đang tải
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
@@ -229,17 +219,14 @@ const PatientDashboard: React.FC = () => {
     );
   }
 
-  // Hiển thị lỗi nếu có
   if (error) {
     return <Alert severity="error">{error}</Alert>;
   }
 
-  // Hiển thị thông báo đang tải dữ liệu
   if (!appointmentStats) {
-    return <Alert severity="info">Đang tải dữ liệu...</Alert>;
+    return <Alert severity="info">Carregando dados...</Alert>;
   }
 
-  // Xử lý thay đổi chế độ xem thời gian
   const handleTimeViewChange = (
     event: React.MouseEvent<HTMLElement>,
     newTimeView: "month" | "year" | null
@@ -251,24 +238,23 @@ const PatientDashboard: React.FC = () => {
   const handleAppointmentClick = (appointmentId: number) => {
     navigate(`/patient/appointments/${appointmentId}`);
   };
-  // Lấy chart data dưa vào chế độ xem thời gian
   const getChartConfig = () => {
     switch (timeView) {
       case "month":
         return {
           xAxisData: [
-            "T1",
-            "T2",
-            "T3",
-            "T4",
-            "T5",
-            "T6",
-            "T7",
-            "T8",
-            "T9",
-            "T10",
-            "T11",
-            "T12",
+            "Jan",
+            "Fev",
+            "Mar",
+            "Abr",
+            "Mai",
+            "Jun",
+            "Jul",
+            "Ago",
+            "Set",
+            "Out",
+            "Nov",
+            "Dez",
           ],
           seriesData: [
             monthlyAppointments.jan,
@@ -284,15 +270,14 @@ const PatientDashboard: React.FC = () => {
             monthlyAppointments.nov,
             monthlyAppointments.dec,
           ],
-          title: "Thống kê lịch hẹn trong năm (theo tháng)",
+          title: "Consultas no ano (por mês)",
         };
       case "year":
-        // Lấy danh sách các năm và sắp xếp theo thứ tự tăng dần
         const yearKeys = Object.keys(yearlyAppointments).sort();
         return {
           xAxisData: yearKeys,
           seriesData: yearKeys.map((year) => yearlyAppointments[year]),
-          title: "Thống kê lịch hẹn theo năm",
+          title: "Consultas por ano",
         };
       default:
         return { xAxisData: [], seriesData: [], title: "" };
@@ -304,11 +289,11 @@ const PatientDashboard: React.FC = () => {
   return (
     <>
       <Grid container spacing={3}>
-        {/* Thống kê lịch hẹn với biểu đồ tròn */}
+        {/* Estatísticas de consultas com gráfico de pizza */}
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
-              Thống kê lịch hẹn
+              Estatísticas de consultas
             </Typography>
             <Stack spacing={2} mt={2}>
               <Box
@@ -328,7 +313,7 @@ const PatientDashboard: React.FC = () => {
                   gutterBottom
                   sx={{ mb: 3 }}
                 >
-                  Tổng số lịch hẹn: {appointmentStats.total}
+                  Total de consultas: {appointmentStats.total}
                 </Typography>
                 <PieChart
                   series={[
@@ -336,45 +321,39 @@ const PatientDashboard: React.FC = () => {
                       data: [
                         {
                           id: 0,
-                          value: appointmentStats.completed, // Số lượng lịch hẹn đã hoàn thành
-                          label: "Đã hoàn thành",
-                          color: "#4caf50", // Màu xanh lá cây
+                          value: appointmentStats.completed,
+                          label: "Concluídas",
+                          color: "#4caf50",
                         },
                         {
                           id: 1,
-                          value: appointmentStats.upcoming, // Số lượng lịch hẹn sắp tới
-                          label: "Sắp tới",
-                          color: "#2196f3", // Màu xanh dương
+                          value: appointmentStats.upcoming,
+                          label: "Próximas",
+                          color: "#2196f3",
                         },
                         {
                           id: 2,
-                          value: appointmentStats.cancelled, // Số lượng lịch hẹn đã hủy
-                          label: "Đã hủy",
-                          color: "#f44336", // Màu đỏ
+                          value: appointmentStats.cancelled,
+                          label: "Canceladas",
+                          color: "#f44336",
                         },
                       ],
-                      // Di chuột vào biểu đồ sẽ hiển thị thông tin chi tiết
-                      // faded: global - Khi di chuột qua một phân đoạn, tất cả các phân đoạn khác sẽ mờ đi
-                      // highlighted: item - Chỉ phân đoạn được di chuột qua sẽ được làm nổi bật
                       highlightScope: { faded: "global", highlighted: "item" },
                       faded: {
-                        // Độ rỗng ở giữa hình tròn
                         innerRadius: 30,
-                        // Thu nhỏ các phân đoạn bị mờ đi
                         additionalRadius: -30,
                         color: "gray",
                       },
                     },
                   ]}
-                  height={300} // Chiều cao biểu đồ (pixel)
-                  width={500} // Chiều rộng biểu đồ (pixel)
-                  // Lề của biểu đồ để tránh đè lên các phần khác như chú thích
+                  height={300}
+                  width={500}
                   margin={{ top: 50, left: 50, right: 50 }}
                   slotProps={{
                     legend: {
-                      hidden: false, // Hiển thị chú thích
-                      position: { vertical: "top", horizontal: "middle" }, // Vị trí chú thích
-                      direction: "row", // Hướng chú thích (ngang)
+                      hidden: false,
+                      position: { vertical: "top", horizontal: "middle" },
+                      direction: "row",
                     },
                   }}
                 />
@@ -383,7 +362,7 @@ const PatientDashboard: React.FC = () => {
           </Paper>
         </Grid>
 
-        {/* Biểu đồ thống kê lịch hẹn theo tháng và năm */}
+        {/* Gráfico de consultas por mês/ano */}
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2 }}>
             <Box
@@ -405,10 +384,10 @@ const PatientDashboard: React.FC = () => {
                 size="small"
               >
                 <ToggleButton value="month" aria-label="month view">
-                  Tháng
+                  Mês
                 </ToggleButton>
                 <ToggleButton value="year" aria-label="year view">
-                  Năm
+                  Ano
                 </ToggleButton>
               </ToggleButtonGroup>
             </Box>
@@ -423,11 +402,10 @@ const PatientDashboard: React.FC = () => {
                   justifyContent: "center",
                 }}
               >
-                {/* Biểu đồ thống kê số lịch hẹn theo tháng/năm */}
                 <BarChart
                   xAxis={[
                     {
-                      scaleType: "band", // Sử dụng dạng biểu đồ cột
+                      scaleType: "band",
                       data: chartConfig.xAxisData,
                       tickLabelStyle: {
                         fontSize: 12,
@@ -435,25 +413,21 @@ const PatientDashboard: React.FC = () => {
                       },
                     },
                   ]}
-                  // Cấu hình dữ liệu hiển thị trên biểu đồ
                   series={[
                     {
                       data: chartConfig.seriesData,
-                      label: "Số lịch hẹn", // Nhãn cho chuỗi dữ liệu
+                      label: "Consultas",
                     },
                   ]}
-                  // Sử dụng màu xanh dương cho biểu đồ lịch hẹn
                   colors={["#2196f3"]}
-                  height={320} // Chiều cao của biểu đồ (pixel)
-                  width={590} // Chiều rộng của biểu đồ (pixel)
-                  // Thêm tiêu đề trục Y
+                  height={320}
+                  width={590}
                   yAxis={[
                     {
-                      label: "Số lịch hẹn",
+                      label: "Consultas",
                     },
                   ]}
                   margin={{ left: timeView === "year" ? 120 : 80 }}
-                  // Cấu hình tooltip hiển thị khi di chuột vào từng cột
                   tooltip={{ trigger: "item" }}
                 />
               </Box>
@@ -461,7 +435,7 @@ const PatientDashboard: React.FC = () => {
           </Paper>
         </Grid>
 
-        {/* Phần hiển thị lịch hẹn hôm nay */}
+        {/* Consultas de hoje */}
         <Grid item xs={12}>
           <Paper sx={{ p: 2 }}>
             <Typography
@@ -472,9 +446,8 @@ const PatientDashboard: React.FC = () => {
               alignItems="center"
             >
               <EventIcon sx={{ mr: 1 }} />
-              Lịch hẹn hôm nay
+              Consultas de hoje
             </Typography>
-            {/* Hiển thị trạng thái tải dữ liệu lịch hẹn */}
             {appointmentsLoading ? (
               <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
                 <CircularProgress size={24} />
@@ -515,7 +488,7 @@ const PatientDashboard: React.FC = () => {
                               component="span"
                               fontWeight="medium"
                             >
-                              STT: {appointment.numericalOrder} -{" "}
+                              Nº: {appointment.numericalOrder} -{" "}
                               {appointment.doctorName}
                             </Typography>
                           </Box>
@@ -569,7 +542,7 @@ const PatientDashboard: React.FC = () => {
                           </Box>
                         }
                         secondaryTypographyProps={{
-                          component: "div", // Change the secondary Typography to render as div instead of p
+                          component: "div",
                         }}
                       />
                     </ListItem>
@@ -577,7 +550,7 @@ const PatientDashboard: React.FC = () => {
                 ))}
               </List>
             ) : (
-              <EmptyState message="Không có lịch hẹn nào hôm nay" />
+              <EmptyState message="Nenhuma consulta para hoje" />
             )}
           </Paper>
         </Grid>
