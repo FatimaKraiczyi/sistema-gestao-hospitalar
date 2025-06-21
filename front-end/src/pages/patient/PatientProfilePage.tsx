@@ -3,17 +3,14 @@ import { Container, Grid, Box, IconButton, Alert } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import LockIcon from "@mui/icons-material/Lock";
 import Button from "@mui/material/Button";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import CreditCardIcon from "@mui/icons-material/CreditCard"; // Importa ícone para conta bancária
 
 // Importação dos componentes usados no perfil
 import { PersonalInfoSection } from "../../components/profile/PersonalInfoSection";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 // Importação de serviços e hooks do Redux
-import {
-  completeInfo,
-  getPatientInfo,
-} from "../../services/authenticate/user_service";
+import { completeInfo } from "../../services/authenticate/user_service";
 import { useSelector } from "react-redux";
 import { ROUTING } from "../../constants/routing";
 import { RootState } from "../../stores/store";
@@ -43,26 +40,14 @@ const PatientProfilePage: React.FC = () => {
   // Declaração dos states necessários
   const [patientData, setPatientData] = useState<PatientData | null>(null); // Armazena informações do paciente
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Estado de exibição do modal de edição
-
+  const location = useLocation();
   const navigate = useNavigate(); // Hook de navegação
 
   useEffect(() => {
-    const fetchPatientData = async () => {
-      if (!userData || !userData.id) {
-        // Primeiro acesso, sem id → abre o modal
-        setIsEditModalOpen(true);
-        return;
-      }
-
-      const response = await getPatientInfo(userData.id);
-      if (response.data?.code === 200) {
-        const data = response.data.data;
-        setPatientData(data);
-      }
-    };
-
-    fetchPatientData();
-  }, [userData]);
+    if (location.state?.openModal) {
+      setIsEditModalOpen(true);
+    }
+  }, [location.state]);
 
   // Funções de controle dos modais - não chamam API
   // Abre modal de edição

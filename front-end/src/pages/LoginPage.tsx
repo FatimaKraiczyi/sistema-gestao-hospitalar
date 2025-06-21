@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -21,7 +22,6 @@ import { setUser } from "../stores/slices/user.slice";
 import { toast } from "react-toastify";
 import { ROUTING } from "../constants/routing";
 import { jwtDecode } from "jwt-decode";
-import { getPatientInfo } from "../services/authenticate/user_service";
 
 interface DecodedToken {
   email: string;
@@ -50,67 +50,38 @@ export default function LoginPage() {
       email: "",
       password: "",
     },
-    validationSchema: validationSchema,
+    validationSchema,
     onSubmit: async (values) => {
       try {
         setIsLoading(true);
+
         const response = await login(values.email, values.password);
+        const token = response.data.token;
+        localStorage.setItem("token", token);
 
-        if (response.status === 200) {
-          const token = response.data.token;
-          localStorage.setItem("token", token);
+        const decoded: DecodedToken = jwtDecode(token);
+        const userData = {
+          email: decoded.email,
+          cpf: decoded.cpf,
+          id: decoded.sub,
+          type: decoded.type,
+        };
 
-          const decoded: DecodedToken = jwtDecode(token);
-          const userData = {
-            email: decoded.email,
-            cpf: decoded.cpf,
-            id: decoded.sub,
-            type: decoded.type,
-          };
+        dispatch(setUser(userData));
+        localStorage.setItem("type", userData.type);
 
-          dispatch(setUser(userData));
-          localStorage.setItem("type", userData.type);
+        toast.success("Login realizado com sucesso!");
 
-          toast.success("Login realizado com sucesso!");
-
-          // Verifica tipo de usuário
-          if (userData.type === "PACIENTE") {
-            try {
-              const patientResponse = await getPatientInfo(userData.id);
-
-              if (patientResponse?.data?.code === 200) {
-                // Paciente já existe → vai para layout principal
-                dispatch(
-                  setUser({
-                    ...userData,
-                    ...patientResponse.data.data, // nome, telefone, etc
-                  })
-                );
-                setTimeout(() => navigate(ROUTING.PACIENTE), 1000);
-              } else {
-                // Fallback
-                setTimeout(() => navigate(ROUTING.PROFILE), 1000);
-              }
-            } catch {
-              if (response?.data.code === 404) {
-                // Paciente não encontrado → precisa completar cadastro
-                setTimeout(() => navigate(ROUTING.PROFILE), 1000);
-              } else {
-                console.error("Erro ao buscar paciente:");
-                toast.error("Erro ao verificar informações do paciente.");
-              }
-            }
-          } else if (userData.type === "FUNCIONARIO") {
-            setTimeout(() => navigate(ROUTING.FUNCIONARIO), 1000);
-          } else {
-            setTimeout(() => navigate(ROUTING.ADMIN), 1000);
-          }
+        if (userData.type === "PACIENTE") {
+          setTimeout(() => navigate(ROUTING.PACIENTE), 1000);
+        } else if (userData.type === "FUNCIONARIO") {
+          setTimeout(() => navigate(ROUTING.FUNCIONARIO), 1000);
         } else {
-          toast.error("Falha no login. Verifique suas credenciais.");
+          setTimeout(() => navigate(ROUTING.ADMIN), 1000);
         }
-      } catch (error) {
+      } catch (error: any) {
+        toast.error(error.message);
         console.error("Erro ao fazer login:", error);
-        toast.error("Erro ao fazer login. Tente novamente mais tarde.");
       } finally {
         setIsLoading(false);
       }
@@ -183,11 +154,7 @@ export default function LoginPage() {
             <Grid2 size={{ xs: 12 }}>
               <Link
                 href={ROUTING.FORGET_PASSWORD}
-                sx={{
-                  display: "block",
-                  textAlign: "right",
-                  mb: 1,
-                }}
+                sx={{ display: "block", textAlign: "right", mb: 1 }}
               >
                 Esqueceu a senha?
               </Link>

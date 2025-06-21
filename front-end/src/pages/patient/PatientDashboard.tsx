@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import {
   Typography,
@@ -24,6 +25,9 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import { format } from "date-fns";
 import { getPatientDashboard } from "../../services/appointment/dashboard_service";
+import { ROUTING } from "../../constants/routing";
+import { getPatientInfo } from "../../services/authenticate/user_service";
+import { RootState } from "../../stores/store";
 
 interface Appointment {
   id: number;
@@ -81,9 +85,6 @@ interface DashboardResponse {
 }
 
 const PatientDashboard: React.FC = () => {
-  // Obtém informações do usuário do Redux store
-  const user = useSelector((state: any) => state.user);
-
   // Estado para controlar a visualização de tempo (mês ou ano)
   const [timeView, setTimeView] = useState<"month" | "year">("month");
 
@@ -122,6 +123,7 @@ const PatientDashboard: React.FC = () => {
   const [appointmentsError, setAppointmentsError] = useState<string | null>(
     null
   );
+  const userData = useSelector((state: RootState) => state.user.user);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -136,20 +138,36 @@ const PatientDashboard: React.FC = () => {
     return timeString;
   };
 
-  // Busca dados do dashboard do paciente
+  useEffect(() => {
+    const fetchPatient = async () => {
+      try {
+        const response = await getPatientInfo(userData.id);
+        const { nome, telefone } = response.data;
+
+        if (!nome || !telefone) {
+          // Redireciona para PROFILE com modal aberto
+          navigate(ROUTING.PROFILE, { state: { openModal: true } });
+        }
+      } catch (error: any) {
+        // Caso o paciente ainda nem exista
+        if (error.message === "Paciente não encontrado") {
+          navigate(ROUTING.PROFILE, { state: { openModal: true } });
+        } else {
+          console.error("Erro ao verificar dados do paciente:", error.message);
+        }
+      }
+    };
+
+    fetchPatient();
+  }, [userData, navigate]);
+
   useEffect(() => {
     const fetchPatientData = async () => {
-      if (!user?.userId) {
-        setError("Não foi possível encontrar informações do usuário");
-        setLoading(false);
-        return;
-      }
-
       try {
         setLoading(true);
         setAppointmentsLoading(true);
 
-        const response = await getPatientDashboard(user.userId);
+        const response = await getPatientDashboard(userData.id);
         const dashboardData: DashboardResponse = response.data;
 
         setAppointmentStats({
@@ -209,7 +227,7 @@ const PatientDashboard: React.FC = () => {
     };
 
     fetchPatientData();
-  }, [user]);
+  }, [userData]);
 
   if (loading) {
     return (
