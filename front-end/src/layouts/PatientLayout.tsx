@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useRef, useState } from "react";
 import { BaseLayout } from "./BaseLayout";
 import {
   List,
@@ -12,44 +13,41 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import { Outlet, useNavigate } from "react-router";
 import { ROUTING } from "../constants/routing";
 import { getPatientInfo } from "../services/authenticate/paciente_service";
-import { useSelector } from "react-redux";
-import { RootState } from "../stores/store";
+import { useDispatch } from "react-redux";
+import { setProfile } from "../stores/slices/user.slice";
 
 export default function PatientLayout() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [currentTitle, setCurrentTitle] = useState("Meus Agendamentos");
-  const userData = useSelector((state: RootState) => state.user.user);
   const titleMap: Record<string, string> = {
     appointments: "Meus Agendamentos",
     "find-doctor": "Encontrar Médico",
     "medical-records": "Meus Prontuários",
   };
 
+  const hasFetched = useRef(false);
+
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const userId = user.userId || user.id;
+
     const fetchPatient = async () => {
-      try {
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const userId = user.userId || user.id;
+      if (hasFetched.current) return;
+      hasFetched.current = true;
 
-        const response = await getPatientInfo(userId);
-        const { id } = response.data.data;
+      const response = await getPatientInfo(userId);
+      const paciente = response.data.data;
 
-        if (!id) {
-          // Redireciona para PROFILE com modal aberto
-          navigate(ROUTING.PROFILE, { state: { openModal: true } });
-        }
-      } catch (error: any) {
-        // Caso o paciente ainda nem exista
-        if (error.message === "Paciente não encontrado") {
-          navigate(ROUTING.PROFILE, { state: { openModal: true } });
-        } else {
-          console.error("Erro ao verificar dados do paciente:", error.message);
-        }
+      if (!paciente?.id) {
+        navigate(ROUTING.PROFILE, { state: { openModal: true } });
+      } else {
+        dispatch(setProfile(paciente));
       }
     };
 
     fetchPatient();
-  }, [userData, navigate]);
+  }, [navigate, dispatch]);
 
   useEffect(() => {
     if (location.pathname === ROUTING.PACIENTE) {

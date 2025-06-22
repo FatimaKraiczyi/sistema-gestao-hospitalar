@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -16,7 +17,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
 import { login } from "../services/authenticate/auth_service";
-import { setUser } from "../stores/slices/user.slice";
+import { setProfile } from "../stores/slices/user.slice";
 import { toast } from "react-toastify";
 import { ROUTING } from "../constants/routing";
 import { jwtDecode } from "jwt-decode";
@@ -92,7 +93,7 @@ export default function LoginPage() {
           type: decoded.type,
         };
 
-        dispatch(setUser(userData));
+        dispatch(setProfile(userData));
         localStorage.setItem("token", token);
         localStorage.setItem("type", userData.type);
 

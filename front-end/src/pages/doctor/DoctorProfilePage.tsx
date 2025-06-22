@@ -19,7 +19,7 @@ import {
   getDoctorInfo,
   updateDoctorAvatar,
 } from "../../services/authenticate/paciente_service";
-import { setUser } from "../../stores/slices/user.slice";
+import { setAuth } from "../../stores/slices/user.slice";
 import { ROUTING } from "../../constants/routing";
 
 // Dữ liệu mẫu - thông thường sẽ lấy từ API
@@ -202,7 +202,7 @@ const DoctorProfilePage: React.FC = () => {
           ...user,
           avatar: response.data.data.avatar, // Avatar là trực tiếp trong data object, không phải trong doctor.avatar
         };
-        dispatch(setUser(updatedUser));
+        dispatch(setAuth(updatedUser));
 
         console.log(
           "Doctor avatar updated successfully:",

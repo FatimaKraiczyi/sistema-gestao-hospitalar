@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Container, Grid, Box, IconButton, Alert } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import LockIcon from "@mui/icons-material/Lock";
 import Button from "@mui/material/Button";
 import { useLocation, useNavigate } from "react-router";
 import CreditCardIcon from "@mui/icons-material/CreditCard"; // Importa ícone para conta bancária
@@ -10,7 +9,6 @@ import CreditCardIcon from "@mui/icons-material/CreditCard"; // Importa ícone p
 import { PersonalInfoSection } from "../../components/profile/PersonalInfoSection";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 // Importação de serviços e hooks do Redux
-import { completeInfo } from "../../services/authenticate/paciente_service";
 import { useSelector } from "react-redux";
 import { ROUTING } from "../../constants/routing";
 import { RootState } from "../../stores/store";
@@ -36,7 +34,9 @@ export interface PatientData {
 // Componente da página de perfil do paciente
 const PatientProfilePage: React.FC = () => {
   // Busca o usuário logado do Redux
-  const userData = useSelector((state: RootState) => state.user.user);
+  const userData = useSelector((state: RootState) => state.user.profile);
+
+  console.log("Dados do usuário:", userData);
   // Declaração dos states necessários
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Estado de exibição do modal de edição
   const location = useLocation();
@@ -89,6 +89,15 @@ const PatientProfilePage: React.FC = () => {
               lastName={userData.nome?.split(" ").slice(1).join(" ") || ""}
               email={userData.email || "Não informado"}
               phone={userData.telefone || "Não informado"}
+              address={{
+                logradouro: userData.logradouro || "Não informado",
+                numero: userData.numero || "Não informado",
+                complemento: userData.complemento,
+                bairro: userData.bairro || "Não informado",
+                cidade: userData.cidade || "Não informado",
+                estado: userData.estado || "Não informado",
+                cep: userData.cep || "Não informado",
+              }}
             />
 
             {/* Botão para editar informações */}

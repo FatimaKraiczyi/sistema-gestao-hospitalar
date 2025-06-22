@@ -14,7 +14,7 @@ import {
   completeInfo,
 } from "../../services/authenticate/paciente_service";
 import { useDispatch } from "react-redux";
-import { setUser } from "../../stores/slices/user.slice";
+import { setProfile } from "../../stores/slices/user.slice";
 import { Formik, Form, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
@@ -114,7 +114,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
       if (response.data.status === 200) {
         const updatedUser = { ...user, ...response.data.data };
-        dispatch(setUser(updatedUser));
+        dispatch(setProfile(updatedUser));
         localStorage.setItem("user", JSON.stringify(updatedUser));
 
         toast.success(response.data.message);
