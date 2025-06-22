@@ -60,7 +60,7 @@ export default function PatientLayout() {
 
   const handleNavigation = (path: string) => {
     navigate(path);
-    setCurrentTitle(titleMap[path] || "Dashboard do Paciente");
+    setCurrentTitle(titleMap[path]);
   };
 
   const sidebarContent = (

@@ -50,7 +50,7 @@ interface BaseLayoutProps {
 
 export const BaseLayout: React.FC<BaseLayoutProps> = ({
   children,
-  // title,
+  //title,
   sidebarContent,
 }) => {
   const [open, setOpen] = useState(true);
@@ -107,7 +107,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {userData ? `${userData.nome} ` : ""}
+            DASHBOARD DO {userData?.type}
           </Typography>
           <div>
             <IconButton
