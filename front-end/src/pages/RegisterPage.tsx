@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Grid2 } from "@mui/material";
@@ -14,6 +13,7 @@ import { signUp } from "../services/authenticate/auth_service";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { ROUTING } from "../constants/routing";
+import { ApiError } from "../types";
 
 const validationSchema = Yup.object({
   cpf: Yup.string()
@@ -29,15 +29,19 @@ export default function RegisterPage() {
     initialValues: {
       cpf: "",
       email: "",
+      type: "PACIENTE", // Tipo fixo como paciente
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       try {
-        const response = await signUp(values.cpf, values.email);
+        const response = await signUp(values.cpf, values.email, values.type);
+
         toast.success(response.data.message);
+
         setTimeout(() => navigate(ROUTING.LOGIN), 1000);
-      } catch (error: any) {
-        toast.error(error.message);
+      } catch (error: unknown) {
+        const err = error as ApiError;
+        toast.error(err.message);
       }
     },
   });

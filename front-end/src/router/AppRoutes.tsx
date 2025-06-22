@@ -7,7 +7,6 @@ import DoctorProfilePage from "../pages/doctor/DoctorProfilePage";
 import DoctorAppointmentDetailsPage from "../pages/doctor/DoctorAppointmentDetailsPage";
 import PatientAppointmentDetailsPage from "../pages/patient/PatientAppointmentDetailsPage";
 import EmergencyPage from "../pages/doctor/EmergencyPage";
-import ChangePasswordPage from "../pages/ChangePasswordPage";
 import ForgetPasswordPage from "../pages/ForgetPasswordPage";
 import BankAccountPage from "../pages/patient/BankAccountPage";
 
@@ -17,7 +16,6 @@ import DoctorLayout from "../layouts/DoctorLayout";
 import PatientLayout from "../layouts/PatientLayout";
 import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
-import VerifyEmailPage from "../pages/VerifyEmailPage";
 import RegisterPage from "../pages/RegisterPage";
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
 import PatientDashboard from "../pages/patient/PatientDashboard";
@@ -69,11 +67,6 @@ export const AppRoutes = () => {
           <Route path={ROUTING.HOME} element={<HomePage />} />
           <Route path={ROUTING.REGISTER} element={<RegisterPage />} />
           <Route path={ROUTING.LOGIN} element={<LoginPage />} />
-          <Route path={ROUTING.VERIFY_EMAIL} element={<VerifyEmailPage />} />
-          <Route
-            path={ROUTING.CHANGE_PASSWORD}
-            element={<ChangePasswordPage />}
-          />
           <Route
             path={ROUTING.FORGET_PASSWORD}
             element={<ForgetPasswordPage />}

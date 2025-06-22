@@ -3,12 +3,12 @@ import axiosConfig from "../axiosConfig";
 const prefix = "/auth";
 
 /** Login do usuário */
-export const login = async (email: string, password: string) => {
-  return axiosConfig.post(`${prefix}/login`, { email, password });
+export const login = async (identifier: string, password: string) => {
+  return axiosConfig.post(`${prefix}/login`, { identifier, password });
 };
 
 /** Cadastro do usuário (com type fixo ou opcional) */
-export const signUp = async (cpf: string, email: string, type = "PACIENTE") => {
+export const signUp = async (cpf: string, email: string, type: string) => {
   return axiosConfig.post(`${prefix}/register`, { cpf, email, type });
 };
 

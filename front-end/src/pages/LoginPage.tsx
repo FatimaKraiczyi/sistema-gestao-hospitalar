@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { use, useState } from "react";
+import { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Grid2 } from "@mui/material";
 import {
   Box,
   Container,
@@ -22,21 +20,40 @@ import { setUser } from "../stores/slices/user.slice";
 import { toast } from "react-toastify";
 import { ROUTING } from "../constants/routing";
 import { jwtDecode } from "jwt-decode";
+import { ApiError } from "../types";
 
 interface DecodedToken {
   email: string;
   cpf: string;
   type: string;
-  sub: string; // id
+  sub: string;
 }
 
 const validationSchema = Yup.object({
-  email: Yup.string().email("E-mail inválido").required("E-mail é obrigatório"),
+  identifier: Yup.string()
+    .required("CPF ou e-mail é obrigatório")
+    .test(
+      "is-valid-identifier",
+      "Deve ser um e-mail válido ou um CPF numérico com 11 dígitos",
+      (value) => {
+        if (!value) return false;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const cpfRegex = /^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/;
+        return emailRegex.test(value) || cpfRegex.test(value);
+      }
+    ),
   password: Yup.string()
     .min(4, "A senha tem pelo menos 4 caracteres")
-    .max(20, "A senha não pode ter mais de 20 caracteres")
     .required("Senha é obrigatória"),
 });
+
+function maskCpf(value: string): string {
+  const numeric = value.replace(/[^\d]/g, "").slice(0, 11);
+  return numeric
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1-$2");
+}
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -47,7 +64,7 @@ export default function LoginPage() {
 
   const formik = useFormik({
     initialValues: {
-      email: "",
+      identifier: "",
       password: "",
     },
     validationSchema,
@@ -55,9 +72,17 @@ export default function LoginPage() {
       try {
         setIsLoading(true);
 
-        const response = await login(values.email, values.password);
-        const token = response.data.token;
-        localStorage.setItem("token", token);
+        let cleanedIdentifier = values.identifier;
+
+        // Se for CPF, remove tudo que não for dígito
+        const onlyNumbers = cleanedIdentifier.replace(/\D/g, "");
+        if (/^\d{11}$/.test(onlyNumbers)) {
+          cleanedIdentifier = onlyNumbers; // CPF limpo só números
+        }
+        // Senão, assume email e mantém como está
+        const response = await login(cleanedIdentifier, values.password);
+
+        const token = response.data.data.token;
 
         const decoded: DecodedToken = jwtDecode(token);
         const userData = {
@@ -68,25 +93,76 @@ export default function LoginPage() {
         };
 
         dispatch(setUser(userData));
+        localStorage.setItem("token", token);
         localStorage.setItem("type", userData.type);
 
-        toast.success("Login realizado com sucesso!");
+        // Exibir mensagem vinda da API no toast
+        toast.success(response.data.message);
 
-        if (userData.type === "PACIENTE") {
-          setTimeout(() => navigate(ROUTING.PACIENTE), 1000);
-        } else if (userData.type === "FUNCIONARIO") {
-          setTimeout(() => navigate(ROUTING.FUNCIONARIO), 1000);
-        } else if (userData.type === "ADMIN") {
-          setTimeout(() => navigate(ROUTING.ADMIN), 1000);
+        switch (userData.type) {
+          case "PACIENTE":
+            setTimeout(() => navigate(ROUTING.PACIENTE), 1000);
+            break;
+          case "FUNCIONARIO":
+            setTimeout(() => navigate(ROUTING.FUNCIONARIO), 1000);
+            break;
+          case "ADMIN":
+            setTimeout(() => navigate(ROUTING.ADMIN), 1000);
+            break;
         }
-      } catch (error: any) {
-        toast.error(error.message);
-        console.error("Erro ao fazer login:", error);
+      } catch (error: unknown) {
+        const err = error as ApiError;
+        toast.error(err.message);
       } finally {
         setIsLoading(false);
       }
     },
   });
+
+  // Limpa a senha quando o identifier muda
+  useEffect(() => {
+    formik.setFieldValue("password", "");
+  }, [formik.values.identifier]);
+
+  // Detecta autofill do navegador após montar o componente e atualiza formik
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const identifierInput = document.getElementById(
+        "identifier"
+      ) as HTMLInputElement;
+      const passwordInput = document.getElementById(
+        "password"
+      ) as HTMLInputElement;
+
+      if (identifierInput && passwordInput) {
+        const identifier = identifierInput.value.trim();
+        const password = passwordInput.value;
+
+        if (identifier && !formik.values.identifier) {
+          formik.setFieldValue("identifier", identifier);
+        }
+
+        if (password && !formik.values.password) {
+          formik.setFieldValue("password", password);
+        }
+      }
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const handleIdentifierChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = event.target.value;
+    const onlyNumbers = value.replace(/\D/g, "");
+
+    if (/^\d+$/.test(onlyNumbers) && onlyNumbers.length <= 11) {
+      formik.setFieldValue("identifier", maskCpf(onlyNumbers));
+    } else {
+      formik.setFieldValue("identifier", value);
+    }
+  };
 
   return (
     <Container maxWidth="sm">
@@ -107,75 +183,68 @@ export default function LoginPage() {
         </Typography>
 
         <form onSubmit={formik.handleSubmit}>
-          <Grid2 container spacing={2}>
-            <Grid2 size={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                id="email"
-                name="email"
-                label="E-mail"
-                value={formik.values.email}
-                onChange={formik.handleChange}
-                error={formik.touched.email && Boolean(formik.errors.email)}
-                helperText={formik.touched.email && formik.errors.email}
-                disabled={isLoading}
-              />
-            </Grid2>
-            <Grid2 size={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                id="password"
-                name="password"
-                label="Senha"
-                type={showPassword ? "text" : "password"}
-                value={formik.values.password}
-                onChange={formik.handleChange}
-                error={
-                  formik.touched.password && Boolean(formik.errors.password)
-                }
-                helperText={formik.touched.password && formik.errors.password}
-                disabled={isLoading}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowPassword(!showPassword)}
-                        edge="end"
-                        disabled={isLoading}
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid2>
+          <TextField
+            fullWidth
+            id="identifier"
+            name="identifier"
+            label="E-mail ou CPF"
+            value={formik.values.identifier}
+            onChange={handleIdentifierChange}
+            error={
+              formik.touched.identifier && Boolean(formik.errors.identifier)
+            }
+            helperText={formik.touched.identifier && formik.errors.identifier}
+            disabled={isLoading}
+            sx={{ mb: 2 }}
+            autoComplete="username"
+          />
 
-            <Grid2 size={{ xs: 12 }}>
-              <Link
-                href={ROUTING.FORGET_PASSWORD}
-                sx={{ display: "block", textAlign: "right", mb: 1 }}
-              >
-                Esqueceu a senha?
-              </Link>
-            </Grid2>
+          <TextField
+            fullWidth
+            id="password"
+            name="password"
+            label="Senha"
+            type={showPassword ? "text" : "password"}
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            error={formik.touched.password && Boolean(formik.errors.password)}
+            helperText={formik.touched.password && formik.errors.password}
+            disabled={isLoading}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                    disabled={isLoading}
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            sx={{ mb: 2 }}
+            autoComplete="current-password"
+          />
 
-            <Grid2 size={{ xs: 12 }}>
-              <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                type="submit"
-                size="large"
-                disabled={isLoading}
-                startIcon={
-                  isLoading && <CircularProgress size={24} color="inherit" />
-                }
-              >
-                {isLoading ? "Entrando..." : "Entrar"}
-              </Button>
-            </Grid2>
-          </Grid2>
+          <Link
+            href={ROUTING.FORGET_PASSWORD}
+            sx={{ display: "block", textAlign: "right", mb: 2 }}
+          >
+            Esqueceu a senha?
+          </Link>
+
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            type="submit"
+            size="large"
+            disabled={isLoading}
+            startIcon={isLoading && <CircularProgress size={24} />}
+          >
+            {isLoading ? "Entrando..." : "Entrar"}
+          </Button>
         </form>
       </Box>
     </Container>
