@@ -1,4 +1,5 @@
-import { useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useRef, useState } from "react";
 import { BaseLayout } from "./BaseLayout";
 import {
   List,
@@ -7,37 +8,62 @@ import {
   Divider,
   ListItemButton,
 } from "@mui/material";
-import DashboardIcon from "@mui/icons-material/Dashboard";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { Outlet, useNavigate } from "react-router";
 import { ROUTING } from "../constants/routing";
+import { getPatientInfo } from "../services/authenticate/paciente_service";
+import { useDispatch } from "react-redux";
+import { setProfile } from "../stores/slices/user.slice";
 
 export default function PatientLayout() {
   const navigate = useNavigate();
-  const [currentTitle, setCurrentTitle] = useState("Dashboard");
-
+  const dispatch = useDispatch();
+  const [currentTitle, setCurrentTitle] = useState("Meus Agendamentos");
   const titleMap: Record<string, string> = {
-    dashboard: "Dashboard",
     appointments: "Meus Agendamentos",
     "find-doctor": "Encontrar Médico",
     "medical-records": "Meus Prontuários",
   };
 
+  const hasFetched = useRef(false);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const userId = user.userId || user.id;
+
+    const fetchPatient = async () => {
+      if (hasFetched.current) return;
+      hasFetched.current = true;
+
+      const response = await getPatientInfo(userId);
+      const paciente = response.data.data;
+
+      if (!paciente?.id) {
+        navigate(ROUTING.PROFILE, { state: { openModal: true } });
+      } else {
+        dispatch(setProfile(paciente));
+      }
+    };
+
+    fetchPatient();
+  }, [navigate, dispatch]);
+
+  useEffect(() => {
+    if (location.pathname === ROUTING.PACIENTE) {
+      navigate(ROUTING.APPOINTMENTS);
+      setCurrentTitle(titleMap["appointments"]);
+    }
+  }, [location.pathname, navigate]);
+
   const handleNavigation = (path: string) => {
     navigate(path);
-    setCurrentTitle(titleMap[path] || "Dashboard do Paciente");
+    setCurrentTitle(titleMap[path]);
   };
 
   const sidebarContent = (
     <>
       <List>
-        <ListItemButton onClick={() => handleNavigation(ROUTING.DASHBOARD)}>
-          <ListItemIcon>
-            <DashboardIcon />
-          </ListItemIcon>
-          <ListItemText primary="Estatísticas" />
-        </ListItemButton>
         <ListItemButton onClick={() => handleNavigation(ROUTING.APPOINTMENTS)}>
           <ListItemIcon>
             <EventNoteIcon />
@@ -53,7 +79,7 @@ export default function PatientLayout() {
           <ListItemIcon>
             <DescriptionIcon />
           </ListItemIcon>
-          <ListItemText primary="Prontuários" />
+          <ListItemText primary="Pontos" />
         </ListItemButton>
       </List>
     </>

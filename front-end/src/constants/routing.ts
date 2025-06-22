@@ -3,9 +3,6 @@ export const ROUTING = {
   HOME: "/",
   LOGIN: "/login",
   REGISTER: "/register",
-  VERIFY_EMAIL: "/verify-email",
-  CHANGE_PASSWORD: "/change-password", // New route for password change
-  EXAMINATION_ROOM: "/examination/:scheduleId", // New standalone examination room route
   FORGET_PASSWORD: "/forgot-password", // New route for forgot password
 
   // Role root paths
@@ -33,12 +30,10 @@ export const ROUTING = {
   SCHEDULE: "schedule",
   CURRENT_SCHEDULE: "current-schedule",
   MEDICAL_RECORDS: "medical-records", // This will be used for both doctor and patient
-  EMERGENCY: "emergency", // New route for emergency cases
 
   // Patient routes (nested under /patient)
   FIND_DOCTOR: "find-doctor",
   PATIENT_APPOINTMENT: "appointments",
   PATIENT_APPOINTMENT_DETAILS: "appointments/:appointmentId", // New route for patient appointment details
-  WATING_ROOM: "wating-room/:scheduleId", // New route for patient examination room
   BANK_ACCOUNT: "bank-account", // Thêm route mới để quản lý tài khoản ngân hàng
 };

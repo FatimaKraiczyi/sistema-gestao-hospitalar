@@ -35,7 +35,7 @@ import {
 import { User } from "../../types/user";
 import { formatCreatedAtDate } from "../../utils/dateUtils";
 import { getAllMedicalRecord } from "../../services/appointment/medical_record_service";
-import { getPatientInfo } from "../../services/authenticate/user_service";
+import { getPatientInfo } from "../../services/authenticate/paciente_service";
 import { useSelector } from "react-redux";
 
 // Dữ liệu bệnh nhân mẫu để kiểm thử

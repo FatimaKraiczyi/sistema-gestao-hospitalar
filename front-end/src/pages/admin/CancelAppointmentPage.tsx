@@ -29,7 +29,7 @@ import {
   assignPayback,
   getAllBookings,
 } from "../../services/admin/book_service";
-import { getPatientBankAccount } from "../../services/authenticate/user_service";
+import { getPatientBankAccount } from "../../services/authenticate/paciente_service";
 import { formatTimeFromTimeString } from "../../utils/dateUtils";
 import { PaymentStatus } from "../../types/enums";
 

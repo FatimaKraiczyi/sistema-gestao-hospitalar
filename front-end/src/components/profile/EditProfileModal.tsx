@@ -1,4 +1,3 @@
-// EditProfileModal.tsx
 import React, { useState } from "react";
 import {
   Dialog,
@@ -8,24 +7,28 @@ import {
   TextField,
   Button,
   Grid,
-  Box,
   CircularProgress,
-  Snackbar,
-  Alert,
 } from "@mui/material";
-import { updateInfo } from "../../services/authenticate/user_service";
+import {
+  updatePatientInfo,
+  completeInfo,
+} from "../../services/authenticate/paciente_service";
 import { useDispatch } from "react-redux";
-import { setUser } from "../../stores/slices/user.slice";
-import { Formik, Form, Field, FormikHelpers } from "formik";
+import { setProfile } from "../../stores/slices/user.slice";
+import { Formik, Form, FormikHelpers } from "formik";
 import * as Yup from "yup";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { ApiError } from "../../types";
 
 interface EditProfileModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  isCompleting?: boolean;
   userData: {
     nome: string;
     sobrenome: string;
+    cpf: string;
     email: string;
     telefone: string;
     logradouro: string;
@@ -41,21 +44,17 @@ interface EditProfileModalProps {
 export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   open,
   onClose,
-  onSave,
+  isCompleting,
   userData,
 }) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
-  });
 
   const initialValues = {
+    cpf: userData.cpf || "",
+    email: userData.email || "",
     nome: userData.nome || "",
     sobrenome: userData.sobrenome || "",
-    email: userData.email || "",
     telefone: userData.telefone || "",
     logradouro: userData.logradouro || "",
     numero: userData.numero || "",
@@ -69,17 +68,28 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const validationSchema = Yup.object({
     nome: Yup.string().required("Nome é obrigatório"),
     sobrenome: Yup.string().required("Sobrenome é obrigatório"),
-    email: Yup.string().email("Email inválido").required("Email é obrigatório"),
     telefone: Yup.string()
-      .matches(/^\d{10,11}$/, "Telefone inválido")
+      .matches(/^[0-9]{10,11}$/, "Telefone inválido")
       .required("Telefone é obrigatório"),
-    logradouro: Yup.string().required("Logradouro é obrigatório"),
     numero: Yup.string().required("Número é obrigatório"),
-    bairro: Yup.string().required("Bairro é obrigatório"),
-    cidade: Yup.string().required("Cidade é obrigatória"),
-    estado: Yup.string().required("Estado é obrigatório"),
     cep: Yup.string().required("CEP é obrigatório"),
   });
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+  const handleCEPChange = async (cep: string, setFieldValue: Function) => {
+    try {
+      const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = response.data;
+      if (!data.erro) {
+        setFieldValue("logradouro", data.logradouro || "");
+        setFieldValue("bairro", data.bairro || "");
+        setFieldValue("cidade", data.localidade || "");
+        setFieldValue("estado", data.uf || "");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar CEP:", error);
+    }
+  };
 
   const handleSubmit = async (
     values: typeof initialValues,
@@ -90,30 +100,29 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const userId = user.userId || user.id;
 
-      if (!userId) throw new Error("User ID not found");
+      const payload = {
+        nome: `${values.nome} ${values.sobrenome}`.trim(),
+        telefone: values.telefone,
+        cep: values.cep,
+        numero: values.numero,
+        complemento: values.complemento,
+      };
 
-      const response = await updateInfo(userId, values);
+      const response = isCompleting
+        ? await completeInfo(userId, values.cpf, values.email, payload)
+        : await updatePatientInfo(userId, payload);
 
-      if (response.data?.code === 200) {
+      if (response.data.status === 200) {
         const updatedUser = { ...user, ...response.data.data };
-        onSave(updatedUser);
-        dispatch(setUser(updatedUser));
+        dispatch(setProfile(updatedUser));
         localStorage.setItem("user", JSON.stringify(updatedUser));
-        setSnackbar({
-          open: true,
-          message: "Dados atualizados com sucesso!",
-          severity: "success",
-        });
+
+        toast.success(response.data.message);
         onClose();
-      } else {
-        throw new Error(response.data?.message || "Erro ao atualizar dados");
       }
-    } catch (error: any) {
-      setSnackbar({
-        open: true,
-        message: error.message || "Erro inesperado",
-        severity: "error",
-      });
+    } catch (error: unknown) {
+      const err = error as ApiError;
+      toast.error(err.message);
     } finally {
       setLoading(false);
       setSubmitting(false);
@@ -122,8 +131,16 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
   return (
     <>
-      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-        <DialogTitle>Editar Perfil</DialogTitle>
+      <Dialog
+        open={open}
+        onClose={isCompleting ? undefined : onClose}
+        disableEscapeKeyDown={isCompleting}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {isCompleting ? "Completar Cadastro" : "Editar Perfil"}
+        </DialogTitle>
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
@@ -136,13 +153,31 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             touched,
             handleChange,
             handleBlur,
+            setFieldValue,
             isSubmitting,
           }) => (
             <Form>
               <DialogContent>
                 <Grid container spacing={2}>
-                  {/* Nome e sobrenome */}
                   <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="CPF"
+                      name="cpf"
+                      fullWidth
+                      value={values.cpf}
+                      disabled
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Email"
+                      name="email"
+                      fullWidth
+                      value={values.email}
+                      disabled
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
                     <TextField
                       label="Nome"
                       name="nome"
@@ -154,7 +189,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       helperText={touched.nome && errors.nome}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={5}>
                     <TextField
                       label="Sobrenome"
                       name="sobrenome"
@@ -166,21 +201,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       helperText={touched.sobrenome && errors.sobrenome}
                     />
                   </Grid>
-
-                  {/* Contato */}
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Email"
-                      name="email"
-                      fullWidth
-                      value={values.email}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={touched.email && Boolean(errors.email)}
-                      helperText={touched.email && errors.email}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={3}>
                     <TextField
                       label="Telefone"
                       name="telefone"
@@ -192,9 +213,24 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       helperText={touched.telefone && errors.telefone}
                     />
                   </Grid>
-
-                  {/* Endereço */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={2}>
+                    <TextField
+                      label="CEP"
+                      name="cep"
+                      fullWidth
+                      value={values.cep}
+                      onChange={(e) => {
+                        handleChange(e);
+                        if (e.target.value.length === 8) {
+                          handleCEPChange(e.target.value, setFieldValue);
+                        }
+                      }}
+                      onBlur={handleBlur}
+                      error={touched.cep && Boolean(errors.cep)}
+                      helperText={touched.cep && errors.cep}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={7}>
                     <TextField
                       label="Logradouro"
                       name="logradouro"
@@ -202,8 +238,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       value={values.logradouro}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={touched.logradouro && Boolean(errors.logradouro)}
-                      helperText={touched.logradouro && errors.logradouro}
+                      disabled
                     />
                   </Grid>
                   <Grid item xs={12} sm={3}>
@@ -228,7 +263,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       onBlur={handleBlur}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={12} sm={3}>
                     <TextField
                       label="Bairro"
                       name="bairro"
@@ -236,8 +271,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       value={values.bairro}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={touched.bairro && Boolean(errors.bairro)}
-                      helperText={touched.bairro && errors.bairro}
+                      disabled
                     />
                   </Grid>
                   <Grid item xs={12} sm={4}>
@@ -248,8 +282,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       value={values.cidade}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={touched.cidade && Boolean(errors.cidade)}
-                      helperText={touched.cidade && errors.cidade}
+                      disabled
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
@@ -260,28 +293,17 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       value={values.estado}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={touched.estado && Boolean(errors.estado)}
-                      helperText={touched.estado && errors.estado}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={2}>
-                    <TextField
-                      label="CEP"
-                      name="cep"
-                      fullWidth
-                      value={values.cep}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={touched.cep && Boolean(errors.cep)}
-                      helperText={touched.cep && errors.cep}
+                      disabled
                     />
                   </Grid>
                 </Grid>
               </DialogContent>
               <DialogActions>
-                <Button onClick={onClose} disabled={loading || isSubmitting}>
-                  Cancelar
-                </Button>
+                {!isCompleting && (
+                  <Button onClick={onClose} disabled={loading || isSubmitting}>
+                    Cancelar
+                  </Button>
+                )}
                 <Button
                   type="submit"
                   variant="contained"
@@ -294,20 +316,6 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
           )}
         </Formik>
       </Dialog>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </>
   );
 };

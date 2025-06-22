@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Container, Grid, Box, IconButton, Alert } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import LockIcon from "@mui/icons-material/Lock";
 import Button from "@mui/material/Button";
 import { useLocation, useNavigate } from "react-router";
 import CreditCardIcon from "@mui/icons-material/CreditCard"; // Importa ícone para conta bancária
@@ -10,7 +9,6 @@ import CreditCardIcon from "@mui/icons-material/CreditCard"; // Importa ícone p
 import { PersonalInfoSection } from "../../components/profile/PersonalInfoSection";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 // Importação de serviços e hooks do Redux
-import { completeInfo } from "../../services/authenticate/user_service";
 import { useSelector } from "react-redux";
 import { ROUTING } from "../../constants/routing";
 import { RootState } from "../../stores/store";
@@ -36,16 +34,19 @@ export interface PatientData {
 // Componente da página de perfil do paciente
 const PatientProfilePage: React.FC = () => {
   // Busca o usuário logado do Redux
-  const userData = useSelector((state: RootState) => state.user.user);
+  const userData = useSelector((state: RootState) => state.user.profile);
+
+  console.log("Dados do usuário:", userData);
   // Declaração dos states necessários
-  const [patientData, setPatientData] = useState<PatientData | null>(null); // Armazena informações do paciente
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Estado de exibição do modal de edição
   const location = useLocation();
   const navigate = useNavigate(); // Hook de navegação
+  const [isCompletingProfile, setIsCompletingProfile] = useState(false); // novo estado
 
   useEffect(() => {
     if (location.state?.openModal) {
       setIsEditModalOpen(true);
+      setIsCompletingProfile(true); // flag ativada para completar
     }
   }, [location.state]);
 
@@ -58,35 +59,6 @@ const PatientProfilePage: React.FC = () => {
   // Fecha modal de edição
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
-  };
-
-  // Atualiza o state local e garante atualização do Redux
-  const handleSaveProfile = async (updatedData: Partial<PatientData>) => {
-    const updatedPatientData = {
-      ...patientData,
-      ...updatedData,
-    };
-
-    setPatientData(updatedPatientData);
-
-    try {
-      const nome = `${updatedData.nome || ""} ${
-        updatedData.sobrenome || ""
-      }`.trim();
-      const telefone = updatedPatientData.telefone || "";
-      const cep = updatedPatientData.cep || "";
-      const numero = updatedPatientData.numero || "";
-      const complemento = updatedPatientData.complemento || "";
-
-      await completeInfo(
-        userData?.id || "",
-        userData?.cpf || "",
-        userData?.email || updatedPatientData.email || "",
-        { nome, telefone, cep, numero, complemento }
-      );
-    } catch (err) {
-      console.error("Erro ao completar cadastro:", err);
-    }
   };
 
   // Exibe estado de carregamento
@@ -117,6 +89,15 @@ const PatientProfilePage: React.FC = () => {
               lastName={userData.nome?.split(" ").slice(1).join(" ") || ""}
               email={userData.email || "Não informado"}
               phone={userData.telefone || "Não informado"}
+              address={{
+                logradouro: userData.logradouro || "Não informado",
+                numero: userData.numero || "Não informado",
+                complemento: userData.complemento,
+                bairro: userData.bairro || "Não informado",
+                cidade: userData.cidade || "Não informado",
+                estado: userData.estado || "Não informado",
+                cep: userData.cep || "Não informado",
+              }}
             />
 
             {/* Botão para editar informações */}
@@ -147,15 +128,6 @@ const PatientProfilePage: React.FC = () => {
           <Box
             sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 2 }}
           >
-            {/* Botão para trocar senha */}
-            <Button
-              variant="outlined"
-              startIcon={<LockIcon />}
-              onClick={() => navigate(ROUTING.CHANGE_PASSWORD)}
-            >
-              Trocar senha
-            </Button>
-
             {/* Botão para gerenciar conta bancária */}
             <Button
               variant="outlined"
@@ -172,10 +144,11 @@ const PatientProfilePage: React.FC = () => {
       <EditProfileModal
         open={isEditModalOpen}
         onClose={handleCloseEditModal}
-        onSave={handleSaveProfile}
+        isCompleting={isCompletingProfile}
         userData={{
           nome: userData.nome?.split(" ")[0] || "",
           sobrenome: userData.nome?.split(" ").slice(1).join(" ") || "",
+          cpf: userData.cpf || "",
           email: userData.email || "",
           telefone: userData.telefone || "",
           cep: userData.cep || "",

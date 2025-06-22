@@ -9,7 +9,7 @@ import {
   Paper,
   CircularProgress,
 } from "@mui/material";
-import { getDoctorInfo } from "../../services/authenticate/user_service";
+import { getDoctorInfo } from "../../services/authenticate/paciente_service";
 import { DoctorEducationSection } from "../doctor/DoctorEducationSection";
 import { DoctorExperienceSection } from "../doctor/DoctorExperienceSection";
 import { DoctorCertificatesSection } from "../doctor/DoctorCertificatesSection";

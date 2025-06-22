@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { ReactNode, useState } from "react";
 import {
   Box,
@@ -50,14 +49,14 @@ interface BaseLayoutProps {
 
 export const BaseLayout: React.FC<BaseLayoutProps> = ({
   children,
-  // title,
+  //title,
   sidebarContent,
 }) => {
   const [open, setOpen] = useState(true);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const userData = useSelector((state: RootState) => state.user.user);
+  const userData = useSelector((state: RootState) => state.user.auth);
   const isAdmin = userData?.type === "ADMIN";
 
   const handleDrawerToggle = () => {
@@ -107,7 +106,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {userData ? `${userData.nome} ` : ""}
+            DASHBOARD DO {userData?.type}
           </Typography>
           <div>
             <IconButton
@@ -118,17 +117,9 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
               onClick={handleMenu}
               color="inherit"
             >
-              {userData?.avatar ? (
-                <Avatar
-                  sx={{ bgcolor: "secondary.main" }}
-                  src={userData.avatar}
-                  alt={`${userData?.name ?? ""}`}
-                />
-              ) : (
-                <Avatar sx={{ bgcolor: "secondary.main" }}>
-                  <AccountCircle />
-                </Avatar>
-              )}
+              <Avatar sx={{ bgcolor: "secondary.main" }}>
+                <AccountCircle />
+              </Avatar>
             </IconButton>
             <Menu
               id="menu-appbar"

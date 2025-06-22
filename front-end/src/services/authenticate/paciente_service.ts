@@ -1,25 +1,25 @@
+import { PacienteRequest } from "../../types";
 import axiosConfig from "../axiosConfig";
 
 const prefix = "/paciente";
 
-export interface PacienteRequest {
-  nome: string;
-  telefone: string;
-  cep: string;
-  numero: string;
-  complemento?: string;
-}
-
-export const getPatientInfo = async (id: string) => {
-  const response = await axiosConfig.get(`${prefix}/usuario`, {
-    params: {
-      id: id,
-    },
+export const getPatientInfo = async (id?: string, cpf?: string) => {
+  const response = await axiosConfig.get(`${prefix}/buscar`, {
+    params: { id, cpf },
   });
   return response;
 };
 
-/** Cadastro do usuário (com type fixo ou opcional) */
+export const getAllPatients = async () => {
+  const response = await axiosConfig.get(`${prefix}/todos`);
+  return response;
+};
+
+export const updatePatientInfo = async (id: string, data: PacienteRequest) => {
+  const response = await axiosConfig.put(`${prefix}/editar/${id}`, data);
+  return response;
+};
+
 export const completeInfo = async (
   id: string,
   cpf: string,
@@ -35,6 +35,18 @@ export const completeInfo = async (
   });
   return response;
 };
+
+export const getPointsBalance = async () => {
+  const response = await axiosConfig.get(`${prefix}/pontos/saldo`);
+  return response;
+};
+
+export const getPointsHistory = async () => {
+  const response = await axiosConfig.get(`${prefix}/pontos/historico`);
+  return response;
+};
+
+// teste
 
 export const getDoctorInfo = async (userId: string) => {
   const response = await axiosConfig.get(`${prefix}/doctor`, {

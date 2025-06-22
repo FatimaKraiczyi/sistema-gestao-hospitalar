@@ -37,20 +37,20 @@ import {
 } from "../../utils/dateUtils";
 import { useNavigate } from "react-router";
 import { ROUTING } from "../../constants/routing";
-import { getPatientBankAccount } from "../../services/authenticate/user_service";
+import { getPatientBankAccount } from "../../services/authenticate/paciente_service";
 
 /**
- * Trang hiển thị chi tiết cuộc hẹn khám bệnh của bệnh nhân
- * Hiển thị thông tin về cuộc hẹn, bác sĩ phụ trách, và cho phép xem hồ sơ y tế liên quan
+ * Página de detalhes da consulta do paciente
+ * Exibe informações sobre a consulta, médico responsável e permite visualizar o prontuário médico relacionado
  */
 const PatientAppointmentDetailsPage: React.FC = () => {
-  // Lấy ID cuộc hẹn từ URL params
+  // Obtém o ID da consulta dos parâmetros da URL
   const { appointmentId } = useParams<{ appointmentId: string }>();
-  // State lưu trữ thông tin cuộc hẹn
+  // Estado para armazenar informações da consulta
   const [appointment, setAppointment] = useState<any>(null);
-  // State xác định trạng thái đang tải dữ liệu
+  // Estado para indicar carregamento
   const [loading, setLoading] = useState(true);
-  // State điều khiển hiển thị modal hồ sơ bệnh án
+  // Estado para controlar exibição do modal do prontuário médico
   const [isMedicalRecordOpen, setIsMedicalRecordOpen] =
     useState<boolean>(false);
   const user = useSelector((state: any) => state.user);
@@ -62,13 +62,13 @@ const PatientAppointmentDetailsPage: React.FC = () => {
   const getStatus = (status: string) => {
     switch (status) {
       case "WAITING":
-        return "Đang chờ";
+        return "Aguardando";
       case "IN_PROGRESS":
-        return "Đang khám";
+        return "Em atendimento";
       case "DONE":
-        return "Đã hoàn thành";
+        return "Concluído";
       case "CANCELLED":
-        return "Đã hủy";
+        return "Cancelado";
       default:
         return "default";
     }
@@ -86,7 +86,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
       )
         .then((response) => response.data.data)
         .catch((error) => {
-          console.error("Lỗi khi tải thông tin cuộc hẹn:", error);
+          console.error("Erro ao carregar informações da consulta:", error);
           setLoading(false);
         });
 
@@ -101,7 +101,6 @@ const PatientAppointmentDetailsPage: React.FC = () => {
           result.work_schedule.shift.end,
           "string"
         )}`,
-        // location: "Phòng 302, Tòa nhà chính",
         status: getStatus(result.book_appointment.status),
         patientInfo: {
           id: result.book_appointment.patientId,
@@ -120,7 +119,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
       setAppointment(data);
       setLoading(false);
     } catch (error) {
-      console.error("Lỗi khi tải thông tin cuộc hẹn:", error);
+      console.error("Erro ao carregar informações da consulta:", error);
       setLoading(false);
     }
   };
@@ -128,14 +127,13 @@ const PatientAppointmentDetailsPage: React.FC = () => {
   useEffect(() => {
     fetchAppointmentDetails();
 
-    // Check if patient has bank account
+    // Verifica se o paciente possui conta bancária
     const checkBankAccount = async () => {
       try {
         const response = await getPatientBankAccount(user.userId);
-        // If response status is 200, patient has bank account
         setHasBankAccount(response.data.code === 200);
       } catch (error) {
-        console.error("Error checking bank account:", error);
+        console.error("Erro ao verificar conta bancária:", error);
         setHasBankAccount(false);
       }
     };
@@ -143,7 +141,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
     checkBankAccount();
   }, [appointmentId, cancellationSuccess, user.userId]);
 
-  // Hiển thị trạng thái đang tải
+  // Exibe carregando
   if (loading) {
     return (
       <Box
@@ -157,29 +155,31 @@ const PatientAppointmentDetailsPage: React.FC = () => {
     );
   }
 
-  // Hiển thị thông báo khi không tìm thấy thông tin cuộc hẹn
+  // Exibe mensagem caso não encontre a consulta
   if (!appointment) {
     return (
       <Box p={3}>
-        <Typography variant="h5">Không tìm thấy thông tin cuộc hẹn</Typography>
+        <Typography variant="h5">
+          Informações da consulta não encontradas
+        </Typography>
       </Box>
     );
   }
 
   /**
-   * Xác định màu cho trạng thái cuộc hẹn
-   * @param status - Trạng thái cuộc hẹn
-   * @returns Màu tương ứng với trạng thái
+   * Define a cor do status da consulta
+   * @param status - Status da consulta
+   * @returns Cor correspondente ao status
    */
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Đang khám":
+      case "Em atendimento":
         return "success";
-      case "Đang chờ":
+      case "Aguardando":
         return "warning";
-      case "Đã hoàn thành":
+      case "Concluído":
         return "info";
-      case "Đã hủy":
+      case "Cancelado":
         return "error";
       default:
         return "default";
@@ -187,38 +187,33 @@ const PatientAppointmentDetailsPage: React.FC = () => {
   };
 
   /**
-   * Mở modal hồ sơ bệnh án
+   * Abre o modal do prontuário médico
    */
   const handleOpenMedicalRecord = () => {
     setIsMedicalRecordOpen(true);
   };
 
   /**
-   * Đóng modal hồ sơ bệnh án
+   * Fecha o modal do prontuário médico
    */
   const handleCloseMedicalRecord = () => {
     setIsMedicalRecordOpen(false);
   };
 
   /**
-   * Xác định xem một cuộc hẹn có đủ điều kiện để tham gia phòng khám trực tuyến hay không
-   * Chỉ các cuộc hẹn có trạng thái "ĐANG CHỜ" hoặc "ĐANG KHÁM" mới có thể tham gia
+   * Verifica se a consulta pode acessar a sala online
+   * Apenas status "Aguardando" ou "Em atendimento"
    */
   const canJoinExamination = (status: string) => {
-    // Kiểm tra trạng thái cuộc hẹn
-    if (!(status === "Đang khám" || status === "Đang chờ")) {
+    if (!(status === "Em atendimento" || status === "Aguardando")) {
       return false;
     }
 
     try {
-      // Kiểm tra ngày hiện tại có trùng với ngày hẹn không
       const today = new Date();
-      // console.log("Ngày hẹn:", appointment.date);
-      // Chuyển đổi định dạng ngày từ "DD/MM/YYYY" sang định dạng ngày JavaScript
       const [day, month, year] = appointment.date.split("-").map(Number);
       const appointmentDate = new Date(year, month - 1, day);
 
-      // So sánh ngày (bỏ qua giờ, phút, giây)
       const todayDate = new Date(
         today.getFullYear(),
         today.getMonth(),
@@ -229,43 +224,35 @@ const PatientAppointmentDetailsPage: React.FC = () => {
         appointmentDate.getMonth(),
         appointmentDate.getDate()
       );
-      // console.log("Ngày hiện tại:", todayDate);
-      // console.log("Ngày hẹn:", appointmentDateOnly);
       if (todayDate.getTime() !== appointmentDateOnly.getTime()) {
         return false;
       }
 
-      // Lấy thời gian bắt đầu và kết thúc từ chuỗi thời gian của appointment
-      const timeString = appointment.time; // Ví dụ: "08:00 - 11:30"
+      const timeString = appointment.time;
       const [startTimeStr, endTimeStr] = timeString.split(" - ");
 
-      // Chuyển thời gian sang phút
       const [startHour, startMinute] = startTimeStr.split(":").map(Number);
       const startTimeInMinutes = startHour * 60 + startMinute;
 
       const [endHour, endMinute] = endTimeStr.split(":").map(Number);
       const endTimeInMinutes = endHour * 60 + endMinute;
 
-      // Tính thời gian hiện tại tính bằng phút
       const currentHour = today.getHours();
       const currentMinute = today.getMinutes();
       const currentTimeInMinutes = currentHour * 60 + currentMinute;
 
-      // console.log("Thời gian hiện tại (phút):", currentTimeInMinutes);
-      // Kiểm tra xem thời gian hiện tại có nằm trong khoảng thời gian của ca khám không
       return (
         currentTimeInMinutes >= startTimeInMinutes &&
         currentTimeInMinutes <= endTimeInMinutes
       );
     } catch (error) {
-      console.error("Lỗi khi kiểm tra thời gian cho cuộc hẹn:", error);
+      console.error("Erro ao verificar horário da consulta:", error);
       return false;
     }
-    // return true;
   };
 
   /**
-   * Xử lý sự kiện khi người dùng muốn tham gia phòng khám trực tuyến
+   * Lida com o evento de entrar na sala online
    */
   const handleJoinExamination = (
     appointmentId: number,
@@ -290,74 +277,68 @@ const PatientAppointmentDetailsPage: React.FC = () => {
   };
 
   /**
-   * Kiểm tra xem cuộc hẹn có thể huỷ hay không
-   * Chỉ cho phép huỷ nếu đặt trong vòng 24h và có tài khoản ngân hàng
+   * Verifica se a consulta pode ser cancelada
+   * Só permite cancelar se foi marcada há menos de 24h e tem conta bancária
    */
   const canCancelAppointment = (createdAt: string, status: string) => {
-    // Kiểm tra trạng thái cuộc hẹn
-    if (status !== "Đang chờ") return false;
+    if (status !== "Aguardando") return false;
 
     try {
-      // Sử dụng hàm từ dateUtils để parse chuỗi ngày đặt lịch hẹn
       const createdDate = parseDateTimeFromString(createdAt);
       const now = new Date();
 
-      // Tính thời gian chênh lệch (milliseconds)
       const timeDiff = now.getTime() - createdDate.getTime();
       const hoursDiff = timeDiff / (1000 * 60 * 60);
 
-      // Chỉ cho phép huỷ nếu đặt trong vòng 24h
       return hoursDiff <= 24;
     } catch (error) {
-      console.error("Lỗi khi xử lý ngày tháng:", error);
+      console.error("Erro ao processar datas:", error);
       return false;
     }
-    // return true;
   };
 
   /**
-   * Mở dialog xác nhận huỷ lịch hẹn
+   * Abre o diálogo de confirmação de cancelamento
    */
   const handleOpenCancelDialog = () => {
     setOpenCancelDialog(true);
   };
 
   /**
-   * Đóng dialog xác nhận huỷ lịch hẹn
+   * Fecha o diálogo de confirmação de cancelamento
    */
   const handleCloseCancelDialog = () => {
     setOpenCancelDialog(false);
   };
 
   /**
-   * Xử lý huỷ lịch hẹn
+   * Cancela a consulta
    */
   const handleCancelAppointment = async () => {
     try {
-      // Check nếu có tài khoản ngân hàng
       if (!hasBankAccount) {
         alert(
-          "Bạn cần có tài khoản ngân hàng để có thể huỷ lịch hẹn. Vui lòng liên hệ bệnh viện để biết thêm chi tiết."
+          "Você precisa ter uma conta bancária para cancelar a consulta. Por favor, entre em contato com o hospital para mais detalhes."
         );
         return;
       }
       await cancelAppointment(appointment.id);
       setCancellationSuccess(true);
       handleCloseCancelDialog();
-      fetchAppointmentDetails(); // Tải lại thông tin cuộc hẹn sau khi huỷ
+      fetchAppointmentDetails();
     } catch (error) {
-      console.error("Lỗi khi huỷ lịch hẹn:", error);
+      console.error("Erro ao cancelar consulta:", error);
     }
   };
 
   return (
     <Box p={3}>
-      {/* Tiêu đề trang */}
+      {/* Título da página */}
       <Typography variant="h4" gutterBottom fontWeight="bold">
-        Chi tiết cuộc hẹn khám bệnh
+        Detalhes da consulta
       </Typography>
 
-      {/* Thẻ thông tin chi tiết cuộc hẹn */}
+      {/* Card de detalhes da consulta */}
       <Card elevation={3} sx={{ mb: 4 }}>
         <CardContent>
           <Box
@@ -367,9 +348,9 @@ const PatientAppointmentDetailsPage: React.FC = () => {
             mb={2}
           >
             <Typography variant="h5">
-              Thông tin cuộc hẹn #{appointment.id}
+              Informações da consulta #{appointment.id}
             </Typography>
-            {/* Hiển thị trạng thái cuộc hẹn */}
+            {/* Status da consulta */}
             <Chip
               label={appointment.status}
               color={getStatusColor(appointment.status) as any}
@@ -377,10 +358,10 @@ const PatientAppointmentDetailsPage: React.FC = () => {
             />
           </Box>
 
-          {/* Hiển thị ID khám bệnh của bệnh nhân */}
+          {/* Número de ordem do paciente */}
           <Box mb={2}>
             <Chip
-              label={`Số Thứ Tự Khám: ${appointment.patientInfo.numericalOrder}`}
+              label={`Número de ordem: ${appointment.patientInfo.numericalOrder}`}
               color="primary"
               sx={{
                 fontWeight: "medium",
@@ -391,13 +372,13 @@ const PatientAppointmentDetailsPage: React.FC = () => {
             />
           </Box>
 
-          {/* Thông tin chi tiết cuộc hẹn: ngày, giờ, địa điểm */}
+          {/* Data, hora */}
           <Grid container spacing={3}>
             <Grid item xs={12} md={4} display="flex" alignItems="center">
               <EventIcon sx={{ mr: 1, color: "primary.main" }} />
               <Box>
                 <Typography variant="body2" color="text.secondary">
-                  Ngày khám
+                  Data da consulta
                 </Typography>
                 <Typography variant="body1" fontWeight="medium">
                   {appointment.date}
@@ -409,7 +390,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
               <AccessTimeIcon sx={{ mr: 1, color: "primary.main" }} />
               <Box>
                 <Typography variant="body2" color="text.secondary">
-                  Thời gian
+                  Horário
                 </Typography>
                 <Typography variant="body1" fontWeight="medium">
                   {appointment.time}
@@ -418,20 +399,20 @@ const PatientAppointmentDetailsPage: React.FC = () => {
             </Grid>
           </Grid>
 
-          {/* Lý do khám bệnh */}
+          {/* Motivo da consulta */}
           <Box mt={3}>
             <Typography variant="body2" color="text.secondary">
-              Lý do khám bệnh
+              Motivo da consulta
             </Typography>
             <Typography variant="body1">
               {appointment.doctorInfo.typeDisease}
             </Typography>
           </Box>
 
-          {/* Nút xem hồ sơ y tế và tham gia khám */}
+          {/* Botões */}
           <Box mt={3} display="flex" justifyContent="flex-end" gap={2}>
-            {appointment.status === "Đang chờ" && !hasBankAccount ? (
-              <Tooltip title="Bạn cần có tài khoản ngân hàng để có thể huỷ lịch hẹn">
+            {appointment.status === "Aguardando" && !hasBankAccount ? (
+              <Tooltip title="Você precisa ter uma conta bancária para cancelar a consulta">
                 <span>
                   <Button
                     variant="outlined"
@@ -439,7 +420,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
                     startIcon={<CancelIcon />}
                     disabled={true}
                   >
-                    Huỷ lịch hẹn
+                    Cancelar consulta
                   </Button>
                 </span>
               </Tooltip>
@@ -454,7 +435,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
                   startIcon={<CancelIcon />}
                   onClick={handleOpenCancelDialog}
                 >
-                  Huỷ lịch hẹn
+                  Cancelar consulta
                 </Button>
               )
             )}
@@ -475,7 +456,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
                   )
                 }
               >
-                Tham gia khám
+                Entrar na consulta
               </Button>
             )}
             {appointment.hasMedicalRecord && (
@@ -484,22 +465,22 @@ const PatientAppointmentDetailsPage: React.FC = () => {
                 startIcon={<DescriptionIcon />}
                 onClick={handleOpenMedicalRecord}
               >
-                Xem hồ sơ bệnh án
+                Ver prontuário
               </Button>
             )}
           </Box>
         </CardContent>
       </Card>
 
-      {/* Thông tin bác sĩ */}
+      {/* Informações do médico */}
       <Card elevation={3} sx={{ mb: 4 }}>
         <CardContent>
           <Typography variant="h5" gutterBottom>
-            Thông tin bác sĩ phụ trách
+            Informações do médico responsável
           </Typography>
 
           <Box display="flex" alignItems="flex-start" mt={2}>
-            {/* Avatar bác sĩ */}
+            {/* Avatar do médico */}
             <Avatar
               src={appointment.doctorInfo.avatar}
               alt={appointment.doctorInfo.name}
@@ -509,12 +490,12 @@ const PatientAppointmentDetailsPage: React.FC = () => {
             </Avatar>
 
             <Box>
-              {/* Tên bác sĩ */}
+              {/* Nome do médico */}
               <Typography variant="h6" color="primary.main" fontWeight="bold">
                 {appointment.doctorInfo.name}
               </Typography>
 
-              {/* Chuyên khoa */}
+              {/* Especialidade */}
               <Box display="flex" alignItems="center" mt={1}>
                 <LocalHospitalIcon
                   fontSize="small"
@@ -525,12 +506,12 @@ const PatientAppointmentDetailsPage: React.FC = () => {
                 </Typography>
               </Box>
 
-              {/* Thông tin học vị */}
+              {/* Grau acadêmico */}
               <Typography variant="body2" color="text.secondary" mt={1}>
                 {appointment.doctorInfo.degree}
               </Typography>
 
-              {/* Kinh nghiệm */}
+              {/* Experiência */}
               <Typography variant="body2" color="text.secondary" mt={0.5}>
                 {appointment.doctorInfo.experience}
               </Typography>
@@ -539,25 +520,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Các lưu ý và hướng dẫn cho bệnh nhân */}
-      {/* <Paper elevation={1} sx={{ p: 3, bgcolor: "info.50" }}>
-        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-          Lưu ý quan trọng:
-        </Typography>
-        <Typography variant="body2" paragraph>
-          • Vui lòng đến trước giờ hẹn 15 phút để hoàn tất thủ tục đăng ký.
-        </Typography>
-        <Typography variant="body2" paragraph>
-          • Mang theo giấy tờ tùy thân, thẻ bảo hiểm y tế (nếu có) và các kết
-          quả xét nghiệm, chẩn đoán trước đó (nếu có).
-        </Typography>
-        <Typography variant="body2">
-          • Nếu cần hủy hoặc thay đổi lịch hẹn, vui lòng thông báo trước ít nhất
-          24 giờ qua hotline của bệnh viện.
-        </Typography>
-      </Paper> */}
-
-      {/* Modal hồ sơ bệnh án */}
+      {/* Modal prontuário médico */}
       <MedicalRecordModal
         open={isMedicalRecordOpen}
         onClose={handleCloseMedicalRecord}
@@ -570,7 +533,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
         isDoctor={false}
       />
 
-      {/* Dialog xác nhận huỷ lịch hẹn */}
+      {/* Diálogo de confirmação de cancelamento */}
       <Dialog
         open={openCancelDialog}
         onClose={handleCloseCancelDialog}
@@ -578,24 +541,24 @@ const PatientAppointmentDetailsPage: React.FC = () => {
         aria-describedby="cancel-dialog-description"
       >
         <DialogTitle id="cancel-dialog-title">
-          Xác nhận huỷ lịch hẹn
+          Confirmar cancelamento da consulta
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="cancel-dialog-description">
-            Bạn có chắc chắn muốn huỷ lịch hẹn khám này không? Thao tác này
-            không thể hoàn tác.
+            Tem certeza que deseja cancelar esta consulta? Esta ação não pode
+            ser desfeita.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseCancelDialog} color="primary">
-            Hủy bỏ
+            Voltar
           </Button>
           <Button
             onClick={handleCancelAppointment}
             color="error"
             variant="contained"
           >
-            Xác nhận huỷ
+            Confirmar cancelamento
           </Button>
         </DialogActions>
       </Dialog>

@@ -54,7 +54,7 @@ import {
   getMedicalRecord,
   getMedicalRecordPrevious,
 } from "../../services/appointment/medical_record_service";
-import { getPatientInfo } from "../../services/authenticate/user_service";
+import { getPatientInfo } from "../../services/authenticate/paciente_service";
 import { getAllDrugs } from "../../services/appointment/drug_service";
 import { ca } from "date-fns/locale";
 

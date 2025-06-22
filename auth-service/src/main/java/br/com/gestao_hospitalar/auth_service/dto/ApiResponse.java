@@ -1,10 +1,16 @@
 package br.com.gestao_hospitalar.auth_service.dto;
 
-import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
-public class ApiResponse {
-    private String message;
+@Builder
+public class ApiResponse<T> {
+
+  private LocalDateTime timestamp;
+  private int status;
+  private String path;
+  private String message;
+  private T data;
 }

@@ -37,7 +37,7 @@ import { Diploma } from "../../types/enums";
 import EducationForm from "./forms/EducationForm";
 import CertificateForm from "./forms/CertificateForm";
 import ExperienceForm from "./forms/ExperienceForm";
-import { getDoctorInfo } from "../../services/authenticate/user_service";
+import { getDoctorInfo } from "../../services/authenticate/paciente_service";
 import { parseDateFromString } from "../../utils/dateUtils";
 
 interface TabPanelProps {

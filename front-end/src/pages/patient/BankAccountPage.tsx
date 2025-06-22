@@ -27,7 +27,7 @@ import {
   addBankAccount,
   getPatientBankAccount,
   updateBankAccount,
-} from "../../services/authenticate/user_service";
+} from "../../services/authenticate/paciente_service";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 

@@ -15,12 +15,13 @@ import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { ROUTING } from "../constants/routing";
 import { resetPassword } from "../services/authenticate/auth_service";
+import { ApiError } from "../types";
 
-// Định nghĩa schema validation
+// Definição do schema de validação
 const validationSchema = Yup.object({
   email: Yup.string()
-    .email("Địa chỉ email không hợp lệ")
-    .required("Email là bắt buộc"),
+    .email("Endereço de e-mail inválido")
+    .required("E-mail é obrigatório"),
 });
 
 export default function ForgetPasswordPage() {
@@ -36,38 +37,34 @@ export default function ForgetPasswordPage() {
     onSubmit: async (values) => {
       try {
         setIsLoading(true);
-        // Gọi API để yêu cầu đặt lại mật khẩu
         const response = await resetPassword(values.email);
 
         if (response.data.code === 200 && response.data.data === true) {
           setIsSubmitted(true);
-          toast.success("Mật khẩu mới đã được gửi đến email của bạn!");
+
+          toast.success(response.data.message);
         } else {
-          toast.error(
-            response.data.message ||
-              "Không thể đặt lại mật khẩu. Vui lòng thử lại sau."
-          );
+          toast.error(response.data.message);
         }
-      } catch (error) {
-        console.error("Lỗi khi đặt lại mật khẩu:", error);
-        toast.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+      } catch (error: unknown) {
+        const err = error as ApiError;
+        toast.error(err.message);
       } finally {
         setIsLoading(false);
       }
     },
   });
 
-  // Nếu đã gửi yêu cầu thành công, hiển thị màn hình xác nhận
   if (isSubmitted) {
     return (
       <Container maxWidth="sm">
         <Paper elevation={3} sx={{ p: 4, mt: 8, textAlign: "center" }}>
           <Typography variant="h5" gutterBottom>
-            Yêu cầu đặt lại mật khẩu đã được gửi!
+            Solicitação de redefinição de senha enviada!
           </Typography>
           <Typography variant="body1" paragraph>
-            Chúng tôi đã gửi mật khẩu mới đến email {formik.values.email}. Vui
-            lòng kiểm tra hộp thư của bạn.
+            Enviamos uma nova senha para o e-mail {formik.values.email}. Por
+            favor, verifique sua caixa de entrada.
           </Typography>
           <Button
             variant="contained"
@@ -75,7 +72,7 @@ export default function ForgetPasswordPage() {
             onClick={() => navigate(ROUTING.LOGIN)}
             sx={{ mt: 2 }}
           >
-            Quay lại trang đăng nhập
+            Voltar para a tela de login
           </Button>
         </Paper>
       </Container>
@@ -94,10 +91,10 @@ export default function ForgetPasswordPage() {
         }}
       >
         <Typography variant="h5" align="center" gutterBottom>
-          Quên mật khẩu
+          Esqueceu a senha
         </Typography>
         <Typography variant="body2" align="center" sx={{ mb: 3 }}>
-          Nhập email của bạn để nhận mật khẩu mới
+          Informe seu e-mail para receber uma nova senha
         </Typography>
 
         <form onSubmit={formik.handleSubmit}>
@@ -105,7 +102,7 @@ export default function ForgetPasswordPage() {
             fullWidth
             id="email"
             name="email"
-            label="Địa chỉ Email"
+            label="Endereço de E-mail"
             value={formik.values.email}
             onChange={formik.handleChange}
             error={formik.touched.email && Boolean(formik.errors.email)}
@@ -126,12 +123,12 @@ export default function ForgetPasswordPage() {
             }
             sx={{ mt: 3, mb: 2 }}
           >
-            {isLoading ? "Đang xử lý..." : "Gửi yêu cầu"}
+            {isLoading ? "Processando..." : "Enviar solicitação"}
           </Button>
 
           <Typography align="center">
             <Link href={ROUTING.LOGIN} variant="body2">
-              Quay lại đăng nhập
+              Voltar para login
             </Link>
           </Typography>
         </form>
