@@ -42,10 +42,12 @@ const PatientProfilePage: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Estado de exibição do modal de edição
   const location = useLocation();
   const navigate = useNavigate(); // Hook de navegação
+  const [isCompletingProfile, setIsCompletingProfile] = useState(false); // novo estado
 
   useEffect(() => {
     if (location.state?.openModal) {
       setIsEditModalOpen(true);
+      setIsCompletingProfile(true); // flag ativada para completar
     }
   }, [location.state]);
 
@@ -173,9 +175,11 @@ const PatientProfilePage: React.FC = () => {
         open={isEditModalOpen}
         onClose={handleCloseEditModal}
         onSave={handleSaveProfile}
+        isCompleting={isCompletingProfile} // novo prop
         userData={{
           nome: userData.nome?.split(" ")[0] || "",
           sobrenome: userData.nome?.split(" ").slice(1).join(" ") || "",
+          cpf: userData.cpf || "",
           email: userData.email || "",
           telefone: userData.telefone || "",
           cep: userData.cep || "",

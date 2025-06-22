@@ -18,14 +18,17 @@ import { useDispatch } from "react-redux";
 import { setUser } from "../../stores/slices/user.slice";
 import { Formik, Form, Field, FormikHelpers } from "formik";
 import * as Yup from "yup";
+import { cp } from "fs";
 
 interface EditProfileModalProps {
   open: boolean;
   onClose: () => void;
   onSave: (data: any) => void;
+  isCompleting?: boolean;
   userData: {
     nome: string;
     sobrenome: string;
+    cpf: string;
     email: string;
     telefone: string;
     logradouro: string;
@@ -42,6 +45,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   open,
   onClose,
   onSave,
+  isCompleting,
   userData,
 }) => {
   const dispatch = useDispatch();
@@ -53,9 +57,10 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   });
 
   const initialValues = {
+    cpf: userData.cpf || "",
+    email: userData.email || "",
     nome: userData.nome || "",
     sobrenome: userData.sobrenome || "",
-    email: userData.email || "",
     telefone: userData.telefone || "",
     logradouro: userData.logradouro || "",
     numero: userData.numero || "",
@@ -69,15 +74,10 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const validationSchema = Yup.object({
     nome: Yup.string().required("Nome é obrigatório"),
     sobrenome: Yup.string().required("Sobrenome é obrigatório"),
-    email: Yup.string().email("Email inválido").required("Email é obrigatório"),
     telefone: Yup.string()
       .matches(/^\d{10,11}$/, "Telefone inválido")
       .required("Telefone é obrigatório"),
-    logradouro: Yup.string().required("Logradouro é obrigatório"),
     numero: Yup.string().required("Número é obrigatório"),
-    bairro: Yup.string().required("Bairro é obrigatório"),
-    cidade: Yup.string().required("Cidade é obrigatória"),
-    estado: Yup.string().required("Estado é obrigatório"),
     cep: Yup.string().required("CEP é obrigatório"),
   });
 
@@ -122,8 +122,16 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
   return (
     <>
-      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-        <DialogTitle>Editar Perfil</DialogTitle>
+      <Dialog
+        open={open}
+        onClose={isCompleting ? undefined : onClose}
+        disableEscapeKeyDown={isCompleting}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {isCompleting ? "Completar Cadastro" : "Editar Perfil"}
+        </DialogTitle>
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
@@ -141,8 +149,33 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             <Form>
               <DialogContent>
                 <Grid container spacing={2}>
-                  {/* Nome e sobrenome */}
                   <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="CPF"
+                      name="cpf"
+                      fullWidth
+                      value={values.cpf}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={touched.cpf && Boolean(errors.cpf)}
+                      helperText={touched.cpf && errors.cpf}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Email"
+                      name="email"
+                      fullWidth
+                      value={values.email}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={touched.email && Boolean(errors.email)}
+                      helperText={touched.email && errors.email}
+                    />
+                  </Grid>
+
+                  {/* Nome e sobrenome */}
+                  <Grid item xs={12} sm={4}>
                     <TextField
                       label="Nome"
                       name="nome"
@@ -154,7 +187,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       helperText={touched.nome && errors.nome}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={5}>
                     <TextField
                       label="Sobrenome"
                       name="sobrenome"
@@ -168,19 +201,8 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                   </Grid>
 
                   {/* Contato */}
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Email"
-                      name="email"
-                      fullWidth
-                      value={values.email}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={touched.email && Boolean(errors.email)}
-                      helperText={touched.email && errors.email}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
+
+                  <Grid item xs={12} sm={3}>
                     <TextField
                       label="Telefone"
                       name="telefone"
@@ -194,7 +216,19 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                   </Grid>
 
                   {/* Endereço */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={2}>
+                    <TextField
+                      label="CEP"
+                      name="cep"
+                      fullWidth
+                      value={values.cep}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={touched.cep && Boolean(errors.cep)}
+                      helperText={touched.cep && errors.cep}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={7}>
                     <TextField
                       label="Logradouro"
                       name="logradouro"
@@ -228,7 +262,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       onBlur={handleBlur}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={12} sm={3}>
                     <TextField
                       label="Bairro"
                       name="bairro"
@@ -264,28 +298,19 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       helperText={touched.estado && errors.estado}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={2}>
-                    <TextField
-                      label="CEP"
-                      name="cep"
-                      fullWidth
-                      value={values.cep}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={touched.cep && Boolean(errors.cep)}
-                      helperText={touched.cep && errors.cep}
-                    />
-                  </Grid>
                 </Grid>
               </DialogContent>
               <DialogActions>
-                <Button onClick={onClose} disabled={loading || isSubmitting}>
+                <Button
+                  onClick={onClose}
+                  disabled={loading || isSubmitting || isCompleting}
+                >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
                   variant="contained"
-                  disabled={loading || isSubmitting}
+                  disabled={loading || isSubmitting || isCompleting}
                 >
                   {loading ? <CircularProgress size={24} /> : "Salvar"}
                 </Button>
