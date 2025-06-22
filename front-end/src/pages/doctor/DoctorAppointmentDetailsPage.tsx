@@ -25,7 +25,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VideocamIcon from "@mui/icons-material/Videocam";
-import MedicalRecordModal from "../../components/medical/MedicalRecordModal";
 import { useNavigate } from "react-router";
 import { getDetailDoctorAppointment } from "../../services/appointment/booking_service";
 import { useSelector } from "react-redux";
@@ -488,19 +487,6 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
           )}
         </CardContent>
       </Card>
-
-      {/* Modal de prontuário médico */}
-      <MedicalRecordModal
-        open={isMedicalRecordOpen}
-        onClose={handleCloseMedicalRecord}
-        appointmentId={selectedPatient?.bookAppointmentId ?? 0}
-        patientId={selectedPatient?.id ?? ""}
-        infoAppointment={{
-          doctorName: workSchedule.doctorName,
-          dateAppointment: workSchedule.date,
-        }}
-        isDoctor={true}
-      />
     </Box>
   );
 };

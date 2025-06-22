@@ -6,7 +6,6 @@ import PatientProfilePage from "../pages/patient/PatientProfilePage";
 import DoctorProfilePage from "../pages/doctor/DoctorProfilePage";
 import DoctorAppointmentDetailsPage from "../pages/doctor/DoctorAppointmentDetailsPage";
 import PatientAppointmentDetailsPage from "../pages/patient/PatientAppointmentDetailsPage";
-import EmergencyPage from "../pages/doctor/EmergencyPage";
 import ForgetPasswordPage from "../pages/ForgetPasswordPage";
 import BankAccountPage from "../pages/patient/BankAccountPage";
 
@@ -18,11 +17,9 @@ import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
-import PatientDashboard from "../pages/patient/PatientDashboard";
 import AppointmentPage from "../pages/patient/AppointmentPage";
 import DoctorSchedulePage from "../pages/doctor/DoctorSchedulePage";
 import DoctorCurrentSchedulePage from "../pages/doctor/DoctorCurrentSchedulePage";
-import WaitingRoomPage from "../pages/patient/WatingRoomPage";
 import PatientManagementPage from "../pages/admin/PatientManagementPage";
 import PatientMedicalRecord from "../pages/patient/PatientMedicalRecord";
 import DrugManagementPage from "../pages/admin/DrugManagementPage";
@@ -120,7 +117,6 @@ export const AppRoutes = () => {
               path={ROUTING.CURRENT_SCHEDULE}
               element={<DoctorCurrentSchedulePage />}
             />
-            <Route path={ROUTING.EMERGENCY} element={<EmergencyPage />} />
             <Route path={ROUTING.PATIENTS} element={<div>Patients</div>} />
             <Route
               path={ROUTING.PRESCRIPTIONS}
@@ -137,15 +133,12 @@ export const AppRoutes = () => {
               </ProtectedRoute>
             }
           >
-            <Route path={ROUTING.DASHBOARD} element={<PatientDashboard />} />
-            <Route index element={<PatientDashboard />} />
             <Route path={ROUTING.PROFILE} element={<PatientProfilePage />} />
             <Route path={ROUTING.APPOINTMENTS} element={<AppointmentPage />} />
             <Route
               path={ROUTING.PATIENT_APPOINTMENT_DETAILS}
               element={<PatientAppointmentDetailsPage />}
             />
-            <Route path={ROUTING.WATING_ROOM} element={<WaitingRoomPage />} />
             <Route
               path={ROUTING.FIND_DOCTOR}
               element={<div>Find Doctor</div>}
