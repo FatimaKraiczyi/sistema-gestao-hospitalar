@@ -21,70 +21,70 @@ app.use(
   })
 );
 
-// Proxy para Auth Service
+// Auth sem autenticação
 app.use(
   "/api/auth",
   createProxyMiddleware({
     target: AUTH_MS_URL,
     changeOrigin: true,
-    onProxyReq: (proxyReq, req) => {
-      proxyReq.removeHeader("Authorization");
-    },
+    onProxyReq: (proxyReq) => proxyReq.removeHeader("Authorization"),
   })
 );
 
-// Proxy para Paciente Service (com autenticação e autorização)
-app.use(
-  "/api/paciente",
-  authenticateToken,
-  authorizeRoles("PACIENTE"),
+// Endpoints específicos acessíveis também por FUNCIONARIO
+const allowPacienteFuncionario = [
+  "/api/paciente/buscar",
+  "/api/paciente/todos",
+];
+
+app.use("/api/paciente", (req, res, next) => {
+  if (allowPacienteFuncionario.some((path) => req.path.startsWith(path))) {
+    return authorizeRoles("PACIENTE", "FUNCIONARIO")(req, res, () =>
+      authenticateToken(req, res, () => proxyPaciente(req, res))
+    );
+  }
+  return authenticateToken(req, res, () =>
+    authorizeRoles("PACIENTE")(req, res, () => proxyPaciente(req, res))
+  );
+});
+
+function proxyPaciente(req, res) {
   createProxyMiddleware({
     target: PACIENTE_MS_URL,
     changeOrigin: true,
-    onProxyReq: (proxyReq, req) => {
+    onProxyReq: (proxyReq) => {
       proxyReq.setHeader("Authorization", req.headers["authorization"]);
-      proxyReq.setHeader("x-user-id", req.user.id);
-      proxyReq.setHeader("x-user-cpf", req.user.cpf);
-      proxyReq.setHeader("x-user-email", req.user.email);
-      proxyReq.setHeader("x-user-type", req.user.type);
+
+      if (req.path === "/completar") {
+        proxyReq.setHeader("x-user-id", req.user.id);
+        proxyReq.setHeader("x-user-cpf", req.user.cpf);
+        proxyReq.setHeader("x-user-email", req.user.email);
+      }
     },
     onError: (err, req, res) => {
-      if (res.headersSent) return;
-      res.status(502).json({
-        message: "Erro ao comunicar com o serviço de paciente",
-        detail: err.message,
-      });
+      if (!res.headersSent) {
+        res.status(502).json({
+          message: "Erro ao comunicar com o serviço de paciente",
+          detail: err.message,
+        });
+      }
     },
     onProxyRes: (proxyRes, req, res) => {
-      // Buffer para acumular dados recebidos do serviço proxied
       let body = Buffer.from("");
-
-      // Escuta os chunks de dados que chegam
-      proxyRes.on("data", (data) => {
-        body = Buffer.concat([body, data]);
-      });
-
-      // Quando a resposta do proxied termina
+      proxyRes.on("data", (data) => (body = Buffer.concat([body, data])));
       proxyRes.on("end", () => {
-        // Se o status da resposta indica erro (400 ou mais)
         if (proxyRes.statusCode >= 400) {
-          // Repasse o status para o cliente
           res.status(proxyRes.statusCode);
-
           try {
-            // Tente enviar o corpo da resposta convertido para JSON
             res.json(JSON.parse(body.toString()));
           } catch {
-            // Se não for JSON válido, envie como texto simples
             res.send(body.toString());
           }
         }
-        // Se não for erro, não fazemos nada aqui
-        // A resposta padrão será passada normalmente pelo proxy
       });
     },
-  })
-);
+  })(req, res);
+}
 
 // Proxy para Consulta Service (com autenticação e autorização para múltiplas roles)
 app.use(
