@@ -1,4 +1,3 @@
-// EditProfileModal.tsx
 import React, { useState } from "react";
 import {
   Dialog,
@@ -8,7 +7,6 @@ import {
   TextField,
   Button,
   Grid,
-  Box,
   CircularProgress,
   Snackbar,
   Alert,
@@ -16,9 +14,8 @@ import {
 import { updateInfo } from "../../services/authenticate/paciente_service";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../stores/slices/user.slice";
-import { Formik, Form, Field, FormikHelpers } from "formik";
+import { Formik, Form, FormikHelpers } from "formik";
 import * as Yup from "yup";
-import { cp } from "fs";
 
 interface EditProfileModalProps {
   open: boolean;
@@ -200,8 +197,6 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                     />
                   </Grid>
 
-                  {/* Contato */}
-
                   <Grid item xs={12} sm={3}>
                     <TextField
                       label="Telefone"
@@ -215,7 +210,6 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                     />
                   </Grid>
 
-                  {/* Endereço */}
                   <Grid item xs={12} sm={2}>
                     <TextField
                       label="CEP"
@@ -301,16 +295,15 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 </Grid>
               </DialogContent>
               <DialogActions>
-                <Button
-                  onClick={onClose}
-                  disabled={loading || isSubmitting || isCompleting}
-                >
-                  Cancelar
-                </Button>
+                {!isCompleting && (
+                  <Button onClick={onClose} disabled={loading || isSubmitting}>
+                    Cancelar
+                  </Button>
+                )}
                 <Button
                   type="submit"
                   variant="contained"
-                  disabled={loading || isSubmitting || isCompleting}
+                  disabled={loading || isSubmitting}
                 >
                   {loading ? <CircularProgress size={24} /> : "Salvar"}
                 </Button>
