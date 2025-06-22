@@ -9,13 +9,9 @@ import br.com.gestao_hospitalar.paciente_service.exception.ApiException;
 import br.com.gestao_hospitalar.paciente_service.repository.PacienteRepository;
 import br.com.gestao_hospitalar.paciente_service.repository.TransacaoPontosRepository;
 import br.com.gestao_hospitalar.paciente_service.via_cep.ViaCepResponse;
-import com.fasterxml.jackson.databind.JsonNode;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -62,15 +58,50 @@ public class PacienteService {
     preencherEnderecoViaCep(paciente, dto.getCep());
 
     pacienteRepository.save(paciente);
+
     return toResponseDTO(paciente);
   }
 
-  public PacienteResponseDTO buscarPaciente(UUID id) {
+  public PacienteResponseDTO buscarPacientePorIdOuCpf(UUID id, String cpf) {
+    Paciente paciente = null;
+
+    if (id != null) {
+      paciente = pacienteRepository.findById(id).orElse(null);
+    } else if (cpf != null) {
+      paciente = pacienteRepository.findByCpf(cpf).orElse(null);
+    }
+
+    if (paciente == null) {
+      throw new ApiException("Paciente não encontrado", HttpStatus.NOT_FOUND);
+    }
+
+    return toResponseDTO(paciente);
+  }
+
+  public List<PacienteResponseDTO> buscarTodosPacientes() {
+    return pacienteRepository
+      .findAll()
+      .stream()
+      .map(this::toResponseDTO)
+      .collect(Collectors.toList());
+  }
+
+  public PacienteResponseDTO editarPaciente(UUID id, PacienteRequestDTO dto) {
     Paciente paciente = pacienteRepository
       .findById(id)
       .orElseThrow(() ->
         new ApiException("Paciente não encontrado", HttpStatus.NOT_FOUND)
       );
+
+    paciente.setNome(dto.getNome());
+    paciente.setTelefone(dto.getTelefone());
+    paciente.setCep(dto.getCep());
+    paciente.setNumero(dto.getNumero());
+    paciente.setComplemento(dto.getComplemento());
+
+    preencherEnderecoViaCep(paciente, dto.getCep());
+
+    pacienteRepository.save(paciente);
 
     return toResponseDTO(paciente);
   }
@@ -83,12 +114,12 @@ public class PacienteService {
         ViaCepResponse.class
       );
 
-      // Considera válido se erro == null ou erro == false
       boolean cepValido =
         response != null &&
         response.getCep() != null &&
         (response.getErro() == null ||
           Boolean.FALSE.equals(response.getErro()));
+
       if (cepValido) {
         paciente.setLogradouro(response.getLogradouro());
         paciente.setBairro(response.getBairro());
@@ -129,6 +160,7 @@ public class PacienteService {
       );
     List<TransacaoPontos> transacoes =
       transacaoPontosRepository.findByPacienteOrderByDataDesc(paciente);
+
     return transacoes
       .stream()
       .map(t -> {
