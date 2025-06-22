@@ -13,7 +13,7 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-import { updateInfo } from "../../services/authenticate/user_service";
+import { updateInfo } from "../../services/authenticate/paciente_service";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../stores/slices/user.slice";
 import { Formik, Form, Field, FormikHelpers } from "formik";

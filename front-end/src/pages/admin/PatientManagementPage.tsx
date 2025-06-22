@@ -25,7 +25,7 @@ import {
   deletePatient,
   importPatients,
 } from "../../services/admin/patients_service";
-import { updateInfo } from "../../services/authenticate/user_service";
+import { updateInfo } from "../../services/authenticate/paciente_service";
 import * as XLSX from "xlsx";
 
 const PatientManagementPage: React.FC = () => {

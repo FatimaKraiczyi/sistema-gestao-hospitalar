@@ -26,7 +26,7 @@ import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import { format } from "date-fns";
 import { getPatientDashboard } from "../../services/appointment/dashboard_service";
 import { ROUTING } from "../../constants/routing";
-import { getPatientInfo } from "../../services/authenticate/user_service";
+import { getPatientInfo } from "../../services/authenticate/paciente_service";
 import { RootState } from "../../stores/store";
 
 interface Appointment {

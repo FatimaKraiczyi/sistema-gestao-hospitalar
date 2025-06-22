@@ -18,7 +18,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   getDoctorInfo,
   updateDoctorAvatar,
-} from "../../services/authenticate/user_service";
+} from "../../services/authenticate/paciente_service";
 import { setUser } from "../../stores/slices/user.slice";
 import { ROUTING } from "../../constants/routing";
 

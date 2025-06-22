@@ -10,7 +10,7 @@ import CreditCardIcon from "@mui/icons-material/CreditCard"; // Importa ícone p
 import { PersonalInfoSection } from "../../components/profile/PersonalInfoSection";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 // Importação de serviços e hooks do Redux
-import { completeInfo } from "../../services/authenticate/user_service";
+import { completeInfo } from "../../services/authenticate/paciente_service";
 import { useSelector } from "react-redux";
 import { ROUTING } from "../../constants/routing";
 import { RootState } from "../../stores/store";

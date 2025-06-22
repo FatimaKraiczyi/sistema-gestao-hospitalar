@@ -37,7 +37,7 @@ import {
 } from "../../utils/dateUtils";
 import { useNavigate } from "react-router";
 import { ROUTING } from "../../constants/routing";
-import { getPatientBankAccount } from "../../services/authenticate/user_service";
+import { getPatientBankAccount } from "../../services/authenticate/paciente_service";
 
 /**
  * Trang hiển thị chi tiết cuộc hẹn khám bệnh của bệnh nhân

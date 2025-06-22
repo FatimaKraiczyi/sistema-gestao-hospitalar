@@ -7,7 +7,7 @@ export const login = async (identifier: string, password: string) => {
   return axiosConfig.post(`${prefix}/login`, { identifier, password });
 };
 
-/** Cadastro do usuário (com type fixo ou opcional) */
+/** Cadastro do usuário  */
 export const signUp = async (cpf: string, email: string, type: string) => {
   return axiosConfig.post(`${prefix}/register`, { cpf, email, type });
 };
