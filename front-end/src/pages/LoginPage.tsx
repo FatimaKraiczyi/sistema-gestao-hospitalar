@@ -16,19 +16,12 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
-import { login } from "../services/authenticate/auth_service";
-import { setProfile } from "../stores/slices/user.slice";
+import { login } from "../services/auth/auth";
+import { setAuth } from "../stores/slices/user.slice";
 import { toast } from "react-toastify";
 import { ROUTING } from "../constants/routing";
 import { jwtDecode } from "jwt-decode";
-import { ApiError } from "../types";
-
-interface DecodedToken {
-  email: string;
-  cpf: string;
-  type: string;
-  sub: string;
-}
+import { ApiError, UserJwtData } from "../types";
 
 const validationSchema = Yup.object({
   identifier: Yup.string()
@@ -84,23 +77,16 @@ export default function LoginPage() {
         const response = await login(cleanedIdentifier, values.password);
 
         const token = response.data.data.token;
+        const decoded: UserJwtData = jwtDecode(token);
 
-        const decoded: DecodedToken = jwtDecode(token);
-        const userData = {
-          email: decoded.email,
-          cpf: decoded.cpf,
-          id: decoded.sub,
-          type: decoded.type,
-        };
-
-        dispatch(setProfile(userData));
+        dispatch(setAuth(decoded));
         localStorage.setItem("token", token);
-        localStorage.setItem("type", userData.type);
+        localStorage.setItem("user", decoded.type);
 
         // Exibir mensagem vinda da API no toast
         toast.success(response.data.message);
 
-        switch (userData.type) {
+        switch (decoded.type) {
           case "PACIENTE":
             setTimeout(() => navigate(ROUTING.PACIENTE), 1000);
             break;

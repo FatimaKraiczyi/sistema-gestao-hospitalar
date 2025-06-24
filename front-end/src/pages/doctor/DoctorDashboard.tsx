@@ -13,7 +13,6 @@ import {
   Alert,
 } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
-import { getDoctorDashboard } from "../../services/appointment/dashboard_service";
 import { useSelector } from "react-redux";
 
 interface DoctorDashboardResponse {

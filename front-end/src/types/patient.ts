@@ -1,7 +1,3 @@
-import { User } from "./user";
-import { Appointment } from "./appointment";
-import { MedicalRecord } from "./medical";
-
 export interface PacienteRequest {
   nome: string;
   telefone: string;
@@ -9,24 +5,19 @@ export interface PacienteRequest {
   numero: string;
   complemento?: string;
 }
-export interface Patient extends User {
-  info?: PacienteRequest; // Based on the stay relationship (1 - 1..*)
-  medicalRecords?: MedicalRecord[]; // Based on the register relationship (1 - 0..*)
-  appointments?: Appointment[]; // Based on the have relationship (1 - 0..*)
-}
-
-export interface PatientResponse {
-  id: string;
-  cpf: string;
-  email: string;
+export interface PatientData {
+  id?: string;
+  cpf?: string;
+  email?: string;
   nome: string;
+  sobrenome?: string;
   telefone: string;
-  cep: string;
-  logradouro: string;
+  logradouro?: string;
   numero: string;
   complemento?: string;
-  bairro: string;
-  cidade: string;
-  estado: string;
-  pontos: number;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  cep: string;
+  pontos?: number;
 }

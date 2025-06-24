@@ -9,12 +9,6 @@ import {
   Grid,
   Box,
   Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   CircularProgress,
   IconButton,
   Alert,
@@ -46,17 +40,8 @@ import {
   GridToolbar,
   GridCsvExportOptions,
 } from "@mui/x-data-grid";
-import { MedicalRecord, MedicalRecordDrug, Drug } from "../../types/medical";
-import { User } from "../../types/user";
 import { formatCreatedAtDate } from "../../utils/dateUtils";
-import {
-  createMedicalRecord,
-  getMedicalRecord,
-  getMedicalRecordPrevious,
-} from "../../services/appointment/medical_record_service";
-import { getPatientInfo } from "../../services/authenticate/paciente_service";
-import { getAllDrugs } from "../../services/appointment/drug_service";
-import { ca } from "date-fns/locale";
+import { getPatientInfo } from "../../services/paciente/paciente";
 
 // Dữ liệu mẫu bệnh nhân
 const MOCK_PATIENT: User = {

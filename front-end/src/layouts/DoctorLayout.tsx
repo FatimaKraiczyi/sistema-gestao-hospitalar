@@ -23,8 +23,6 @@ export default function DoctorLayout() {
     "/doctor/appointments": "Appointments",
     "/doctor/schedule": "Schedule",
     "/doctor/current-schedule": "Current Schedule",
-    "/doctor/prescriptions": "Prescriptions",
-    "/doctor/emergency": "Emergency Cases",
   };
 
   const handleNavigation = (path: string) => {
@@ -57,27 +55,8 @@ export default function DoctorLayout() {
           </ListItemIcon>
           <ListItemText primary="Xem lịch khám" />
         </ListItemButton>
-
-        <ListItemButton onClick={() => handleNavigation("/doctor/emergency")}>
-          <ListItemIcon>
-            {/* <Badge badgeContent={emergencyCount} color="error"> */}
-            <EmergencyIcon />
-            {/* </Badge> */}
-          </ListItemIcon>
-          <ListItemText primary="Cấp cứu" />
-        </ListItemButton>
       </List>
       <Divider />
-      <List>
-        {/* <ListItemButton
-          onClick={() => handleNavigation("/doctor/prescriptions")}
-        >
-          <ListItemIcon>
-            <MedicalServicesIcon />
-          </ListItemIcon>
-          <ListItemText primary="Prescriptions" />
-        </ListItemButton> */}
-      </List>
     </>
   );
 

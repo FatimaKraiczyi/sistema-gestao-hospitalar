@@ -28,16 +28,11 @@ import VideoCallIcon from "@mui/icons-material/VideoCall";
 import CancelIcon from "@mui/icons-material/Cancel";
 import MedicalRecordModal from "../../components/medical/MedicalRecordModal";
 import {
-  getAppointmentPatientDetail,
-  cancelAppointment,
-} from "../../services/appointment/booking_service";
-import {
   formatTimeFromTimeString,
   parseDateTimeFromString,
 } from "../../utils/dateUtils";
 import { useNavigate } from "react-router";
 import { ROUTING } from "../../constants/routing";
-import { getPatientBankAccount } from "../../services/authenticate/paciente_service";
 
 /**
  * Página de detalhes da consulta do paciente
@@ -194,13 +189,6 @@ const PatientAppointmentDetailsPage: React.FC = () => {
   };
 
   /**
-   * Fecha o modal do prontuário médico
-   */
-  const handleCloseMedicalRecord = () => {
-    setIsMedicalRecordOpen(false);
-  };
-
-  /**
    * Verifica se a consulta pode acessar a sala online
    * Apenas status "Aguardando" ou "Em atendimento"
    */
@@ -249,31 +237,6 @@ const PatientAppointmentDetailsPage: React.FC = () => {
       console.error("Erro ao verificar horário da consulta:", error);
       return false;
     }
-  };
-
-  /**
-   * Lida com o evento de entrar na sala online
-   */
-  const handleJoinExamination = (
-    appointmentId: number,
-    workScheduleId: number,
-    dateAppointment: string,
-    event: React.MouseEvent,
-    doctorId?: number,
-    doctorName?: string,
-    numericalOrder?: number
-  ) => {
-    event.stopPropagation();
-
-    navigate(`${ROUTING.PATIENT}/wating-room/${workScheduleId}`, {
-      state: {
-        doctorId: doctorId,
-        appointmentId: appointmentId,
-        dateAppointment: dateAppointment,
-        doctorName: doctorName,
-        numericalOrder: numericalOrder,
-      },
-    });
   };
 
   /**
@@ -519,19 +482,6 @@ const PatientAppointmentDetailsPage: React.FC = () => {
           </Box>
         </CardContent>
       </Card>
-
-      {/* Modal prontuário médico */}
-      <MedicalRecordModal
-        open={isMedicalRecordOpen}
-        onClose={handleCloseMedicalRecord}
-        appointmentId={appointment?.id}
-        patientId={user.userId}
-        infoAppointment={{
-          doctorName: appointment?.doctorInfo.name,
-          dateAppointment: appointment?.date,
-        }}
-        isDoctor={false}
-      />
 
       {/* Diálogo de confirmação de cancelamento */}
       <Dialog

@@ -9,11 +9,6 @@ import {
   Paper,
   CircularProgress,
 } from "@mui/material";
-import { getDoctorInfo } from "../../services/authenticate/paciente_service";
-import { DoctorEducationSection } from "../doctor/DoctorEducationSection";
-import { DoctorExperienceSection } from "../doctor/DoctorExperienceSection";
-import { DoctorCertificatesSection } from "../doctor/DoctorCertificatesSection";
-
 /**
  * Propriedades para o componente DoctorDetails
  * @param doctor - Informações do médico a serem exibidas em detalhes
@@ -123,24 +118,6 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
           </Grid>
         </Grid>
       </Paper>
-
-      {/* Usando componentes especializados para formação, experiência e certificados */}
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <DoctorEducationSection education={education} />
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <DoctorExperienceSection
-            experiences={experience}
-            specialization={infoBasic.specialization || "Não especificado"}
-          />
-        </Grid>
-
-        <Grid item xs={12}>
-          <DoctorCertificatesSection certificates={certificates} />
-        </Grid>
-      </Grid>
     </Box>
   );
 };

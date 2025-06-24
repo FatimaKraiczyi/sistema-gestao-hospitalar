@@ -9,13 +9,6 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import { checkPayment } from "../../services/appointment/payment_service";
-import {
-  getAppointmentPrice,
-  getAppointmentPriceByTypeDisease,
-} from "../../services/appointment/price_service";
-import { v4 as uuidv4 } from "uuid";
-import { format, subHours } from "date-fns";
 import { useSelector } from "react-redux";
 import { Client } from "@stomp/stompjs";
 

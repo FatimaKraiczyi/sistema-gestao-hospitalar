@@ -11,58 +11,14 @@ import {
   ToggleButton,
   Alert,
   Container,
-  SxProps,
 } from "@mui/material";
-import {
-  AnimatedLine,
-  AnimatedLineProps,
-  LineChart,
-} from "@mui/x-charts/LineChart";
+import { AnimatedLine, LineChart } from "@mui/x-charts/LineChart";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import PeopleIcon from "@mui/icons-material/People";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { getDashboard } from "../../services/appointment/dashboard_service";
-import { useChartId, useDrawingArea, useXScale } from "@mui/x-charts";
-
-interface DashboardVisualize {
-  salaries: {
-    month: Record<string, number>;
-    year: Record<string, number>;
-    quarter: Record<string, number>;
-  };
-  // Previsão de receita para os próximos 3 anos
-  salaries_prediction: Array<number>;
-  patients: {
-    month: Record<string, number>;
-    year: Record<string, number>;
-    quarter: Record<string, number>;
-  };
-}
-
-interface AdminDashboardResponse {
-  salaries: {
-    total: number;
-    total_previous_year: number;
-    total_this_year: number;
-  };
-  doctors: {
-    total: number;
-    total_previous_year: number;
-    total_this_year: number;
-  };
-  patients: {
-    total: number;
-    total_previous_year: number;
-    total_this_year: number;
-  };
-  visualize: DashboardVisualize;
-}
-// interface para previsão de receita para os próximos 3 anos
-interface CustomAnimatedLineProps extends AnimatedLineProps {
-  limit?: number;
-  chartData?: string[];
-}
+import { useChartId, useDrawingArea } from "@mui/x-charts";
+import { getAgendamentosByPeriodo } from "../../services/consulta/agendamentos";
 
 const AdminDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -116,89 +72,97 @@ const AdminDashboardPage: React.FC = () => {
 
       try {
         setIsLoading(true);
-        const response = await getDashboard();
-        const dashboardData: AdminDashboardResponse = response.data;
+        // Buscar médicos ativos
+        const medicosResp = await getAllMedicos(undefined, true);
+        setTotalDoctors(medicosResp.data.length);
 
-        setTotalRevenue(dashboardData.salaries.total);
-        setTotalPatients(dashboardData.patients.total);
-        setTotalDoctors(dashboardData.doctors.total);
+        // Buscar agendamentos do ano atual usando a API correta
+        const anoAtual = new Date().getFullYear();
+        const inicioAno = `${anoAtual}-01-01`;
+        const fimAno = `${anoAtual}-12-31`;
+        const agendamentosResp = await getAgendamentosByPeriodo(
+          inicioAno,
+          fimAno
+        );
+        const agendamentos = agendamentosResp.data || [];
 
+        // Receita total e pacientes únicos do ano
+        const receitaAno = agendamentos.reduce(
+          (acc, ag) => acc + (ag.valorPago || 0),
+          0
+        );
+        const pacientesAno = new Set(agendamentos.map((a) => a.codigoPaciente))
+          .size;
         setYearComparison({
-          revenue: {
-            current: dashboardData.salaries.total_this_year,
-            previous: dashboardData.salaries.total_previous_year,
-          },
-          patients: {
-            current: dashboardData.patients.total_this_year,
-            previous: dashboardData.patients.total_previous_year,
-          },
+          revenue: { current: receitaAno, previous: 0 },
+          patients: { current: pacientesAno, previous: 0 },
         });
 
-        // Processa dados mensais (converte nome do mês para número)
-        const monthlyRevenueData: Record<string, number> = {};
-        const monthlyPatientsData: Record<string, number> = {};
-
-        const monthOrder = [
-          "JANUARY",
-          "FEBRUARY",
-          "MARCH",
-          "APRIL",
-          "MAY",
-          "JUNE",
-          "JULY",
-          "AUGUST",
-          "SEPTEMBER",
-          "OCTOBER",
-          "NOVEMBER",
-          "DECEMBER",
-        ];
-
-        monthOrder.forEach((month, index) => {
-          const monthNum = String(index + 1);
-          if (dashboardData.visualize.salaries.month[month] !== undefined) {
-            monthlyRevenueData[monthNum] =
-              dashboardData.visualize.salaries.month[month];
-          }
-          if (dashboardData.visualize.patients.month[month] !== undefined) {
-            monthlyPatientsData[monthNum] =
-              dashboardData.visualize.patients.month[month];
-          }
-        });
-
-        setMonthlyRevenue(monthlyRevenueData);
-        setMonthlyPatients(monthlyPatientsData);
-
-        // Processa dados trimestrais
-        const quarterlyRevenueData: Record<string, number> = {};
-        const quarterlyPatientsData: Record<string, number> = {};
-
-        Object.entries(dashboardData.visualize.salaries.quarter).forEach(
-          ([quarter, value]) => {
-            quarterlyRevenueData[`Q${quarter}`] = value;
-          }
-        );
-
-        Object.entries(dashboardData.visualize.patients.quarter).forEach(
-          ([quarter, value]) => {
-            quarterlyPatientsData[`Q${quarter}`] = value;
-          }
-        );
-
-        setQuarterlyRevenue(quarterlyRevenueData);
-        setQuarterlyPatients(quarterlyPatientsData);
-
-        // Processa dados anuais
-        setYearlyRevenue(dashboardData.visualize.salaries.year);
-        setYearlyPatients(dashboardData.visualize.patients.year);
-
-        // Salva dados de previsão de receita
-        if (dashboardData.visualize.salaries_prediction) {
-          setSalaryPredictions(dashboardData.visualize.salaries_prediction);
+        // Receita e pacientes por mês
+        const receitaPorMes = {};
+        const pacientesPorMes = {};
+        for (let i = 1; i <= 12; i++) {
+          receitaPorMes[String(i)] = 0;
+          pacientesPorMes[String(i)] = new Set();
         }
+        agendamentos.forEach((ag) => {
+          if (ag.data) {
+            const mes = new Date(ag.data).getMonth() + 1;
+            receitaPorMes[String(mes)] += ag.valorPago || 0;
+            pacientesPorMes[String(mes)].add(ag.codigoPaciente);
+          }
+        });
+        setMonthlyRevenue(receitaPorMes);
+        setMonthlyPatients(
+          Object.fromEntries(
+            Object.entries(pacientesPorMes).map(([k, v]) => [k, v.size])
+          )
+        );
+
+        // Receita e pacientes por trimestre
+        const receitaPorTrimestre = { T1: 0, T2: 0, T3: 0, T4: 0 };
+        const pacientesPorTrimestre = {
+          T1: new Set(),
+          T2: new Set(),
+          T3: new Set(),
+          T4: new Set(),
+        };
+        agendamentos.forEach((ag) => {
+          if (ag.data) {
+            const mes = new Date(ag.data).getMonth() + 1;
+            const trimestre = `T${Math.ceil(mes / 3)}`;
+            receitaPorTrimestre[trimestre] += ag.valorPago || 0;
+            pacientesPorTrimestre[trimestre].add(ag.codigoPaciente);
+          }
+        });
+        setQuarterlyRevenue(receitaPorTrimestre);
+        setQuarterlyPatients(
+          Object.fromEntries(
+            Object.entries(pacientesPorTrimestre).map(([k, v]) => [k, v.size])
+          )
+        );
+
+        // Receita e pacientes por ano (últimos 5 anos)
+        const receitaPorAno = {};
+        const pacientesPorAno = {};
+        agendamentos.forEach((ag) => {
+          if (ag.data) {
+            const ano = new Date(ag.data).getFullYear();
+            if (!receitaPorAno[ano]) receitaPorAno[ano] = 0;
+            if (!pacientesPorAno[ano]) pacientesPorAno[ano] = new Set();
+            receitaPorAno[ano] += ag.valorPago || 0;
+            pacientesPorAno[ano].add(ag.codigoPaciente);
+          }
+        });
+        setYearlyRevenue(receitaPorAno);
+        setYearlyPatients(
+          Object.fromEntries(
+            Object.entries(pacientesPorAno).map(([k, v]) => [k, v.size])
+          )
+        );
 
         setError(null);
       } catch (err) {
-        console.error("Erro ao buscar dados do dashboard do admin:", err);
         setError("Não foi possível carregar os dados do painel");
       } finally {
         setIsLoading(false);

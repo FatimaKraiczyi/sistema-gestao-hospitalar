@@ -25,7 +25,6 @@ import VideoCallIcon from "@mui/icons-material/VideoCall";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import BookAppointment from "../../components/appointments/BookAppointment";
-import { getAppointmentPatientBookInWeek } from "../../services/appointment/booking_service";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -36,7 +35,6 @@ import {
   formatDateToString,
   formatTimeFromTimeString,
 } from "../../utils/dateUtils";
-import { ROUTING } from "../../constants/routing";
 
 // Enum dos dias da semana
 enum TypeDay {
@@ -272,36 +270,6 @@ const AppointmentPage = () => {
   // Ir para detalhes do agendamento
   const handleAppointmentClick = (appointmentId: number) => {
     navigate(`/patient/appointments/${appointmentId}`);
-  };
-
-  // Entrar na sala de consulta online
-  const handleJoinExamination = (
-    appointmentId: number,
-    workScheduleId: number,
-    dateAppointment: string,
-    event: React.MouseEvent,
-    doctorId?: number,
-    doctorName?: string,
-    numericalOrder?: number
-  ) => {
-    event.stopPropagation();
-
-    navigate(`${ROUTING.PATIENT}/wating-room/${workScheduleId}`, {
-      state: {
-        doctorId: doctorId,
-        appointmentId: appointmentId,
-        dateAppointment: dateAppointment,
-        doctorName: doctorName,
-        numericalOrder: numericalOrder,
-      },
-    });
-  };
-
-  // Período do turno
-  const getShiftPeriod = (startTime: string): TimePeriod => {
-    const startHour = parseInt(startTime.split(":")[0]);
-    if (startHour < 12) return TimePeriod.MORNING;
-    return TimePeriod.AFTERNOON;
   };
 
   // Agendamentos por data e período

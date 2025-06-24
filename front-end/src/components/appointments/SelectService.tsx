@@ -5,13 +5,11 @@ import {
   Grid,
   Card,
   CardContent,
-  Button,
   CircularProgress,
   Paper,
 } from "@mui/material";
 // import { getSpecialties } from "../../services/specialty_service";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
-import { getAllTypeDiseases } from "../../services/authenticate/typeDisease_service.ts";
 
 interface SelectSpecialtyProps {
   onSelect: (specialty: any) => void;
@@ -23,13 +21,13 @@ const SelectService: React.FC<SelectSpecialtyProps> = ({ onSelect }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Simulate API call with setTimeout
+    // Simula chamada de API com setTimeout
     const fetchServices = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Simulate network delay
+        // Simula atraso de rede
         const result: any = await getAllTypeDiseases()
           .then((response) => response.data.data)
           .catch((error) => {
@@ -42,13 +40,13 @@ const SelectService: React.FC<SelectSpecialtyProps> = ({ onSelect }) => {
           (service: any) => service.status === true
         );
 
-        // Use mock data instead of API call
+        // Use dados mockados ao invés da chamada de API
         // const response = await getSpecialties();
         // setServices(response.data.data || []);
         setServices(activeServices);
       } catch (err) {
-        console.error("Failed to fetch services:", err);
-        setError("Failed to load services. Please try again.");
+        console.error("Falha ao buscar serviços:", err);
+        setError("Falha ao carregar serviços. Por favor, tente novamente.");
         setServices([]);
       } finally {
         setLoading(false);
@@ -61,7 +59,7 @@ const SelectService: React.FC<SelectSpecialtyProps> = ({ onSelect }) => {
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
-        {t("patient.appointments.select_service")}
+        Selecione o serviço
       </Typography>
 
       {loading ? (
@@ -88,7 +86,7 @@ const SelectService: React.FC<SelectSpecialtyProps> = ({ onSelect }) => {
                 sx={{ fontSize: 60, color: "text.secondary", mb: 2 }}
               />
               <Typography variant="h6" color="text.secondary">
-                {t("patient.appointments.no_services")}
+                Nenhum serviço disponível
               </Typography>
             </Paper>
           ) : (
@@ -116,7 +114,7 @@ const SelectService: React.FC<SelectSpecialtyProps> = ({ onSelect }) => {
                         alignItems: "center",
                         justifyContent: "center",
                         textAlign: "center",
-                        padding: 2, // Added padding to improve appearance without image
+                        padding: 2, // Adicionado padding para melhorar a aparência sem imagem
                       }}
                     >
                       <Typography variant="h6" component="div">

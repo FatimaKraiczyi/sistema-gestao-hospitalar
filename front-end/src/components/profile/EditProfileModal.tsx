@@ -12,7 +12,7 @@ import {
 import {
   updatePatientInfo,
   completeInfo,
-} from "../../services/authenticate/paciente_service";
+} from "../../services/paciente/paciente";
 import { useDispatch } from "react-redux";
 import { setProfile } from "../../stores/slices/user.slice";
 import { Formik, Form, FormikHelpers } from "formik";

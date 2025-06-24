@@ -16,13 +16,6 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Edit, Delete, Add } from "@mui/icons-material";
-import { Price } from "../../types/price";
-import {
-  getAll,
-  addPrice,
-  updatePrice,
-  deletePrice,
-} from "../../services/admin/price_service";
 import PriceForm from "../../components/admin/PriceForm";
 
 // Component quản lý giá

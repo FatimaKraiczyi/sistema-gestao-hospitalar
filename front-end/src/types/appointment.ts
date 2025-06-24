@@ -1,13 +1,23 @@
-import { Patient } from "./patient";
-import { Doctor } from "./doctor";
-import { MedicalRecord } from "./medical";
+export interface ConsultaModel {
+  codigo?: string;
+  especialidade?: string;
+  medico?: string;
+  status?: string;
+  data?: string;
+  vagasDisponiveis?: number;
+  vagasTotal?: number;
+  valor?: number;
+}
 
-export interface Appointment {
-  id: number;
-  patient: Patient;
-  doctor: Doctor;
-  note: string;
-  start: string; // Using Date for LocalDateTime
-  end: string;
-  medicalRecord?: MedicalRecord; // Based on the have relationship with MedicalRecord
+export interface AgendamentoModel {
+  id: string;
+  codigoConsulta: string;
+  codigoPaciente: string;
+  data: string; // ISO string (LocalDateTime)
+  especialidade: string;
+  medico: string;
+  valor: number;
+  pontosUsados: number;
+  valorPago: number;
+  status: string;
 }

@@ -7,7 +7,6 @@ import DoctorProfilePage from "../pages/doctor/DoctorProfilePage";
 import DoctorAppointmentDetailsPage from "../pages/doctor/DoctorAppointmentDetailsPage";
 import PatientAppointmentDetailsPage from "../pages/patient/PatientAppointmentDetailsPage";
 import ForgetPasswordPage from "../pages/ForgetPasswordPage";
-import BankAccountPage from "../pages/patient/BankAccountPage";
 
 // Import layout components
 import AdminLayout from "../layouts/AdminLayout";
@@ -22,13 +21,10 @@ import DoctorSchedulePage from "../pages/doctor/DoctorSchedulePage";
 import DoctorCurrentSchedulePage from "../pages/doctor/DoctorCurrentSchedulePage";
 import PatientManagementPage from "../pages/admin/PatientManagementPage";
 import PatientMedicalRecord from "../pages/patient/PatientMedicalRecord";
-import DrugManagementPage from "../pages/admin/DrugManagementPage";
 import DoctorManagementPage from "../pages/admin/DoctorManagementPage";
 import ShiftManagementPage from "../pages/admin/ShiftManagementPage";
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
-import DiseasManagementPage from "../pages/admin/DiseasManagementPage";
 import CancelAppointmentPage from "../pages/admin/CancelAppointmentPage";
-import DoctorRevenueDetailsPage from "../pages/admin/DoctorRevenueDetailsPage";
 import PriceManagementPage from "../pages/admin/PriceManagementPage";
 
 // Protected route component to check user role
@@ -41,7 +37,8 @@ const ProtectedRoute = ({
 }) => {
   const role = localStorage.getItem("type");
   const isAuthenticated = localStorage.getItem("token");
-
+  console.log("ProtectedRoute role:", role);
+  console.log("ProtectedRoute isAuthenticated:", isAuthenticated);
   if (!isAuthenticated) {
     return <Navigate to={ROUTING.HOME} replace />;
   }
@@ -54,8 +51,6 @@ const ProtectedRoute = ({
 };
 
 export const AppRoutes = () => {
-  // const role = localStorage.getItem("role");
-
   return (
     <Suspense fallback={<Loading />}>
       <BrowserRouter>
@@ -82,17 +77,11 @@ export const AppRoutes = () => {
             <Route index element={<AdminDashboardPage />} />
             <Route path={ROUTING.USERS} element={<PatientManagementPage />} />
             <Route path={ROUTING.DOCTORS} element={<DoctorManagementPage />} />
-            <Route path={ROUTING.DRUG} element={<DrugManagementPage />} />
             <Route path={ROUTING.PRICES} element={<PriceManagementPage />} />
             <Route path={ROUTING.SHIFTS} element={<ShiftManagementPage />} />
-            <Route path={ROUTING.DISEASES} element={<DiseasManagementPage />} />
             <Route
               path={ROUTING.CANCEL_APPOINTMENT}
               element={<CancelAppointmentPage />}
-            />
-            <Route
-              path={ROUTING.DOCTOR_REVENUE}
-              element={<DoctorRevenueDetailsPage />}
             />
           </Route>
 
@@ -118,10 +107,6 @@ export const AppRoutes = () => {
               element={<DoctorCurrentSchedulePage />}
             />
             <Route path={ROUTING.PATIENTS} element={<div>Patients</div>} />
-            <Route
-              path={ROUTING.PRESCRIPTIONS}
-              element={<div>Prescriptions</div>}
-            />
           </Route>
 
           {/* Patient routes - with role protection */}
@@ -147,7 +132,6 @@ export const AppRoutes = () => {
               path={ROUTING.MEDICAL_RECORDS}
               element={<PatientMedicalRecord />}
             />
-            <Route path={ROUTING.BANK_ACCOUNT} element={<BankAccountPage />} />
           </Route>
 
           {/* Redirect unauthorized access to home */}

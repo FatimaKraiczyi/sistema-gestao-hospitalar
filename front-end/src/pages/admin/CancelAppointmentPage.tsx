@@ -17,21 +17,9 @@ import {
   MenuItem,
   SelectChangeEvent,
 } from "@mui/material";
-import {
-  DataGrid,
-  GridColDef,
-  GridToolbar,
-  GridCsvExportOptions,
-} from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import {
-  getBookingsByStatus,
-  assignPayback,
-  getAllBookings,
-} from "../../services/admin/book_service";
-import { getPatientBankAccount } from "../../services/authenticate/paciente_service";
 import { formatTimeFromTimeString } from "../../utils/dateUtils";
-import { PaymentStatus } from "../../types/enums";
 
 export default function CancelAppointmentPage() {
   const [loading, setLoading] = useState<boolean>(false);

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   DataGrid,
   GridColDef,
-  GridCsvExportOptions,
   GridRenderCellParams,
   GridToolbar,
 } from "@mui/x-data-grid";
@@ -18,22 +17,9 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Edit, Delete, Add, Visibility, UploadFile } from "@mui/icons-material";
-import { Doctor } from "../../types/doctor";
 import DoctorForm from "../../components/admin/DoctorForm";
 import DoctorDetailModal from "../../components/admin/DoctorDetailModal";
-import {
-  getAllDoctors,
-  addDoctor,
-  importDoctor,
-  deleteDoctor,
-} from "../../services/admin/doctor_service";
 import { format } from "date-fns";
-import * as XLSX from "xlsx";
-import {
-  DoctorCertificate,
-  DoctorEducation,
-  DoctorExperience,
-} from "../../types/doctor";
 
 const DoctorManagementPage: React.FC = () => {
   // Estados para gerenciar dados e UI
@@ -43,26 +29,8 @@ const DoctorManagementPage: React.FC = () => {
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [importing, setImporting] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: "success" | "error" | "info" | "warning";
-  }>({
-    open: false,
-    message: "",
-    severity: "info",
-  });
+
   const [submitting, setSubmitting] = useState<boolean>(false);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const csvOptions: GridCsvExportOptions = {
-    fileName: "doctors",
-    delimiter: ",",
-    utf8WithBom: true,
-  };
 
   // Buscar lista de médicos da API
   const fetchDoctors = async () => {
@@ -85,22 +53,6 @@ const DoctorManagementPage: React.FC = () => {
   useEffect(() => {
     fetchDoctors();
   }, []);
-
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
-
-  const showMessage = (
-    message: string,
-    severity: "success" | "error" | "info" | "warning"
-  ) => {
-    setSnackbar({
-      open: true,
-      message,
-      severity,
-    });
-  };
-
   const handleAddClick = () => {
     setFormMode("add");
     setSelectedDoctor(null);
@@ -144,7 +96,7 @@ const DoctorManagementPage: React.FC = () => {
 
         const doctorToAdd = {
           ...doctorData,
-          password: "123456789",
+          password: "123ww456789",
           dob: formattedDob,
           typeDisease: diseaseInfo,
           certificates: [],
@@ -211,11 +163,6 @@ const DoctorManagementPage: React.FC = () => {
     //   "info"
     // );
   };
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
   // ... As funções auxiliares de parsing e formatação permanecem iguais, apenas traduza mensagens de erro e comentários se desejar ...
 
   // Definição das colunas da tabela
@@ -259,27 +206,6 @@ const DoctorManagementPage: React.FC = () => {
       headerName: "Especialidade",
       width: 150,
       flex: 1,
-    },
-    {
-      field: "sex",
-      headerName: "Gênero",
-      width: 100,
-      flex: 0.7,
-      renderCell: (params: GridRenderCellParams) => (
-        <Chip
-          label={params.value ? "Masculino" : "Feminino"}
-          color={params.value ? "info" : "secondary"}
-          size="small"
-        />
-      ),
-    },
-    {
-      field: "dob",
-      headerName: "Data de nascimento",
-      width: 120,
-      flex: 0.8,
-      renderCell: (params: GridRenderCellParams) =>
-        new Date(params.row.dob).toLocaleDateString("pt-BR"),
     },
     {
       field: "phone",
@@ -342,29 +268,6 @@ const DoctorManagementPage: React.FC = () => {
         >
           Adicionar médico
         </Button>
-        <Button
-          variant="contained"
-          color="success"
-          startIcon={
-            importing ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              <UploadFile />
-            )
-          }
-          onClick={handleImportClick}
-          disabled={importing}
-          sx={{ fontWeight: 600 }}
-        >
-          {importing ? "Importando..." : "Importar arquivo"}
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".csv,.xlsx,.xls"
-          style={{ display: "none" }}
-          onChange={handleFileChange}
-        />
       </Box>
 
       {/* Tabela de médicos */}
@@ -419,21 +322,6 @@ const DoctorManagementPage: React.FC = () => {
         doctor={selectedDoctor}
         onUpdate={handleUpdateDoctorDetail}
       />
-
-      {/* Snackbar para mensagens */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };

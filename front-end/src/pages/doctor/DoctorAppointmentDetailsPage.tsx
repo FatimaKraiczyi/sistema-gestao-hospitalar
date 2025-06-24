@@ -26,7 +26,6 @@ import ClearIcon from "@mui/icons-material/Clear";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import { useNavigate } from "react-router";
-import { getDetailDoctorAppointment } from "../../services/appointment/booking_service";
 import { useSelector } from "react-redux";
 import { ROUTING } from "../../constants/routing";
 

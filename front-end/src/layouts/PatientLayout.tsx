@@ -12,7 +12,7 @@ import EventNoteIcon from "@mui/icons-material/EventNote";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { Outlet, useNavigate } from "react-router";
 import { ROUTING } from "../constants/routing";
-import { getPatientInfo } from "../services/authenticate/paciente_service";
+import { getPatientInfo } from "../services/paciente/paciente";
 import { useDispatch } from "react-redux";
 import { setProfile } from "../stores/slices/user.slice";
 

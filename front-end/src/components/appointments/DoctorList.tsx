@@ -4,23 +4,16 @@ import {
   Typography,
   Grid,
   Card,
-  CardContent,
-  CardMedia,
   Button,
   Chip,
-  Rating,
   Avatar,
   CircularProgress,
-  Divider,
   Paper,
-  Alert,
   Pagination,
-  TablePagination,
   Stack,
 } from "@mui/material";
 // import { getDoctorsBySpecialty } from "../../services/doctor_service";
 import MedicationIcon from "@mui/icons-material/Medication";
-import { getAllDoctorByTypeDiseaseName } from "../../services/authenticate/typeDisease_service.ts";
 
 /**
  * Propriedades para o componente DoctorList

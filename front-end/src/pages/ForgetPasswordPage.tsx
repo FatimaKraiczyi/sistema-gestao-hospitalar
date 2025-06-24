@@ -14,14 +14,12 @@ import {
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { ROUTING } from "../constants/routing";
-import { resetPassword } from "../services/authenticate/auth_service";
+import { resetPassword } from "../services/auth/auth";
 import { ApiError } from "../types";
 
 // Definição do schema de validação
 const validationSchema = Yup.object({
-  email: Yup.string()
-    .email("Endereço de e-mail inválido")
-    .required("E-mail é obrigatório"),
+  email: Yup.string().email("E-mail inválido").required("E-mail é obrigatório"),
 });
 
 export default function ForgetPasswordPage() {
@@ -39,13 +37,8 @@ export default function ForgetPasswordPage() {
         setIsLoading(true);
         const response = await resetPassword(values.email);
 
-        if (response.data.code === 200 && response.data.data === true) {
-          setIsSubmitted(true);
-
-          toast.success(response.data.message);
-        } else {
-          toast.error(response.data.message);
-        }
+        toast.success(response.data.message);
+        setIsSubmitted(true);
       } catch (error: unknown) {
         const err = error as ApiError;
         toast.error(err.message);
@@ -91,7 +84,7 @@ export default function ForgetPasswordPage() {
         }}
       >
         <Typography variant="h5" align="center" gutterBottom>
-          Esqueceu a senha
+          Esqueci a senha
         </Typography>
         <Typography variant="body2" align="center" sx={{ mb: 3 }}>
           Informe seu e-mail para receber uma nova senha
@@ -123,7 +116,7 @@ export default function ForgetPasswordPage() {
             }
             sx={{ mt: 3, mb: 2 }}
           >
-            {isLoading ? "Processando..." : "Enviar solicitação"}
+            {isLoading ? "Processando..." : "Enviar nova senha por email"}
           </Button>
 
           <Typography align="center">

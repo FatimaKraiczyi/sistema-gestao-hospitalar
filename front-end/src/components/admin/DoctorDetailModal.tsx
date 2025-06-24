@@ -22,23 +22,15 @@ import {
   Chip,
   CircularProgress,
 } from "@mui/material";
-import {
-  Doctor,
-  DoctorEducation,
-  DoctorCertificate,
-  DoctorExperience,
-} from "../../types/doctor";
+
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Close as CloseIcon,
 } from "@mui/icons-material";
-import { Diploma } from "../../types/enums";
-import EducationForm from "./forms/EducationForm";
-import CertificateForm from "./forms/CertificateForm";
-import ExperienceForm from "./forms/ExperienceForm";
-import { getDoctorInfo } from "../../services/authenticate/paciente_service";
+
 import { parseDateFromString } from "../../utils/dateUtils";
+import { Doctor } from "../appointments/types";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -80,17 +72,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
   const [isEducationFormOpen, setIsEducationFormOpen] = useState(false);
   const [isCertificateFormOpen, setIsCertificateFormOpen] = useState(false);
   const [isExperienceFormOpen, setIsExperienceFormOpen] = useState(false);
-  const [selectedEducation, setSelectedEducation] =
-    useState<DoctorEducation | null>(null);
-  const [selectedCertificate, setSelectedCertificate] =
-    useState<DoctorCertificate | null>(null);
-  const [selectedExperience, setSelectedExperience] =
-    useState<DoctorExperience | null>(null);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
-
-  const [certificates, setCertificates] = useState<DoctorCertificate[]>([]);
-  const [educations, setEducations] = useState<DoctorEducation[]>([]);
-  const [experiences, setExperiences] = useState<DoctorExperience[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -113,9 +95,6 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
       );
 
       if (response && response.data) {
-        setCertificates(response.data.certificates || []);
-        setEducations(response.data.educations || []);
-        setExperiences(response.data.experiences || []);
       } else {
         setError(
           "Não foi possível carregar as informações detalhadas do médico"
@@ -147,108 +126,6 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
         return "Professor";
       default:
         return "Não especificado";
-    }
-  };
-
-  const handleAddEducation = () => {
-    setFormMode("add");
-    setSelectedEducation(null);
-    setIsEducationFormOpen(true);
-  };
-
-  const handleEditEducation = (education: DoctorEducation) => {
-    setFormMode("edit");
-    setSelectedEducation(education);
-    setIsEducationFormOpen(true);
-  };
-
-  const handleAddCertificate = () => {
-    setFormMode("add");
-    setSelectedCertificate(null);
-    setIsCertificateFormOpen(true);
-  };
-
-  const handleEditCertificate = (certificate: DoctorCertificate) => {
-    setFormMode("edit");
-    setSelectedCertificate(certificate);
-    setIsCertificateFormOpen(true);
-  };
-
-  const handleAddExperience = () => {
-    setFormMode("add");
-    setSelectedExperience(null);
-    setIsExperienceFormOpen(true);
-  };
-
-  const handleEditExperience = (experience: DoctorExperience) => {
-    setFormMode("edit");
-    setSelectedExperience(experience);
-    setIsExperienceFormOpen(true);
-  };
-
-  const handleEducationSuccess = (updatedEducation: DoctorEducation) => {
-    let updatedEducations = [...educations];
-
-    if (formMode === "add") {
-      updatedEducations.push(updatedEducation);
-    } else {
-      updatedEducations = updatedEducations.map((edu) =>
-        edu.id === updatedEducation.id ? updatedEducation : edu
-      );
-    }
-
-    setEducations(updatedEducations);
-
-    if (doctor) {
-      const updatedDoctor = {
-        ...doctor,
-        educations: updatedEducations,
-      };
-      onUpdate(updatedDoctor);
-    }
-  };
-
-  const handleCertificateSuccess = (updatedCertificate: DoctorCertificate) => {
-    let updatedCertificates = [...certificates];
-
-    if (formMode === "add") {
-      updatedCertificates.push(updatedCertificate);
-    } else {
-      updatedCertificates = updatedCertificates.map((cert) =>
-        cert.id === updatedCertificate.id ? updatedCertificate : cert
-      );
-    }
-
-    setCertificates(updatedCertificates);
-
-    if (doctor) {
-      const updatedDoctor = {
-        ...doctor,
-        certificates: updatedCertificates,
-      };
-      onUpdate(updatedDoctor);
-    }
-  };
-
-  const handleExperienceSuccess = (updatedExperience: DoctorExperience) => {
-    let updatedExperiences = [...experiences];
-
-    if (formMode === "add") {
-      updatedExperiences.push(updatedExperience);
-    } else {
-      updatedExperiences = updatedExperiences.map((exp) =>
-        exp.id === updatedExperience.id ? updatedExperience : exp
-      );
-    }
-
-    setExperiences(updatedExperiences);
-
-    if (doctor) {
-      const updatedDoctor = {
-        ...doctor,
-        experiences: updatedExperiences,
-      };
-      onUpdate(updatedDoctor);
     }
   };
 
@@ -339,26 +216,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                         {doctor.userId}
                       </Typography>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Gênero
-                      </Typography>
-                      <Typography variant="body1" gutterBottom>
-                        {doctor.sex ? "Masculino" : "Feminino"}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Data de nascimento
-                      </Typography>
-                      <Typography variant="body1" gutterBottom>
-                        {typeof doctor.dob === "string"
-                          ? parseDateFromString(doctor.dob).toLocaleDateString(
-                              "pt-BR"
-                            )
-                          : new Date(doctor.dob).toLocaleDateString("pt-BR")}
-                      </Typography>
-                    </Grid>
+
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">
                         Telefone

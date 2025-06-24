@@ -18,14 +18,8 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Delete, Add, UploadFile } from "@mui/icons-material";
-import { User } from "../../types/user";
 import PatientForm from "../../components/admin/PatientForm";
-import {
-  getPatients,
-  deletePatient,
-  importPatients,
-} from "../../services/admin/patients_service";
-import { updateInfo } from "../../services/authenticate/paciente_service";
+
 import * as XLSX from "xlsx";
 
 const PatientManagementPage: React.FC = () => {

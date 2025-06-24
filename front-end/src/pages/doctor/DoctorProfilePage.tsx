@@ -1,28 +1,20 @@
-// Import các thư viện React và các component cần thiết
+// Importe as bibliotecas React e os componentes necessários
 import React, { useState, useEffect } from "react";
 import { Container, Grid, Box, IconButton, Alert } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import LockIcon from "@mui/icons-material/Lock";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router";
-// Import các component cho phần thông tin cá nhân và chuyên môn của bác sĩ
+// Importe os componentes para informações pessoais e profissionais do médico
 import { PersonalInfoSection } from "../../components/profile/PersonalInfoSection";
-import { DoctorExperienceSection } from "../../components/doctor/DoctorExperienceSection";
-import { DoctorEducationSection } from "../../components/doctor/DoctorEducationSection";
-import { DoctorCertificatesSection } from "../../components/doctor/DoctorCertificatesSection";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
-// Import types và services
-import { Doctor } from "../../types/doctor";
-import { Diploma } from "../../types";
+// Importe types e services
 import { useSelector, useDispatch } from "react-redux";
-import {
-  getDoctorInfo,
-  updateDoctorAvatar,
-} from "../../services/authenticate/paciente_service";
+
 import { setAuth } from "../../stores/slices/user.slice";
 import { ROUTING } from "../../constants/routing";
 
-// Dữ liệu mẫu - thông thường sẽ lấy từ API
+// Dados de exemplo - normalmente seriam obtidos de uma API
 const mockDoctorData: any = {
   id: 1,
   userId: "dr123",
@@ -61,88 +53,42 @@ const mockDoctorData: any = {
       district: "Central",
     },
     description:
-      "Specialized in cardiovascular treatments and heart surgeries.",
+      "Especializado em tratamentos cardiovasculares e cirurgias cardíacas.",
   },
-  educations: [
-    {
-      id: 1,
-      schoolName: "Medical University",
-      joinedDate: "2000-09-01",
-      graduateDate: "2006-06-30",
-      diploma: Diploma.BACHELOR,
-      doctorId: 0,
-    },
-    {
-      id: 2,
-      schoolName: "Health Academy",
-      joinedDate: "1996-09-01",
-      graduateDate: "2000-05-30",
-      diploma: Diploma.DOCTOR,
-      doctorId: 0,
-    },
-  ],
-  certificates: [
-    {
-      id: 1,
-      certName: "Advanced Cardiovascular Life Support",
-      issueDate: "2018-03-15",
-      doctorId: 1,
-      address: {
-        city: "Metropolis",
-        id: 3,
-        number: "123",
-        street: "Medical Street",
-        ward: "Healthcare",
-        district: "Central",
-      },
-    },
-    {
-      id: 2,
-      certName: "Board Certification in Cardiology",
-      issueDate: "2016-07-22",
-      doctorId: 1,
-      address: {
-        city: "Metropolis",
-        id: 4,
-        number: "123",
-        street: "Medical Street",
-        ward: "Healthcare",
-        district: "Central",
-      },
-    },
-  ],
 };
 
-// Component trang hồ sơ bác sĩ
+// Componente da página de perfil do médico
 const DoctorProfilePage: React.FC = () => {
-  // Khai báo các state cần thiết
-  const [doctorData, setDoctorData] = useState<any | null>(null); // Lưu thông tin bác sĩ
-  const [loading, setLoading] = useState(true); // Trạng thái đang tải
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Trạng thái hiển thị modal chỉnh sửa
-  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false); // Trạng thái hiển thị modal tải lên avatar
-  const [avatarLoading, setAvatarLoading] = useState(false); // Trạng thái đang tải khi cập nhật avatar
-  const [avatarError, setAvatarError] = useState<string | null>(null); // Lỗi khi cập nhật avatar
-  const [error, setError] = useState<string | null>(null); // Lưu thông báo lỗi nếu có
-  const user = useSelector((state: any) => state.user.user); // Lấy thông tin người dùng từ Redux
-  const dispatch = useDispatch(); // Hook để gửi action đến Redux
-  const navigate = useNavigate(); // Hook chuyển trang
+  // Declaração dos estados necessários
+  const [doctorData, setDoctorData] = useState<any | null>(null); // Armazena informações do médico
+  const [loading, setLoading] = useState(true); // Estado de carregamento
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Estado do modal de edição
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false); // Estado do modal de upload de avatar
+  const [avatarLoading, setAvatarLoading] = useState(false); // Estado de carregamento do avatar
+  const [avatarError, setAvatarError] = useState<string | null>(null); // Erro ao atualizar avatar
+  const [error, setError] = useState<string | null>(null); // Mensagem de erro
+  const user = useSelector((state: any) => state.user.user); // Obtém informações do usuário do Redux
+  const dispatch = useDispatch(); // Hook para enviar ações ao Redux
+  const navigate = useNavigate(); // Hook de navegação
 
   useEffect(() => {
-    // Hàm lấy dữ liệu bác sĩ từ API
+    // Função para buscar dados do médico da API
     const fetchDoctorData = async () => {
       setLoading(true);
       try {
-        // Gọi API để lấy thông tin bác sĩ dựa vào userId
+        // Chama a API para obter informações do médico pelo userId
         const response = await getDoctorInfo(user.userId);
         if (response.data && response.data.code === 200) {
-          console.log("Doctor data:", response.data.data.doctor.sex);
+          console.log("Dados do médico:", response.data.data.doctor.sex);
           setDoctorData(response.data.data);
         } else {
-          setError("Failed to retrieve doctor data");
+          setError("Falha ao obter dados do médico");
         }
       } catch (error) {
-        console.error("Error fetching doctor data:", error);
-        setError("Error loading doctor data. Please try again later.");
+        console.error("Erro ao buscar dados do médico:", error);
+        setError(
+          "Erro ao carregar dados do médico. Tente novamente mais tarde."
+        );
       } finally {
         setLoading(false);
       }
@@ -150,110 +96,59 @@ const DoctorProfilePage: React.FC = () => {
 
     fetchDoctorData();
   }, [user?.userId]);
-  console.log("Doctor data:", doctorData);
+  console.log("Dados do médico:", doctorData);
 
-  // Hàm mở modal chỉnh sửa thông tin cá nhân
+  // Função para abrir o modal de edição de informações pessoais
   const handleOpenEditModal = () => {
     setIsEditModalOpen(true);
   };
 
-  // Hàm đóng modal chỉnh sửa thông tin cá nhân
+  // Função para fechar o modal de edição de informações pessoais
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
   };
 
-  // Hàm mở modal tải lên avatar
-  const handleOpenAvatarModal = () => {
-    setIsAvatarModalOpen(true);
-  };
-
-  // Hàm đóng modal tải lên avatar
-  const handleCloseAvatarModal = () => {
-    setIsAvatarModalOpen(false);
-  };
-
-  // Hàm xử lý khi lưu thông tin cá nhân
+  // Função para salvar informações pessoais
   const handleSaveProfile = (updatedData: any) => {
-    // Cập nhật state local để hiển thị ngay lập tức
+    // Atualiza o estado local para exibir imediatamente
     setDoctorData({ ...doctorData, ...updatedData });
-    // Lưu ý: Không cần gọi API ở đây vì đã được thực hiện trong EditProfileModal
+    // Observação: Não é necessário chamar a API aqui, pois já é feito no EditProfileModal
   };
 
-  // Hàm xử lý khi lưu avatar mới
-  const handleSaveAvatar = async (newAvatar: string) => {
-    try {
-      setAvatarLoading(true);
-      setAvatarError(null);
-
-      // Gọi API để cập nhật avatar bác sĩ
-      const response = await updateDoctorAvatar(user.userId, {
-        uri: newAvatar,
-      });
-
-      if (response?.data?.code === 200) {
-        // Cập nhật state local với dữ liệu trả về từ API
-        setDoctorData({
-          ...doctorData,
-          doctor: response.data.data, // Cập nhật thông tin doctor với dữ liệu mới
-        });
-
-        // Cập nhật Redux state với avatar mới
-        const updatedUser = {
-          ...user,
-          avatar: response.data.data.avatar, // Avatar là trực tiếp trong data object, không phải trong doctor.avatar
-        };
-        dispatch(setAuth(updatedUser));
-
-        console.log(
-          "Doctor avatar updated successfully:",
-          response.data.data.avatar
-        );
-      } else {
-        throw new Error("Failed to update doctor avatar");
-      }
-    } catch (error) {
-      console.error("Error updating doctor avatar:", error);
-      setAvatarError("Failed to update avatar. Please try again.");
-    } finally {
-      setAvatarLoading(false);
-    }
-  };
-
-  // Hiển thị trạng thái đang tải
+  // Exibe estado de carregamento
   if (loading) {
-    return <div>Đang tải...</div>;
+    return <div>Carregando...</div>;
   }
 
-  // Hiển thị thông báo lỗi nếu có
+  // Exibe mensagem de erro, se houver
   if (error) {
     return <Alert severity="error">{error}</Alert>;
   }
 
-  // Hiển thị thông báo khi không có dữ liệu
+  // Exibe mensagem quando não há dados
   if (!doctorData) {
-    return <Alert severity="info">Không có dữ liệu</Alert>;
+    return <Alert severity="info">Nenhum dado disponível</Alert>;
   }
 
-  // Render giao diện chính khi đã có dữ liệu
+  // Renderiza a interface principal quando os dados estão disponíveis
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Grid container spacing={3}>
-        {/* Phần thông tin cá nhân */}
+        {/* Seção de informações pessoais */}
         <Grid item xs={12}>
           <Box sx={{ position: "relative" }}>
             <PersonalInfoSection
-              firstName={doctorData.doctor?.firstName || "Không có thông tin"}
-              lastName={doctorData.doctor?.lastName || "Không có thông tin"}
-              email={doctorData.doctor?.email || "Không có thông tin"}
-              phone={doctorData.doctor?.phone || "Không có thông tin"}
-              dob={doctorData.doctor?.dob || "Không có thông tin"}
-              sex={doctorData.doctor?.sex ?? "Không có thông tin"}
+              firstName={doctorData.doctor?.firstName || "Sem informação"}
+              lastName={doctorData.doctor?.lastName || "Sem informação"}
+              email={doctorData.doctor?.email || "Sem informação"}
+              phone={doctorData.doctor?.phone || "Sem informação"}
+              dob={doctorData.doctor?.dob || "Sem informação"}
+              sex={doctorData.doctor?.sex ?? "Sem informação"}
               address={doctorData.doctor?.address || null}
               avatar={doctorData.doctor?.avatar || "/default-avatar.png"}
-              onEditAvatar={handleOpenAvatarModal}
-              hideEditButton={false} // Hiển thị nút chỉnh sửa
+              hideEditButton={false} // Exibe botão de editar
             />
-            {/* Nút chỉnh sửa thông tin */}
+            {/* Botão para editar informações */}
             <IconButton
               color="primary"
               onClick={handleOpenEditModal}
@@ -268,12 +163,12 @@ const DoctorProfilePage: React.FC = () => {
                 boxShadow: 1,
                 zIndex: 1,
               }}
-              aria-label="Chỉnh sửa"
+              aria-label="Editar"
               size="small"
             >
               <EditIcon />
             </IconButton>
-            {/* Nút đổi mật khẩu */}
+            {/* Botão para trocar senha */}
             <Button
               variant="outlined"
               startIcon={<LockIcon />}
@@ -290,31 +185,13 @@ const DoctorProfilePage: React.FC = () => {
               }}
               onClick={() => navigate(ROUTING.CHANGE_PASSWORD)}
             >
-              Đổi mật khẩu
+              Trocar senha
             </Button>
-          </Box>
-        </Grid>
-        {/* Phần thông tin kinh nghiệm */}
-        <Grid item xs={12} md={6}>
-          <DoctorExperienceSection
-            experiences={doctorData.experiences || []}
-            specialization={
-              doctorData.doctor?.typeDisease?.name || "Không có thông tin"
-            }
-          />
-        </Grid>
-        {/* Phần thông tin học vấn và chứng chỉ */}
-        <Grid item xs={12} md={6}>
-          <DoctorEducationSection education={doctorData.educations || []} />
-          <Box sx={{ mt: 3 }}>
-            <DoctorCertificatesSection
-              certificates={doctorData.certificates || []}
-            />
           </Box>
         </Grid>
       </Grid>
 
-      {/* Modal chỉnh sửa thông tin cá nhân */}
+      {/* Modal de edição de informações pessoais */}
       <EditProfileModal
         open={isEditModalOpen}
         onClose={handleCloseEditModal}
