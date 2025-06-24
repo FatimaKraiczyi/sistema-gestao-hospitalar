@@ -17,13 +17,10 @@ import {
 } from "@mui/material";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
-import { Doctor } from "../../types/doctor";
-import { Disease } from "../../types/typeDisease";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { vi } from "date-fns/locale";
-import { getAllTypeDiseases } from "../../services/admin/typeDisease_service";
 
 interface DoctorFormProps {
   open: boolean;

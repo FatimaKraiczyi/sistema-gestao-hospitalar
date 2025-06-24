@@ -26,17 +26,11 @@ import {
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { addDays, format, startOfWeek, addWeeks, subWeeks } from "date-fns";
-import { vi } from "date-fns/locale";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SaveIcon from "@mui/icons-material/Save";
 import { formatDateToString } from "../../utils/dateUtils";
-import {
-  getWorkScheduleBetweenDate,
-  addMultipleWorkSchedule,
-} from "../../services/authenticate/workSchedule_service";
-import { getShiftByStatusTrue } from "../../services/authenticate/shift_service";
 import { parse } from "date-fns/esm";
 
 interface Shift {

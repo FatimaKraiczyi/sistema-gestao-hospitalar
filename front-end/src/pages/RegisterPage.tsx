@@ -9,7 +9,7 @@ import {
   Typography,
   Link,
 } from "@mui/material";
-import { signUp } from "../services/authenticate/auth_service";
+import { signUp } from "../services/auth/auth";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { ROUTING } from "../constants/routing";

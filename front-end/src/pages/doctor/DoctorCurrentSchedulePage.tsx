@@ -31,7 +31,6 @@ import { ROUTING } from "../../constants/routing";
 import { format, addDays, startOfWeek, addWeeks, subWeeks } from "date-fns";
 import { vi } from "date-fns/locale";
 import { formatDateToString, parseDateFromString } from "../../utils/dateUtils";
-import { getWorkScheduleBetweenDate } from "../../services/authenticate/workSchedule_service.ts";
 
 /**
  * DoctorCurrentSchedulePage - Página que exibe a agenda de trabalho do médico
@@ -112,23 +111,6 @@ const isExactDate = (dateString: string): boolean => {
   return date.getTime() === today.getTime();
 };
 
-// Verifica se o horário atual está dentro do turno
-const isWithinShiftHours = (shift: Shift): boolean => {
-  const now = new Date();
-  const currentDate = new Date();
-
-  const startTime = new Date(currentDate);
-  const endTime = new Date(currentDate);
-
-  const [startHour, startMinute] = shift.start.split(":").map(Number);
-  startTime.setHours(startHour, startMinute, 0);
-
-  const [endHour, endMinute] = shift.end.split(":").map(Number);
-  endTime.setHours(endHour, endMinute, 0);
-
-  return now >= startTime && now <= endTime;
-};
-
 // Dias da semana com rótulo em PT-BR
 const DAYS_OF_WEEK = [
   { key: "MONDAY", label: "Segunda" },
@@ -139,12 +121,6 @@ const DAYS_OF_WEEK = [
   { key: "SATURDAY", label: "Sábado" },
   { key: "SUNDAY", label: "Domingo" },
 ];
-
-// Enum para períodos do dia
-enum TimePeriod {
-  MORNING = "morning", // Manhã
-  AFTERNOON = "afternoon", // Tarde
-}
 
 const DoctorCurrentSchedulePage: React.FC = () => {
   const navigate = useNavigate();
@@ -236,11 +212,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
         const dateFromAPI = item.dateAppointment;
         const shiftData = item.shift;
 
-        if (!shiftData) {
-          console.error("Faltando informações do turno:", item);
-          return;
-        }
-
         const formatTimeString = (timeStr: string) => {
           if (timeStr.includes("-")) {
             return timeStr.split("-").slice(0, 2).join(":");
@@ -295,58 +266,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
     fetchScheduleData();
   }, [currentWeekStart, user?.userId]);
 
-  // Busca todos os turnos de um dia específico
-  const getSchedulesForDate = (date: string): WorkSchedule[] => {
-    return scheduleMap[date] || [];
-  };
-
-  // Determina se o turno é manhã ou tarde
-  const getShiftPeriod = (shift: Shift): TimePeriod => {
-    const startHour = parseInt(shift.start.split(":")[0]);
-    if (startHour < 12) return TimePeriod.MORNING;
-    return TimePeriod.AFTERNOON;
-  };
-
-  // Busca todos os turnos de um período (manhã/tarde)
-  const getShiftsForPeriod = (
-    date: string,
-    period: TimePeriod
-  ): WorkSchedule[] => {
-    const schedules = getSchedulesForDate(date);
-    return schedules.filter(
-      (schedule) => getShiftPeriod(schedule.shift) === period
-    );
-  };
-
-  // Iniciar atendimento online
-  const handleStartExamination = (shiftSchedule: WorkSchedule) => {
-    if (!shiftSchedule || !shiftSchedule.id) {
-      alert("Não foi possível abrir a sala de atendimento. Tente novamente.");
-      return;
-    }
-
-    if (!isExactDate(shiftSchedule.dateAppointment)) {
-      alert("Só é possível entrar na sala no dia do turno.");
-      return;
-    }
-
-    if (!isWithinShiftHours(shiftSchedule.shift)) {
-      alert(
-        "Só é possível entrar na sala durante o turno: " +
-          shiftSchedule.shift.start +
-          " até " +
-          shiftSchedule.shift.end
-      );
-      return;
-    }
-
-    const examRoomPath = ROUTING.EXAMINATION_ROOM.replace(
-      ":scheduleId",
-      shiftSchedule.id.toString()
-    );
-    window.open(examRoomPath, "_blank");
-  };
-
   // Exibe status dos turnos de um período (manhã/tarde)
   const renderPeriodStatus = (date: string, period: TimePeriod) => {
     const shifts = getShiftsForPeriod(date, period);
@@ -390,22 +309,11 @@ const DoctorCurrentSchedulePage: React.FC = () => {
         }}
       >
         {shifts.map((shiftSchedule, index) => {
-          const shiftTime = {
-            start: shiftSchedule.shift.start,
-            end: shiftSchedule.shift.end,
-          };
-
           const isDateInPast = isPastDate(date);
 
           const handleCardClick = (event: React.MouseEvent) => {
             if ((event.target as HTMLElement).closest("button")) {
               return;
-            }
-
-            if (shiftSchedule) {
-              navigate(
-                `${ROUTING.DOCTOR}/${ROUTING.SCHEDULE}/${shiftSchedule.id}`
-              );
             }
           };
 
@@ -433,22 +341,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                 },
               }}
             >
-              {/* Horário do turno */}
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  fontWeight: "bold",
-                  color: "primary.main",
-                  bgcolor: "rgba(255, 255, 255, 0.8)",
-                  px: 1.5,
-                  py: 0.5,
-                  borderRadius: 5,
-                  border: "1px solid rgba(25, 118, 210, 0.2)",
-                }}
-              >
-                {shiftTime.start} - {shiftTime.end}
-              </Typography>
-
               {/* Chip de consultas */}
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                 <Typography

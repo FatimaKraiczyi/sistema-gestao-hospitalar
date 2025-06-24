@@ -5,13 +5,11 @@ import {
   Grid,
   Card,
   CardContent,
-  Button,
   CircularProgress,
   Paper,
 } from "@mui/material";
 // import { getSpecialties } from "../../services/specialty_service";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
-import { getAllTypeDiseases } from "../../services/authenticate/typeDisease_service.ts";
 
 interface SelectSpecialtyProps {
   onSelect: (specialty: any) => void;

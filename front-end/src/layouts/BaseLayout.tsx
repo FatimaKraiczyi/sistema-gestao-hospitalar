@@ -58,11 +58,10 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
   const dispatch = useDispatch();
   const userData = useSelector((state: RootState) => state.user.auth);
   const isAdmin = userData?.type === "ADMIN";
-
   const handleDrawerToggle = () => {
     setOpen(!open);
   };
-
+  console.log("userData", userData);
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -106,7 +105,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            DASHBOARD DO {userData?.type}
+            {isAdmin ? "DASHBOARD DO ADMIN" : ` DASHBOARD DO ${userData?.type}`}
           </Typography>
           <div>
             <IconButton

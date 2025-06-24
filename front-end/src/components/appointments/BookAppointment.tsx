@@ -12,10 +12,8 @@ import {
 import SelectService from "./SelectService";
 import DoctorList from "./DoctorList";
 import SelectDateTime from "./SelectDateTime";
-import DoctorDetails from "./DoctorDetails";
 import ConfirmAppointment from "./ConfirmAppointment";
 import PaymentCheckout from "./PaymentCheckout";
-import { createAppointment } from "../../services/appointment/booking_service";
 
 interface BookAppointmentProps {
   onClose: () => void;

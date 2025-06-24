@@ -3,81 +3,46 @@ import { Container, Grid, Box, IconButton, Alert } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import Button from "@mui/material/Button";
 import { useLocation, useNavigate } from "react-router";
-import CreditCardIcon from "@mui/icons-material/CreditCard"; // Importa ícone para conta bancária
+import CreditCardIcon from "@mui/icons-material/CreditCard";
 
 // Importação dos componentes usados no perfil
 import { PersonalInfoSection } from "../../components/profile/PersonalInfoSection";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
-// Importação de serviços e hooks do Redux
 import { useSelector } from "react-redux";
 import { ROUTING } from "../../constants/routing";
 import { RootState } from "../../stores/store";
 
-// Tipagem para os dados do paciente
-export interface PatientData {
-  id?: string;
-  cpf?: string;
-  email?: string;
-  nome: string;
-  sobrenome?: string;
-  telefone: string;
-  logradouro?: string;
-  numero: string;
-  complemento?: string;
-  bairro?: string;
-  cidade?: string;
-  estado?: string;
-  cep: string;
-  pontos?: number;
-}
-
-// Componente da página de perfil do paciente
 const PatientProfilePage: React.FC = () => {
-  // Busca o usuário logado do Redux
   const userData = useSelector((state: RootState) => state.user.profile);
 
-  console.log("Dados do usuário:", userData);
-  // Declaração dos states necessários
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Estado de exibição do modal de edição
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate(); // Hook de navegação
-  const [isCompletingProfile, setIsCompletingProfile] = useState(false); // novo estado
+  const navigate = useNavigate();
+  const [isCompletingProfile, setIsCompletingProfile] = useState(false);
 
   useEffect(() => {
     if (location.state?.openModal) {
       setIsEditModalOpen(true);
-      setIsCompletingProfile(true); // flag ativada para completar
+      setIsCompletingProfile(true);
     }
   }, [location.state]);
 
-  // Funções de controle dos modais - não chamam API
-  // Abre modal de edição
   const handleOpenEditModal = () => {
     setIsEditModalOpen(true);
   };
 
-  // Fecha modal de edição
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
   };
 
-  // Exibe estado de carregamento
   if (!userData) {
     return <div>Carregando...</div>;
   }
 
-  /* 
-  // Exibe mensagem de erro, se houver
-  if (error) {
-    return <Alert severity="error">{error}</Alert>;
-  } */
-
-  // Exibe mensagem caso não haja dados
   if (!userData) {
     return <Alert severity="info">Sem dados disponíveis</Alert>;
   }
 
-  // Renderiza interface principal quando há dados
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Grid container spacing={3}>

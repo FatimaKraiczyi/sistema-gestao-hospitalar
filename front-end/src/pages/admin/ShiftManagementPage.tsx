@@ -17,13 +17,6 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Edit, Delete, Add } from "@mui/icons-material";
-import { Shift } from "../../types/shift";
-import ShiftForm from "../../components/admin/ShiftForm";
-import {
-  getShifts,
-  addShift,
-  deleteShift,
-} from "../../services/admin/shifts_service";
 import { formatTimeFromTimeString } from "../../utils/dateUtils";
 
 const ShiftManagementPage: React.FC = () => {

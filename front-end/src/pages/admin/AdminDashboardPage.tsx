@@ -11,7 +11,6 @@ import {
   ToggleButton,
   Alert,
   Container,
-  SxProps,
 } from "@mui/material";
 import {
   AnimatedLine,
@@ -22,8 +21,7 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import PeopleIcon from "@mui/icons-material/People";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { getDashboard } from "../../services/appointment/dashboard_service";
-import { useChartId, useDrawingArea, useXScale } from "@mui/x-charts";
+import { useChartId, useDrawingArea } from "@mui/x-charts";
 
 interface DashboardVisualize {
   salaries: {

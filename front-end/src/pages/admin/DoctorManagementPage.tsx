@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   DataGrid,
   GridColDef,
-  GridCsvExportOptions,
   GridRenderCellParams,
   GridToolbar,
 } from "@mui/x-data-grid";
@@ -18,22 +17,9 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Edit, Delete, Add, Visibility, UploadFile } from "@mui/icons-material";
-import { Doctor } from "../../types/doctor";
 import DoctorForm from "../../components/admin/DoctorForm";
 import DoctorDetailModal from "../../components/admin/DoctorDetailModal";
-import {
-  getAllDoctors,
-  addDoctor,
-  importDoctor,
-  deleteDoctor,
-} from "../../services/admin/doctor_service";
 import { format } from "date-fns";
-import * as XLSX from "xlsx";
-import {
-  DoctorCertificate,
-  DoctorEducation,
-  DoctorExperience,
-} from "../../types/doctor";
 
 const DoctorManagementPage: React.FC = () => {
   // Estados para gerenciar dados e UI
@@ -43,26 +29,8 @@ const DoctorManagementPage: React.FC = () => {
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [importing, setImporting] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: "success" | "error" | "info" | "warning";
-  }>({
-    open: false,
-    message: "",
-    severity: "info",
-  });
+
   const [submitting, setSubmitting] = useState<boolean>(false);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const csvOptions: GridCsvExportOptions = {
-    fileName: "doctors",
-    delimiter: ",",
-    utf8WithBom: true,
-  };
 
   // Buscar lista de médicos da API
   const fetchDoctors = async () => {
@@ -88,17 +56,6 @@ const DoctorManagementPage: React.FC = () => {
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
-  };
-
-  const showMessage = (
-    message: string,
-    severity: "success" | "error" | "info" | "warning"
-  ) => {
-    setSnackbar({
-      open: true,
-      message,
-      severity,
-    });
   };
 
   const handleAddClick = () => {
@@ -144,7 +101,7 @@ const DoctorManagementPage: React.FC = () => {
 
         const doctorToAdd = {
           ...doctorData,
-          password: "123456789",
+          password: "123ww456789",
           dob: formattedDob,
           typeDisease: diseaseInfo,
           certificates: [],

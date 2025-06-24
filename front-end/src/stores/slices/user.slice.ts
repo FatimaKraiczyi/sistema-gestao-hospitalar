@@ -1,32 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-
-interface UserJwtData {
-  userId: string;
-  cpf: string;
-  email: string;
-  type: string;
-}
-
-interface PatientData {
-  id?: string;
-  nome?: string;
-  email?: string;
-  cpf?: string;
-  telefone?: string;
-  cep?: string;
-  logradouro?: string;
-  numero?: string;
-  complemento?: string;
-  bairro?: string;
-  cidade?: string;
-  estado?: string;
-  pontos?: number;
-}
-
-interface UserState {
-  auth: UserJwtData | null;
-  profile: PatientData | null;
-}
+import { UserJwtData, UserState } from "../../types";
 
 const getUserFromLocalStorage = (): UserJwtData | null => {
   try {

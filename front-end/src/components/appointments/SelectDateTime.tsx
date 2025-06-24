@@ -17,12 +17,8 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { format, addDays, isBefore, isToday } from "date-fns";
 import {
   formatDateToString,
-  parseDateTimeFromString,
-  formatTime,
   formatTimeFromTimeString,
 } from "../../utils/dateUtils";
-import { getWorkScheduleByDoctorAndExactDate } from "../../services/authenticate/workSchedule_service";
-import { getAppointmentPatientDetail } from "../../services/appointment/booking_service";
 import DoctorDetails from "./DoctorDetails"; // Import DoctorDetails component
 
 /**

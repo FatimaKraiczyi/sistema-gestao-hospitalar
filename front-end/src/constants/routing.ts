@@ -14,18 +14,14 @@ export const ROUTING = {
   DASHBOARD: "dashboard",
   USERS: "users",
   DOCTORS: "doctors",
-  DRUG: "drugs",
   PRICES: "prices", // Add new route for prices
   SHIFTS: "shifts",
-  DISEASES: "diseases",
   CANCEL_APPOINTMENT: "cancel-appointment",
-  DOCTOR_REVENUE: "doctor-revenue/:periodType/:period", // New route for doctor revenue details
 
   // Doctor routes (nested under /doctor)
   APPOINTMENTS: "appointments",
   SCHEDULE_DETAIL: "schedule/:scheduleId", // New route for appointment details
   PATIENTS: "patients",
-  PRESCRIPTIONS: "prescriptions",
   PROFILE: "profile",
   SCHEDULE: "schedule",
   CURRENT_SCHEDULE: "current-schedule",
