@@ -1,42 +1,43 @@
 package br.com.gestao_hospitalar.consulta_service.models;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Column;
+import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
-
 @Entity
+@Table(name = "especialidade")
 public class EspecialidadeModel {
-    @Id
-    private String codigo;
-    
-    @Column(nullable = false)
-    private String nome;
 
-    // Construtores
-    public EspecialidadeModel() {
-    }
+  @Id
+  private String codigo;
 
-    public EspecialidadeModel(String codigo, String nome) {
-        this.codigo = codigo;
-        this.nome = nome;
-    }
+  @Column(nullable = false)
+  private String nome;
 
-    // Getters e Setters
-    public String getCodigo() {
-        return codigo;
-    }
+  // Construtores
+  public EspecialidadeModel() {}
 
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
+  public EspecialidadeModel(String codigo, String nome) {
+    this.codigo = codigo;
+    this.nome = nome;
+  }
 
-    public String getNome() {
-        return nome;
-    }
+  // Getters e Setters
+  public String getCodigo() {
+    return codigo;
+  }
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+  public void setCodigo(String codigo) {
+    this.codigo = codigo;
+  }
+
+  public String getNome() {
+    return nome;
+  }
+
+  public void setNome(String nome) {
+    this.nome = nome;
+  }
 }

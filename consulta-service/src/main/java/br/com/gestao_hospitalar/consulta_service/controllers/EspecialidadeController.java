@@ -1,4 +1,4 @@
-package br.com.gestao_hospitalar.consulta_service.controllers;
+package br.com.gestao_hospitalar.consulta_service.controller;
 
 import br.com.gestao_hospitalar.consulta_service.models.EspecialidadeModel;
 import br.com.gestao_hospitalar.consulta_service.services.EspecialidadeService;
