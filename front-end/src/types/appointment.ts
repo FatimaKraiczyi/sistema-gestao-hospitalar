@@ -1,11 +1,12 @@
 export interface ConsultaModel {
-  codigo: string;
-  especialidade: string;
-  medico: string;
-  status: string;
-  data: string; // ISO string (LocalDateTime)
-  vagasDisponiveis: number;
-  // Adicione outros campos conforme necessário
+  codigo?: string;
+  especialidade?: string;
+  medico?: string;
+  status?: string;
+  data?: string;
+  vagasDisponiveis?: number;
+  vagasTotal?: number;
+  valor?: number;
 }
 
 export interface AgendamentoModel {

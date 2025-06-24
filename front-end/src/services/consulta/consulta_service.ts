@@ -1,16 +1,7 @@
+import { ConsultaModel } from "../../types";
 import axiosConfig from "../axiosConfig";
 
 const prefix = "/consulta";
-
-export interface ConsultaModel {
-  codigo?: string;
-  especialidade?: string;
-  medico?: string;
-  status?: string;
-  data?: string;
-  vagasDisponiveis?: number;
-  // Adicione outros campos conforme necessário
-}
 
 export const getAllConsultas = async (
   especialidade?: string,
