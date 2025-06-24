@@ -7,17 +7,17 @@ CREATE TABLE especialidade (
 -- Tabela: medico
 CREATE TABLE medico (
     id UUID PRIMARY KEY,
-		cpf VARCHAR(14) NOT NULL UNIQUE,
+    cpf VARCHAR(14) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
     nome VARCHAR(255) NOT NULL,
-		telefone VARCHAR(20) NOT NULL,
+    telefone VARCHAR(20) NOT NULL,
     especialidade VARCHAR(255) NOT NULL,
-		crm VARCHAR(20) NOT NULL UNIQUE,
-		ativo BOOLEAN NOT NULL DEFAULT TRUE,
-	);
+    crm VARCHAR(20) NOT NULL UNIQUE,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE
+);
 
 -- Tabela: consulta
-CREATE TABLE consulta(
+CREATE TABLE consulta (
     codigo VARCHAR(255) PRIMARY KEY,
     data TIMESTAMP NOT NULL,
     especialidade VARCHAR(255) NOT NULL,

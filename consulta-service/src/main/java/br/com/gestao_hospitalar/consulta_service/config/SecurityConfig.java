@@ -1,4 +1,4 @@
-package br.com.gestao_hospitalar.consulta_service.controllers.config;
+package br.com.gestao_hospitalar.consulta_service.config;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
