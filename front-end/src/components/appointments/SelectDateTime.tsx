@@ -19,7 +19,7 @@ import {
   formatDateToString,
   formatTimeFromTimeString,
 } from "../../utils/dateUtils";
-import DoctorDetails from "./DoctorDetails"; // Import DoctorDetails component
+import DoctorDetails from "./DoctorDetails"; // Importa o componente DoctorDetails
 
 /**
  * Props para o componente SelectDateTime
@@ -30,11 +30,11 @@ import DoctorDetails from "./DoctorDetails"; // Import DoctorDetails component
 interface SelectDateTimeProps {
   doctor: any;
   onSelect: (date: Date, shift: any, workScheduleTarget: object) => void;
-  patientId?: string; // Add patientId prop
+  patientId?: string; // Adiciona prop patientId
   // onBack: () => void;
 }
 
-// Loại bỏ định nghĩa SHIFTS cố định
+// Remove definição fixa de SHIFTS
 
 /**
  * Componente que permite ao paciente escolher a data e o turno da consulta
@@ -94,15 +94,15 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   /**
    * Função que chama a API para buscar a lista de turnos do médico por data
    * Foi ajustada para lidar de forma flexível com os turnos de trabalho conforme os dados da API
-   * @param date - Ngày cần kiểm tra lịch
+   * @param date - Data a ser verificada
    */
   const fetchAvailableShifts = async (date: Date) => {
     try {
       setLoading(true);
       setError(null);
-      setHasWorkSchedules(true); // Reset state khi bắt đầu fetch dữ liệu mới
+      setHasWorkSchedules(true); // Reseta o estado ao iniciar nova busca
 
-      // Gọi API lấy thông tin lịch làm việc của bác sĩ theo ngày
+      // Chama a API para obter informações da agenda do médico na data
       const result = await getWorkScheduleByDoctorAndExactDate(
         doctor.userId,
         formatDateToString(date)
@@ -112,33 +112,33 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
           console.log(error);
           return null;
         });
-      // lọc ra lịch có status true
+      // filtra agendas com status true
       const filteredResult = result.filter((item: any) => item.status === true);
       setWorkSchedules(filteredResult);
 
-      // Kiểm tra dữ liệu trả về từ API
+      // Verifica dados retornados pela API
       if (!result || !Array.isArray(result)) {
         setAvailableShifts([]);
-        setHasWorkSchedules(false); // Không có lịch làm việc nào cho ngày này
+        setHasWorkSchedules(false); // Não há agenda para este dia
         return;
       }
 
-      // Kiểm tra xem có lịch làm việc nào trong ngày đã chọn không
+      // Verifica se há agenda para o dia selecionado
       if (result.length === 0) {
         setAvailableShifts([]);
         setHasWorkSchedules(false);
         return;
       }
 
-      // Tạo map để nhóm các lịch làm việc theo shift id
+      // Cria um map para agrupar agendas por id do turno
       const shiftsMap = new Map();
 
-      // Nhóm các lịch làm việc theo shift id
+      // Agrupa agendas por id do turno
       filteredResult.forEach((item: any) => {
         if (!shiftsMap.has(item.shift.id)) {
           shiftsMap.set(item.shift.id, {
             id: item.shift.id,
-            shift: `Ca ${item.shift.shift}`,
+            shift: `Turno ${item.shift.shift}`,
             start: item.shift.start,
             end: item.shift.end,
             isAvailable: true,
@@ -146,22 +146,24 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
         }
       });
 
-      // Chuyển map thành mảng để hiển thị
+      // Converte o map em array para exibição
       const shifts = Array.from(shiftsMap.values());
 
       setAvailableShifts(shifts);
     } catch (err) {
-      console.error("Không thể lấy lịch khám của bác sĩ:", err);
-      setError("Không thể tải các ca khám khả dụng. Vui lòng thử lại.");
+      console.error("Não foi possível obter a agenda do médico:", err);
+      setError(
+        "Não foi possível carregar os turnos disponíveis. Tente novamente."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   /**
-   * Xử lý khi người dùng chọn một ngày mới
-   * Reset ca khám đã chọn và tải lại danh sách ca khám
-   * @param date - Ngày được chọn mới
+   * Lida com a seleção de uma nova data
+   * Reseta o turno selecionado e recarrega a lista de turnos
+   * @param date - Nova data selecionada
    */
   const handleDateChange = (date: Date | null) => {
     setSelectedDate(date);
@@ -169,34 +171,34 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   };
 
   /**
-   * Xử lý khi người dùng chọn một ca khám
-   * @param shift - Ca khám được chọn
-   * @param shiftInfo - Thông tin chi tiết của ca khám
+   * Lida com a seleção de um turno
+   * @param shift - Turno selecionado
+   * @param shiftInfo - Informações detalhadas do turno
    */
   const handleShiftSelect = async (shift: string, shiftInfo: any) => {
-    // Tìm và lưu thông tin lịch làm việc tương ứng với ca được chọn
+    // Busca e salva a agenda correspondente ao turno selecionado
     const shiftId = shiftInfo.id;
     const selectedWorkSchedule = workSchedules.find(
       (item: any) => item.shift.id === shiftId
     );
 
-    // Kiểm tra xem bệnh nhân đã có lịch khám trong ca này chưa
+    // Verifica se o paciente já possui agendamento neste turno
     try {
       const response = await getAppointmentPatientDetail(
         patientId,
         selectedWorkSchedule.id
       );
 
-      // Nếu API trả về mã 200, nghĩa là đã có lịch khám
+      // Se a API retornar código 200, já existe agendamento
       if (response.data.code === 200) {
         setHasExistingAppointment(true);
         setError(
-          "Bạn đã có lịch khám trong khung giờ này. Vui lòng chọn khung giờ khác."
+          "Você já possui um agendamento neste horário. Por favor, escolha outro horário."
         );
         return;
       }
     } catch (error) {
-      // Nếu API trả về lỗi, nghĩa là chưa có lịch khám
+      // Se a API retornar erro, não há agendamento
       setHasExistingAppointment(false);
       setError(null);
     }
@@ -207,8 +209,8 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   };
 
   /**
-   * Xử lý khi người dùng bấm nút tiếp tục
-   * Gọi callback với ngày và ca khám đã chọn
+   * Lida com o clique no botão continuar
+   * Chama o callback com a data e turno selecionados
    */
   const handleContinue = () => {
     if (selectedDate && selectedShift) {
@@ -217,37 +219,37 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   };
 
   /**
-   * Kiểm tra xem một ngày có bị vô hiệu hóa không
-   * Vô hiệu hóa các ngày trong quá khứ và ngày xa hơn 30 ngày tính từ hiện tại
-   * @param date - Ngày cần kiểm tra
-   * @returns true nếu ngày bị vô hiệu hóa, ngược lại false
+   * Verifica se uma data deve ser desabilitada
+   * Desabilita datas passadas e datas além de 30 dias a partir de hoje
+   * @param date - Data a ser verificada
+   * @returns true se a data deve ser desabilitada, senão false
    */
   const shouldDisableDate = (date: Date) => {
     const today = new Date();
-    const maxDate = addDays(today, 30); // Thay đổi từ 14 ngày thành 30 ngày (1 tháng)
+    const maxDate = addDays(today, 30); // 30 dias a partir de hoje
 
     return (isBefore(date, today) && !isToday(date)) || isBefore(maxDate, date);
   };
 
   /**
-   * Kiểm tra xem một ca khám có bị vô hiệu hóa không
-   * Vô hiệu hóa ca đã qua trong ngày hiện tại hoặc ca không còn trống
-   * @param shift - Ca khám cần kiểm tra
-   * @returns true nếu ca khám bị vô hiệu hóa, ngược lại false
+   * Verifica se um turno deve ser desabilitado
+   * Desabilita turnos já passados no dia atual ou que não estão disponíveis
+   * @param shift - Turno a ser verificado
+   * @returns true se o turno deve ser desabilitado, senão false
    */
   const isShiftDisabled = (shift: any) => {
-    // Nếu ca không còn trống, vô hiệu hóa
+    // Se o turno não está disponível, desabilita
     if (!shift.isAvailable) {
       return true;
     }
 
-    // Chỉ kiểm tra thời gian cho ngày hiện tại
+    // Só verifica horário para o dia atual
     if (!selectedDate || !isToday(selectedDate)) return false;
 
     const now = new Date();
     const shiftEndHour = parseInt(shift.end.split(":")[0]);
 
-    // Vô hiệu hóa ca nếu đã qua giờ kết thúc
+    // Desabilita turno se já passou do horário de término
     if (now.getHours() >= shiftEndHour) {
       return true;
     }
@@ -257,30 +259,30 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
 
   return (
     <Box>
-      {/* Tiêu đề trang */}
+      {/* Título da página */}
       <Typography variant="h6" gutterBottom>
-        {t("patient.appointments.select_date_time")}
+        Selecionar data e horário
       </Typography>
 
-      {/* Include DoctorDetails component */}
+      {/* Inclui o componente DoctorDetails */}
       <Box sx={{ mb: 3 }}>
         <DoctorDetails doctor={doctor} />
       </Box>
 
-      {/* Hiển thị thông báo lỗi nếu có */}
+      {/* Exibe mensagem de erro se houver */}
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
 
-      {/* Bố cục lưới: bên trái là lịch, bên phải là danh sách ca khám */}
+      {/* Layout em grid: à esquerda o calendário, à direita os turnos */}
       <Grid container spacing={3}>
-        {/* Phần chọn ngày khám bên trái */}
+        {/* Seleção de data à esquerda */}
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="subtitle1" gutterBottom>
-              {t("patient.appointments.select_date")}
+              Selecione a data
             </Typography>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DateCalendar
@@ -293,25 +295,25 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
           </Paper>
         </Grid>
 
-        {/* Phần chọn ca khám bên phải */}
+        {/* Seleção de turno à direita */}
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2, height: "100%" }}>
             <Typography variant="subtitle1" gutterBottom>
-              Chọn ca khám
+              Selecione o turno
             </Typography>
 
             {selectedDate && (
               <Box>
-                {/* Hiển thị ngày đã chọn */}
+                {/* Exibe a data selecionada */}
                 <Typography
                   variant="body2"
                   color="text.secondary"
                   sx={{ mb: 2 }}
                 >
-                  {format(selectedDate, "EEEE, MMMM d, yyyy")}
+                  {format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy")}
                 </Typography>
 
-                {/* Hiển thị loading hoặc danh sách ca khám */}
+                {/* Exibe loading ou lista de turnos */}
                 {loading ? (
                   <Box
                     sx={{ display: "flex", justifyContent: "center", my: 4 }}
@@ -321,7 +323,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
                 ) : (
                   <Stack spacing={2} sx={{ mb: 2, minHeight: "200px" }}>
                     {availableShifts.length > 0 ? (
-                      // Hiển thị các ca khám có sẵn
+                      // Exibe os turnos disponíveis
                       availableShifts.map((shift) => (
                         <Card
                           key={shift.id}
@@ -351,13 +353,13 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
                           }
                         >
                           <CardContent>
-                            {/* Tên ca khám */}
+                            {/* Nome do turno */}
                             <Typography variant="h6" component="div">
                               {shift.shift}
                             </Typography>
-                            {/* Thời gian ca khám */}
+                            {/* Horário do turno */}
                             <Typography variant="body2" color="text.secondary">
-                              Thời gian:{" "}
+                              Horário:{" "}
                               {formatTimeFromTimeString(shift.start, "string")}{" "}
                               - {formatTimeFromTimeString(shift.end, "string")}
                             </Typography>
@@ -365,14 +367,14 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
                         </Card>
                       ))
                     ) : (
-                      // Hiển thị thông báo khi không có ca khám nào khả dụng
+                      // Exibe mensagem quando não há turnos disponíveis
                       <Typography
                         color="text.secondary"
                         sx={{ py: 3, textAlign: "center" }}
                       >
                         {!hasWorkSchedules
-                          ? "Bác sĩ không có lịch làm việc trong ngày này"
-                          : t("patient.appointments.no_available_slots")}
+                          ? "O médico não possui agenda neste dia"
+                          : "Não há horários disponíveis para este dia"}
                       </Typography>
                     )}
                   </Stack>
@@ -383,18 +385,18 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
         </Grid>
       </Grid>
 
-      {/* Các nút điều hướng */}
+      {/* Botões de navegação */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
-        {/* Nút quay lại */}
-        {/* <Button onClick={onBack}>{t("common.back")}</Button> */}
-        {/* Nút tiếp tục - vô hiệu hóa nếu chưa chọn đủ thông tin hoặc đã có lịch */}
+        {/* Botão voltar */}
+        {/* <Button onClick={onBack}>Voltar</Button> */}
+        {/* Botão continuar - desabilitado se não selecionou tudo ou já tem agendamento */}
         <Button
           variant="contained"
           color="primary"
           disabled={!selectedDate || !selectedShift || hasExistingAppointment}
           onClick={handleContinue}
         >
-          {t("common.continue")}
+          Continuar
         </Button>
       </Box>
     </Box>

@@ -4,9 +4,17 @@ import { UserJwtData, UserState } from "../../types";
 const getUserFromLocalStorage = (): UserJwtData | null => {
   try {
     const savedUser = localStorage.getItem("user");
-    return savedUser ? JSON.parse(savedUser) : null;
+    if (!savedUser) return null;
+    // Garante que é um JSON válido
+    if (savedUser.trim().startsWith("{") || savedUser.trim().startsWith("[")) {
+      return JSON.parse(savedUser);
+    }
+    // Caso não seja JSON, retorna null e limpa o localStorage
+    localStorage.removeItem("user");
+    return null;
   } catch (error) {
     console.error("Erro ao obter user do localStorage:", error);
+    localStorage.removeItem("user");
     return null;
   }
 };

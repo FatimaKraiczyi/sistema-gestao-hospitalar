@@ -2,7 +2,6 @@ import React from "react";
 import { Typography, Box, Divider, Paper, Chip, Avatar } from "@mui/material";
 import { ProfileCard } from "../profile/ProfileCard";
 import EventIcon from "@mui/icons-material/Event";
-import { Appointment } from "../../types/appointment";
 
 interface PatientAppointmentsProps {
   appointments: Appointment[];

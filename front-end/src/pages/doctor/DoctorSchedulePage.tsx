@@ -75,31 +75,6 @@ interface MaxSlotsFormValues {
   maxSlots: number;
 }
 
-/**
- * DoctorSchedulePage - Trang quản lý và đăng ký lịch làm việc của bác sĩ
- *
- * CÁCH HIỂN THỊ LỊCH:
- * 1. Cấu trúc dữ liệu:
- *    - Mỗi tuần bao gồm 7 ngày, mỗi ngày có thể có nhiều ca làm việc
- *    - Mỗi ngày được biểu diễn qua đối tượng ScheduleItem gồm:
- *      + dayIndex: vị trí của ngày trong tuần (0-6)
- *      + date: đối tượng Date đại diện cho ngày
- *      + selectedShifts: mảng các ca đã chọn (bao gồm cả ca đã khóa và sẽ đăng ký mới)
- *      + lockedShifts: mảng các ca đã được đăng ký trước đó (không thể hủy chọn)
- *
- * 2. Hiển thị lịch đã tồn tại:
- *    - Khi component được tải, hệ thống gọi API getWorkScheduleBetweenDate để lấy lịch đã đăng ký
- *    - Các ca làm việc đã đăng ký được chuyển thành lockedShifts và selectedShifts
- *    - Trên giao diện, các ca này được hiển thị dưới dạng checkbox đã được chọn và bị khóa
- *
- * 3. Thêm lịch mới:
- *    - Người dùng có thể chọn các ca trống (không có trong lockedShifts) bằng cách click vào checkbox
- *    - Các ca được chọn sẽ được thêm vào selectedShifts nhưng không có trong lockedShifts
- *    - Khi lưu lịch, chỉ các ca trong selectedShifts mà không có trong lockedShifts sẽ được gửi lên server
- *    - Sau khi lưu thành công, các ca mới sẽ được thêm vào lockedShifts
- *    - Chỉ lưu được 1 tuần mỗi lần
- */
-
 const DoctorSchedulePage = () => {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const doctorId = user?.userId;

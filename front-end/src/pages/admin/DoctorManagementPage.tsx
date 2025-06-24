@@ -53,11 +53,6 @@ const DoctorManagementPage: React.FC = () => {
   useEffect(() => {
     fetchDoctors();
   }, []);
-
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
-
   const handleAddClick = () => {
     setFormMode("add");
     setSelectedDoctor(null);
@@ -168,11 +163,6 @@ const DoctorManagementPage: React.FC = () => {
     //   "info"
     // );
   };
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
   // ... As funções auxiliares de parsing e formatação permanecem iguais, apenas traduza mensagens de erro e comentários se desejar ...
 
   // Definição das colunas da tabela
@@ -216,27 +206,6 @@ const DoctorManagementPage: React.FC = () => {
       headerName: "Especialidade",
       width: 150,
       flex: 1,
-    },
-    {
-      field: "sex",
-      headerName: "Gênero",
-      width: 100,
-      flex: 0.7,
-      renderCell: (params: GridRenderCellParams) => (
-        <Chip
-          label={params.value ? "Masculino" : "Feminino"}
-          color={params.value ? "info" : "secondary"}
-          size="small"
-        />
-      ),
-    },
-    {
-      field: "dob",
-      headerName: "Data de nascimento",
-      width: 120,
-      flex: 0.8,
-      renderCell: (params: GridRenderCellParams) =>
-        new Date(params.row.dob).toLocaleDateString("pt-BR"),
     },
     {
       field: "phone",
@@ -299,29 +268,6 @@ const DoctorManagementPage: React.FC = () => {
         >
           Adicionar médico
         </Button>
-        <Button
-          variant="contained"
-          color="success"
-          startIcon={
-            importing ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              <UploadFile />
-            )
-          }
-          onClick={handleImportClick}
-          disabled={importing}
-          sx={{ fontWeight: 600 }}
-        >
-          {importing ? "Importando..." : "Importar arquivo"}
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".csv,.xlsx,.xls"
-          style={{ display: "none" }}
-          onChange={handleFileChange}
-        />
       </Box>
 
       {/* Tabela de médicos */}
@@ -376,21 +322,6 @@ const DoctorManagementPage: React.FC = () => {
         doctor={selectedDoctor}
         onUpdate={handleUpdateDoctorDetail}
       />
-
-      {/* Snackbar para mensagens */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };
